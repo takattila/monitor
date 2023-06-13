@@ -1,0 +1,37 @@
+on_start:
+  port: 8383
+  domain: example.net
+  web_sources_directory: /web
+  auth_file: /configs/auth.db
+  save_credentials: false
+  routes:
+    index: /monitor
+    login: /monitor/login
+    logout: /monitor/logout
+    internal: /monitor/internal
+    api: /monitor/api/{statistics}
+    systemctl: /monitor/systemctl/{action}/{service}
+    power: /monitor/power/{action}
+    toggle: /monitor/toggle/{section}/{status}
+    web: /monitor/web
+  pages:
+    login: /html/login.html
+    internal: /html/monitor.html
+on_runtime:
+  theme:
+    skin: rpi
+    logo: linux
+  allowed_ip: 0.0.0.0
+  interval_seconds: 1
+  api:
+    url: "http://127.0.0.1"
+    port: 7070
+  commands:
+    systemctl:
+      - dash
+      - -c
+      - systemctl {action} {service}
+    init:
+      - dash
+      - -c
+      - init {number}

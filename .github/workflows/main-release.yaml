@@ -1,0 +1,64 @@
+# Create new release by pushing git tag:
+# - git tag -a v1.0.0 -m "First release"
+# - git push --tags
+
+name: main release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  test:
+    uses: ./.github/workflows/reusable-test.yaml
+
+  release:
+    needs:
+      - test
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        goos: 
+          - linux
+        goarch: 
+          - 386
+          - amd64
+          - arm
+          - arm64
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20.1'
+      
+      - name: Env
+        id: vars
+        run: |
+          echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+          echo "tag_msg=$(git tag -l --format='%(contents:subject)' ${GITHUB_REF#refs/*/})" >> $GITHUB_OUTPUT
+
+      - name: Build
+        run: |
+          env CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o cmd internal/api/app/api.go
+          env CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o cmd internal/web/app/web.go
+          env CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o cmd internal/credentials/app/credentials.go
+          echo "# Version: ${{ steps.vars.outputs.tag }}" > VERSION.md
+          echo ""                                        >> VERSION.md
+          echo "${{ steps.vars.outputs.tag_msg }}"       >> VERSION.md
+
+      - name: ZIP
+        uses: montudor/action-zip@v1
+        with:
+          args: zip -qq -r monitor-${{ steps.vars.outputs.tag }}-${{ matrix.goos }}-${{ matrix.goarch }}.zip . -x *.git* -x *internal* -x *pkg*
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./**/*.zip
+          name: ${{ env.RELEASE_VERSION }}

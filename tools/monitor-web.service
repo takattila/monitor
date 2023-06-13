@@ -1,0 +1,17 @@
+[Unit]
+Description = Web
+After = caddy.service
+
+[Service]
+User = root
+Group = root
+Type = simple
+# WorkingDirectory=/opt/monitor
+# ExecStart = /usr/local/go/bin/go build -o cmd internal/web/app/web.go
+ExecStart = /opt/monitor/cmd/web
+Restart = always
+RestartSec = 3
+KillSignal=9
+
+[Install]
+WantedBy=multi-user.target

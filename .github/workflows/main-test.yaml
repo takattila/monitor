@@ -1,0 +1,14 @@
+# Running tests on every git push, except: git push --tags.
+
+name: main test
+
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - 'v*.*.*'
+
+jobs:
+  test:
+    uses: ./.github/workflows/reusable-test.yaml

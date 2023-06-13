@@ -1,0 +1,56 @@
+on_start:
+  port: 7070
+  routes:
+    all: /all
+    playground: /play
+    model: /model
+    cpu: /cpu
+    memory: /memory
+    processes: /processes
+    storages: /storages
+    services: /services
+    network: /network
+    toggle: /toggle/{section}/{status}
+on_runtime:
+  physical_memory: 1GB
+  commands:
+    cpu_temp:
+      - vcgencmd
+      - measure_temp
+    model_name:
+      - dash
+      - -c
+      - |
+        xargs </proc/device-tree/model \
+          2>/dev/null \
+          || true
+    processes:
+      - dash
+      - -c
+      - |
+        ps -ewwo pid,user,%mem,%cpu,cmd \
+          --sort=-%cpu --no-headers \
+          | head -n 10 \
+          | tail -n 10
+    service_is_active:
+      - dash
+      - -c
+      - systemctl is-active {service} || true
+    service_is_enabled:
+      - dash
+      - -c
+      - systemctl is-enabled {service} || true
+    storage:
+      - dash
+      - -c
+      - |
+        df -B1 \
+          | grep -v tmpfs \
+          | awk '(NR>1)' \
+          | sort -k 6
+  services_list:
+    - monitor-api
+    - monitor-web
+    - smbd
+    - sshd
+    - syslog

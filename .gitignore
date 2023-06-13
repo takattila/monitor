@@ -1,0 +1,5 @@
+cmd/api
+cmd/credentials
+cmd/web
+configs/auth.db
+vendor/
