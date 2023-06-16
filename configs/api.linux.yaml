@@ -15,14 +15,14 @@ on_runtime:
   # physical_memory: 1GB
   commands:
     # cpu_temp:
-    #   - dash
+    #   - bash
     #   - -c
     #   - |
     #     cat /sys/class/thermal/thermal_zone*/temp \
     #     | column -s $'\t' -t \
     #     | sed 's/\(.\)..$/.\1/'
     model_name:
-      - dash
+      - bash
       - -c
       - | 
         hostnamectl \
@@ -30,7 +30,7 @@ on_runtime:
           | awk -F: '{print $2}' \
           | xargs
     processes:
-      - dash
+      - bash
       - -c
       - |
         ps -ewwo pid,user,%mem,%cpu,cmd \
@@ -38,15 +38,15 @@ on_runtime:
           | head -n 10 \
           | tail -n 10
     service_is_active:
-      - dash
+      - bash
       - -c
       - systemctl is-active {service} || true
     service_is_enabled:
-      - dash
+      - bash
       - -c
       - systemctl is-enabled {service} || true
     storage:
-      - dash
+      - bash
       - -c
       - |
         df -B1 \

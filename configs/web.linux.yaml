@@ -28,10 +28,10 @@ on_runtime:
     port: 7070
   commands:
     systemctl:
-      - dash
+      - bash
       - -c
       - systemctl {action} {service}
     init:
-      - dash
+      - bash
       - -c
       - init {number}
