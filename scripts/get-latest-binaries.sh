@@ -1,6 +1,8 @@
 #!/bin/bash
 
 RED="\e[31m"
+GREEN="\e[32m"
+YELLOW="\e[1;93m"
 ENDCOLOR="\e[0m"
 ERROR="${RED}[ERROR]${ENDCOLOR}"
 
@@ -40,7 +42,12 @@ function getArchitecture {
 }
 
 function getVersion {
-    echo "$(wget -q -O- https://api.github.com/repos/takattila/monitor/releases/latest | jq -r '.tag_name')"
+    wget -q -O- \
+        https://api.github.com/repos/takattila/monitor/releases/latest \
+        | grep "tag_name" \
+        | awk '{print $2}' \
+        | tr -d '"' \
+        | tr -d ','
 }
 
 function getLatestReleaseURL {
@@ -59,7 +66,7 @@ function getWebConfigType {
 }
 
 function getIP {
-    echo "$(hostname -I | awk '{print $1}')"
+    echo "$(hostname)"
 }
 
 function getPort {
@@ -78,60 +85,75 @@ function installServices {
     local monitorDir="monitor"
 
     cd "$baseDir"
-    echo "=========================================="
-    echo "[1./10.] Downloading $url to ${baseDir}..."
-    echo "=========================================="
+    echo -e "- ${YELLOW}[1./10.] ${GREEN}Downloading...${ENDCOLOR}"
+    echo -e "  - ${GREEN}$url${ENDCOLOR}"
+    echo -e "  - ${GREEN}to: ${baseDir}...${ENDCOLOR}"
     sudo rm -f monitor-v*.zip
-    sudo wget "$url"
+    sudo wget -q --show-progress "$url"
     
-    echo "=============================================="
-    echo "[2./10.] Unzip monitor-v*.zip to ${baseDir}..."
-    echo "=============================================="
-    sudo unzip -o monitor-v*.zip -d monitor
+    echo -e "- ${YELLOW}[2./10.] ${GREEN}Unzip monitor-v*.zip to ${baseDir}...${ENDCOLOR}"
+    sudo unzip -q -o monitor-v*.zip -d monitor
 
-    echo "=============================================================================="
-    echo "[3./10.] Change ownership of the ${baseDir}${monitorDir} directory to $USER..."
-    echo "=============================================================================="
+    echo -e "- ${YELLOW}[3./10.] ${GREEN}Change ownership of the ${baseDir}${monitorDir} directory to $USER...${ENDCOLOR}"
     sudo chown ${USER}:${USER} ${baseDir}${monitorDir}
     sudo chown -R ${USER}:${USER} ${baseDir}${monitorDir}
 
-    echo "======================================"
-    echo "[4./10.] Change directory: $monitorDir"
-    echo "======================================"
+    echo -e "- ${YELLOW}[4./10.] ${GREEN}Change directory: $monitorDir${ENDCOLOR}"
     cd "$monitorDir"
 
-    echo "=============================="
-    echo "[5./10.] Save your credentials"
-    echo "=============================="
+    echo -e "- ${YELLOW}[5./10.] ${GREEN}Save your credentials${ENDCOLOR}"
     sudo ./cmd/credentials
 
-    echo "====================================================================="
-    echo "[6./10.] Copy ${monitorDir}/tools/*.service to /etc/systemd/system..."
-    echo "====================================================================="
+    echo -e "- ${YELLOW}[6./10.] ${GREEN}Copy ${monitorDir}/tools/*.service to /etc/systemd/system...${ENDCOLOR}"
     sudo cp tools/*.service /etc/systemd/system
     
-    echo "========================="
-    echo "[7./10.] Reload daemon..."
-    echo "========================="
+    echo -e "- ${YELLOW}[7./10.] ${GREEN}Reload daemon...${ENDCOLOR}"
     sudo systemctl daemon-reload
 
-    echo "============================="
-    echo "[8./10.] Enabling services..."
-    echo "============================="
+    echo -e "- ${YELLOW}[8./10.] ${GREEN}Enabling services...${ENDCOLOR}"
     sudo systemctl enable monitor-api.service monitor-web.service
-    sudo systemctl is-enabled monitor-api.service monitor-web.service
+    echo "  - monitor-api: $(sudo systemctl is-enabled monitor-api.service)"
+    echo "  - monitor-web: $(sudo systemctl is-enabled monitor-web.service)"
 
-    echo "============================="
-    echo "[9./10.] Starting services..."
-    echo "============================="
+    echo -e "- ${YELLOW}[9./10.] ${GREEN}Starting services...${ENDCOLOR}"
     sudo systemctl start monitor-api.service monitor-web.service
-    sudo systemctl is-active monitor-api.service monitor-web.service
+    echo "  - monitor-api: $(sudo systemctl is-active monitor-api.service)"
+    echo "  - monitor-web: $(sudo systemctl is-active monitor-web.service)"
 
-    echo "==================="
-    echo "[10./10.] Finished!"
-    echo "==================="
-    echo "Web interface:"
-    echo "http://$(getIP):$(getPort "${baseDir}${monitorDir}")$(getRoute "${baseDir}${monitorDir}")"
+    echo -e "- ${YELLOW}[10./10.] ${GREEN}Finished!${ENDCOLOR}"
+    echo -e "  - $(cat /opt/monitor/VERSION.md | sed ':a;N;$!ba;s/\n/ /g')"
+    echo -e "  - Web interface: ${YELLOW}http://$(getIP):$(getPort "${baseDir}${monitorDir}")$(getRoute "${baseDir}${monitorDir}")${ENDCOLOR}"
+}
+
+function setRootPassword {
+    sudo -p "$(
+        echo
+        echo -e "- A password is required for installation."
+        echo -e "  Please enter the ${YELLOW}root password${ENDCOLOR}: "
+    )" echo -n "" 2> /dev/null
+}
+
+function printLogo {
+    printf "${YELLOW}"
+cat <<-'EOF'
+      _____                .__  __                   
+     /     \   ____   ____ |__|/  |_  ___________    
+    /  \ /  \ /  _ \ /    \|  \   __\/  _ \_  __ \   
+   /    Y    (  <_> )   |  \  ||  | (  <_> )  | \/   
+   \____|__  /\____/|___|  /__||__|  \____/|__|      
+           \/            \/                          
+  _________                  .__                     
+ /   _____/ ______________  _|__| ____  ____   ______
+ \_____  \_/ __ \_  __ \  \/ /  |/ ___\/ __ \ /  ___/
+ /        \  ___/|  | \/\   /|  \  \__\  ___/ \___ \ 
+/_______  /\___  >__|    \_/ |__|\___  >___  >____  >
+        \/     \/                    \/    \/     \/ 
+
+                 ...installation...
+
+EOF
+    printf "${ENDCOLOR}\n"
+
 }
 
 function main {
@@ -139,7 +161,10 @@ function main {
     local version
     local url
   
+    clear
+    printLogo
     checkOS
+    setRootPassword
 
     architecture="$(getArchitecture)"
     if [[ "$architecture" = "" ]]; then
