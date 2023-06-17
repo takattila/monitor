@@ -24,7 +24,7 @@ REQUIRED_PROGRAMS=(
 )
 
 function checkOS {
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    if [[ "$OSTYPE" != "linux-gnu"* ]]; then
         echo -e "${ERROR} Sorry, there is no release for your OS for now."
         exit 1
     fi
