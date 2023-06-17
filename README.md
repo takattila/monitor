@@ -384,7 +384,7 @@ Both the `skin` and the `logo` of the web service can be modified in the [config
 on_runtime:
   theme:
     skin: suse # can be: centos, fedora, manjaro, mint, opi, redhat, rpi, suse, ubuntu, vanilla
-    logo: rpi  # can be: arch, centos, debian, fedora, linux, manjaro, mint, opi, pop, redhat, rpi, suse, ubuntu, vanilla, zorin
+    logo: rpi  # can be: arch, centos, debian, fedora, tux, manjaro, mint, opi, pop, redhat, rpi, suse, ubuntu, vanilla, zorin
 ```
 
 You can find the available skins under [web/css](web/css) directory.

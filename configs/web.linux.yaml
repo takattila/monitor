@@ -20,7 +20,7 @@ on_start:
 on_runtime:
   theme:
     skin: rpi
-    logo: linux
+    logo: tux
   allowed_ip: 0.0.0.0
   interval_seconds: 1
   api:
