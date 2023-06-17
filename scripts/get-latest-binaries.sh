@@ -81,48 +81,73 @@ function getRoute {
 
 function installServices {
     local url="$1"
-    local baseDir="/opt/"
-    local monitorDir="monitor"
+    local basePath="/opt/"
+    local programDir="monitor"
+    local monitorPath="${basePath}${programDir}"
+    local cfgBackupPath="${monitorPath}-cfg-backup"
+    local totalSteps="11"
+    local backupCfg="n"
 
-    cd "$baseDir"
-    echo -e "- ${YELLOW}[1./10.] ${GREEN}Downloading...${ENDCOLOR}"
-    echo -e "  - ${GREEN}$url${ENDCOLOR}"
-    echo -e "  - ${GREEN}to: ${baseDir}...${ENDCOLOR}"
-    sudo rm -f monitor-v*.zip
-    sudo wget -q --show-progress "$url"
+    echo -e "- ${YELLOW}[1./${totalSteps}.] ${GREEN}Downloading...${ENDCOLOR}"
+        cd "$basePath"
+        echo -e "  - ${GREEN}$url${ENDCOLOR}"
+        echo -e "  - ${GREEN}to: ${basePath}...${ENDCOLOR}"
+        sudo rm -f monitor-v*.zip 2>&1 || true
+        sudo wget -q --show-progress "$url"
+
+    if [[ -e "${monitorPath}" ]]; then
+        echo -e "- ${YELLOW}[2./${totalSteps}.] ${GREEN}Backup existing configuration...${ENDCOLOR}"
+            read -r -p $'  - '$(echo -e "${YELLOW}")'Do you want to keep your existing configuration?'$(echo -e "${ENDCOLOR}")' [y/N] ' backupCfg
+            if [[ "$backupCfg" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+                echo -e "  - ${YELLOW}Creating backup...${ENDCOLOR}"
+                sudo mkdir -p ${cfgBackupPath} >/dev/null 2>&1 || true
+                sudo chown ${USER}:${USER} ${cfgBackupPath}
+                sudo chown -R ${USER}:${USER} ${cfgBackupPath}
+                sudo cp -f ${monitorPath}/configs/*.yaml ${cfgBackupPath} >/dev/null 2>&1 || true
+                sudo rm -rf ${monitorPath} >/dev/null 2>&1 || true
+        else
+                echo -e "  - ${YELLOW}Backup skipped...${ENDCOLOR}"
+        fi
+    else
+        echo -e "- ${YELLOW}[2./${totalSteps}.] ${GREEN}There is no existing configuration, backup skipped...${ENDCOLOR}"
+    fi
+
+    echo -e "- ${YELLOW}[3./${totalSteps}.] ${GREEN}Unzip monitor-v*.zip to ${basePath}...${ENDCOLOR}"
+        sudo unzip -q -o monitor-v*.zip -d monitor
+        sudo cp ${cfgBackupPath}/*.yaml ${monitorPath}/configs >/dev/null 2>&1 || true
+        sudo rm -rf ${cfgBackupPath} >/dev/null 2>&1 || true
+        sudo rm -f monitor-v*.zip 2>&1 || true
+
+    echo -e "- ${YELLOW}[4./${totalSteps}.] ${GREEN}Change ownership of the ${monitorPath} directory to $USER...${ENDCOLOR}"
+        sudo chown ${USER}:${USER} ${monitorPath}
+        sudo chown -R ${USER}:${USER} ${monitorPath}
+
+    echo -e "- ${YELLOW}[5./${totalSteps}.] ${GREEN}Change directory to: ${monitorPath}${ENDCOLOR}"
+        cd "${monitorPath}"
+
+    echo -e "- ${YELLOW}[6./${totalSteps}.] ${GREEN}Save your credentials${ENDCOLOR}"
+        sudo ./cmd/credentials
+
+    echo -e "- ${YELLOW}[7./${totalSteps}.] ${GREEN}Copy ${programDir}/tools/*.service to /etc/systemd/system...${ENDCOLOR}"
+        sudo cp tools/*.service /etc/systemd/system
     
-    echo -e "- ${YELLOW}[2./10.] ${GREEN}Unzip monitor-v*.zip to ${baseDir}...${ENDCOLOR}"
-    sudo unzip -q -o monitor-v*.zip -d monitor
+    echo -e "- ${YELLOW}[8./${totalSteps}.] ${GREEN}Reload daemon...${ENDCOLOR}"
+        sudo systemctl daemon-reload
 
-    echo -e "- ${YELLOW}[3./10.] ${GREEN}Change ownership of the ${baseDir}${monitorDir} directory to $USER...${ENDCOLOR}"
-    sudo chown ${USER}:${USER} ${baseDir}${monitorDir}
-    sudo chown -R ${USER}:${USER} ${baseDir}${monitorDir}
+    echo -e "- ${YELLOW}[9./${totalSteps}.] ${GREEN}Enabling services...${ENDCOLOR}"
+        sudo systemctl enable monitor-api.service monitor-web.service
+        echo "  - monitor-api: $(sudo systemctl is-enabled monitor-api.service)"
+        echo "  - monitor-web: $(sudo systemctl is-enabled monitor-web.service)"
 
-    echo -e "- ${YELLOW}[4./10.] ${GREEN}Change directory: $monitorDir${ENDCOLOR}"
-    cd "$monitorDir"
+    echo -e "- ${YELLOW}[10./${totalSteps}.] ${GREEN}Starting services...${ENDCOLOR}"
+        sudo systemctl stop monitor-api.service monitor-web.service
+        sudo systemctl start monitor-api.service monitor-web.service
+        echo "  - monitor-api: $(sudo systemctl is-active monitor-api.service)"
+        echo "  - monitor-web: $(sudo systemctl is-active monitor-web.service)"
 
-    echo -e "- ${YELLOW}[5./10.] ${GREEN}Save your credentials${ENDCOLOR}"
-    sudo ./cmd/credentials
-
-    echo -e "- ${YELLOW}[6./10.] ${GREEN}Copy ${monitorDir}/tools/*.service to /etc/systemd/system...${ENDCOLOR}"
-    sudo cp tools/*.service /etc/systemd/system
-    
-    echo -e "- ${YELLOW}[7./10.] ${GREEN}Reload daemon...${ENDCOLOR}"
-    sudo systemctl daemon-reload
-
-    echo -e "- ${YELLOW}[8./10.] ${GREEN}Enabling services...${ENDCOLOR}"
-    sudo systemctl enable monitor-api.service monitor-web.service
-    echo "  - monitor-api: $(sudo systemctl is-enabled monitor-api.service)"
-    echo "  - monitor-web: $(sudo systemctl is-enabled monitor-web.service)"
-
-    echo -e "- ${YELLOW}[9./10.] ${GREEN}Starting services...${ENDCOLOR}"
-    sudo systemctl start monitor-api.service monitor-web.service
-    echo "  - monitor-api: $(sudo systemctl is-active monitor-api.service)"
-    echo "  - monitor-web: $(sudo systemctl is-active monitor-web.service)"
-
-    echo -e "- ${YELLOW}[10./10.] ${GREEN}Finished!${ENDCOLOR}"
-    echo -e "  - $(cat /opt/monitor/VERSION.md | sed ':a;N;$!ba;s/\n/ /g')"
-    echo -e "  - Web interface: ${YELLOW}http://$(getIP):$(getPort "${baseDir}${monitorDir}")$(getRoute "${baseDir}${monitorDir}")${ENDCOLOR}"
+    echo -e "- ${YELLOW}[11./${totalSteps}.] ${GREEN}Finished!${ENDCOLOR}"
+        echo -e "  - $(cat /opt/monitor/VERSION.md | sed ':a;N;$!ba;s/\n/ /g')"
+        echo -e "  - Web interface: ${YELLOW}http://$(getIP):$(getPort "${monitorPath}")$(getRoute "${monitorPath}")${ENDCOLOR}"
 }
 
 function setRootPassword {
