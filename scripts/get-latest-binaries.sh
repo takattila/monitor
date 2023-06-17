@@ -5,6 +5,23 @@ GREEN="\e[32m"
 YELLOW="\e[1;93m"
 ENDCOLOR="\e[0m"
 ERROR="${RED}[ERROR]${ENDCOLOR}"
+REQUIRED_PROGRAMS=(
+    awk
+    bash
+    cat
+    curl
+    getconf
+    grep
+    hostnamectl
+    python
+    sed
+    systemctl
+    tr
+    uname
+    unzip
+    wget
+    xargs
+)
 
 function checkOS {
     if [[ "$(uname -s | awk '{print tolower($0)}')" != "linux" ]]; then
@@ -79,6 +96,45 @@ function getRoute {
     cat "${monitorPath}/configs/web.$(getWebConfigType).yaml" | grep "^    index:" | awk '{print $2}'
 }
 
+
+function checkProgramIsInstalled {
+    local program=$1
+    sudo which ${program} &> /dev/null
+    echo $?
+}
+
+function checkAllProgramsInstalled {
+    local shouldBeInstalled
+    local check
+
+    declare -A shouldBeInstalled
+
+    echo -en "- Checking neccesary programs:\n"
+
+    for p in ${REQUIRED_PROGRAMS[@]} ; do
+        echo -en "  - ${YELLOW}${p}${ENDCOLOR}..."
+        check=$(checkProgramIsInstalled "${p}")
+        if [[ "$check" != "0" ]]; then
+            shouldBeInstalled["${p}"]="$check"
+            echo -e "${RED}[FAIL]${ENDCOLOR}"
+        else
+            echo -e "${GREEN}[PASS]${ENDCOLOR}"
+        fi
+    done
+
+    echo
+
+    if [[ "${#shouldBeInstalled[@]}" -gt 0 ]]; then
+        echo -e "${ERROR} For a successful installation, the following programs must be installed:"
+        for program in ${!shouldBeInstalled[@]}; do
+            if [[ "${shouldBeInstalled[$program]}" = "1" ]]; then
+                echo "- $program"
+            fi
+        done
+        exit 1
+    fi
+}
+
 function installServices {
     local url="$1"
     local basePath="/opt/"
@@ -89,7 +145,8 @@ function installServices {
     local backupCfg="n"
 
     echo -e "- ${YELLOW}[1./${totalSteps}.] ${GREEN}Downloading...${ENDCOLOR}"
-        cd "$basePath"
+        sudo mkdir -p "${basePath}" >/dev/null 2>&1 || true
+        cd "${basePath}"
         echo -e "  - ${GREEN}$url${ENDCOLOR}"
         echo -e "  - ${GREEN}to: ${basePath}...${ENDCOLOR}"
         sudo rm -f monitor-v*.zip 2>&1 || true
@@ -196,6 +253,7 @@ function main {
     clearScreen
     printLogo
     checkOS
+    checkAllProgramsInstalled
     setRootPassword
 
     architecture="$(getArchitecture)"
