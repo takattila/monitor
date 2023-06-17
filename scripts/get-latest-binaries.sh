@@ -133,6 +133,13 @@ function setRootPassword {
     )" echo -n "" 2> /dev/null
 }
 
+function clearScreen {
+    echo -ne '\e]11;#000000\e\\' # set default foreground to black
+    echo -ne '\e]10;#ffffff\e\\' # set default background to #abcdef
+  
+    clear
+}
+
 function printLogo {
     printf "${YELLOW}"
 cat <<-'EOF'
@@ -160,8 +167,8 @@ function main {
     local architecture
     local version
     local url
-  
-    clear
+
+    clearScreen
     printLogo
     checkOS
     setRootPassword
