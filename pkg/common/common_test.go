@@ -20,59 +20,59 @@ import (
 )
 
 type (
-	Suite struct {
+	CommonSuite struct {
 		suite.Suite
 	}
 )
 
-func (s Suite) TestTracking() {
+func (s CommonSuite) TestTracking() {
 	t := Tracking(1)
 	s.Equal("common_test.go", t.File)
 	s.NotEqual(0, t.Line)
-	s.Equal("common.Suite.TestTracking", t.Function)
+	s.Equal("common.CommonSuite.TestTracking", t.Function)
 
 	func() {
 		t := Tracking(1)
-		s.Equal("common.Suite.TestTracking.func1", t.Function)
+		s.Equal("common.CommonSuite.TestTracking.func1", t.Function)
 	}()
 
 	func() {
 		t := Tracking(2)
-		s.Equal("common.Suite.TestTracking", t.Function)
+		s.Equal("common.CommonSuite.TestTracking", t.Function)
 	}()
 }
 
-func (s Suite) TestInfo() {
+func (s CommonSuite) TestInfo() {
 	output := captureOutput(func() {
 		Info("TestInfo")
 	})
 	s.Contains(output, "[INFO]")
 	s.Contains(output, "File: common_test.go")
-	s.Contains(output, "Function: common.Suite.TestInfo.func1")
+	s.Contains(output, "Function: common.CommonSuite.TestInfo.func1")
 	s.Contains(output, "Message: [TestInfo]")
 }
 
-func (s Suite) TestWarning() {
+func (s CommonSuite) TestWarning() {
 	output := captureOutput(func() {
 		Warning("TestWarning")
 	})
 	s.Contains(output, "[WARNING]")
 	s.Contains(output, "File: common_test.go")
-	s.Contains(output, "Function: common.Suite.TestWarning.func1")
+	s.Contains(output, "Function: common.CommonSuite.TestWarning.func1")
 	s.Contains(output, "Message: [TestWarning]")
 }
 
-func (s Suite) TestError() {
+func (s CommonSuite) TestError() {
 	output := captureOutput(func() {
 		Error(fmt.Errorf("%s", "[TestError]"))
 	})
 	s.Contains(output, "[ERROR]")
 	s.Contains(output, "File: common_test.go")
-	s.Contains(output, "Function: common.Suite.TestError.func1")
+	s.Contains(output, "Function: common.CommonSuite.TestError.func1")
 	s.Contains(output, "Message: [TestError]")
 }
 
-func (s Suite) TestFatal() {
+func (s CommonSuite) TestFatal() {
 	ExpectedPanicText := "Fatal function called"
 
 	panicFunc := func(int) {
@@ -91,21 +91,21 @@ func (s Suite) TestFatal() {
 			})
 			s.Contains(output, "[FATAL]")
 			s.Contains(output, "File: common_test.go")
-			s.Contains(output, "Function: common.Suite.TestFatal.func1")
+			s.Contains(output, "Function: common.CommonSuite.TestFatal.func1")
 			s.Contains(output, "Message: [TestFatal]")
 		},
 		"Fatal function was not called")
 }
 
-func (s Suite) TestGetFuncName() {
+func (s CommonSuite) TestGetFuncName() {
 	fn := getFuncName(0)
-	s.Equal("common.Suite.TestGetFuncName", fn)
+	s.Equal("common.CommonSuite.TestGetFuncName", fn)
 
 	unknown := getFuncName(100)
 	s.Equal("unknown", unknown)
 }
 
-func (s Suite) TestFetchNameFromPath() {
+func (s CommonSuite) TestFetchNameFromPath() {
 	path := "/path/fo/testFuncName"
 
 	funcName := fetchNameFromPath(path)
@@ -117,7 +117,7 @@ func (s Suite) TestFetchNameFromPath() {
 	s.Equal("testFuncName", funcName)
 }
 
-func (s Suite) TestDynamicSizeSI() {
+func (s CommonSuite) TestDynamicSizeSI() {
 	size := DynamicSizeSI(uint64(1))
 	s.Equal("1 B", size)
 
@@ -128,7 +128,7 @@ func (s Suite) TestDynamicSizeSI() {
 	s.Equal("1.0 MB", size)
 }
 
-func (s Suite) TestDynamicSizeSISize() {
+func (s CommonSuite) TestDynamicSizeSISize() {
 	size := DynamicSizeSISize(uint64(1))
 	s.Equal(float64(1), size)
 
@@ -139,7 +139,7 @@ func (s Suite) TestDynamicSizeSISize() {
 	s.Equal(float64(1), size)
 }
 
-func (s Suite) TestDynamicSizeSIUnit() {
+func (s CommonSuite) TestDynamicSizeSIUnit() {
 	size := DynamicSizeSIUnit(uint64(1))
 	s.Equal("B", size)
 
@@ -150,7 +150,7 @@ func (s Suite) TestDynamicSizeSIUnit() {
 	s.Equal("MB", size)
 }
 
-func (s Suite) TestDynamicSizeIEC() {
+func (s CommonSuite) TestDynamicSizeIEC() {
 	size := DynamicSizeIEC(uint64(1))
 	s.Equal("1 B", size)
 
@@ -161,7 +161,7 @@ func (s Suite) TestDynamicSizeIEC() {
 	s.Equal("1.0 MB", size)
 }
 
-func (s Suite) TestDynamicSizeIECSize() {
+func (s CommonSuite) TestDynamicSizeIECSize() {
 	size := DynamicSizeIECSize(uint64(1))
 	s.Equal(float64(1), size)
 
@@ -172,7 +172,7 @@ func (s Suite) TestDynamicSizeIECSize() {
 	s.Equal(float64(1), size)
 }
 
-func (s Suite) TestDynamicSizeIECUnit() {
+func (s CommonSuite) TestDynamicSizeIECUnit() {
 	size := DynamicSizeIECUnit(uint64(1))
 	s.Equal("B", size)
 
@@ -183,12 +183,12 @@ func (s Suite) TestDynamicSizeIECUnit() {
 	s.Equal("MB", size)
 }
 
-func (s Suite) TestGetPercent() {
+func (s CommonSuite) TestGetPercent() {
 	percent := GetPercent(uint64(50), uint64(100))
 	s.Equal(float64(50), percent)
 }
 
-func (s Suite) TestCli() {
+func (s CommonSuite) TestCli() {
 	cmd := []string{""}
 	if runtime.GOOS == "windows" {
 		cmd = []string{"powershell", "-NoProfile", "-c", "echo 'Hello World'"}
@@ -200,12 +200,12 @@ func (s Suite) TestCli() {
 	s.Contains(output, "Hello World")
 }
 
-func (s Suite) TestGetProgramDir() {
+func (s CommonSuite) TestGetProgramDir() {
 	dir := GetProgramDir()
 	s.NotEmpty(dir)
 }
 
-func (s Suite) TestFileExists() {
+func (s CommonSuite) TestFileExists() {
 	s.Equal(true, FileExists("common_test.go"))
 
 	s.Equal(false, FileExists("random_file.go"))
@@ -213,17 +213,17 @@ func (s Suite) TestFileExists() {
 	s.Equal(false, FileExists("../_codegen"))
 }
 
-func (s Suite) TestGetString() {
+func (s CommonSuite) TestGetString() {
 	str := GetString("56465456HELLO757657")
 	s.Equal("HELLO", str)
 }
 
-func (s Suite) TestGetNum() {
+func (s CommonSuite) TestGetNum() {
 	num := GetNum("1234HELLO5678")
 	s.Equal(uint64(12345678), num)
 }
 
-func (s Suite) TestTextToBytes() {
+func (s CommonSuite) TestTextToBytes() {
 	size := 2
 
 	text := TextToBytes(fmt.Sprintf("%dPB", size))
@@ -255,12 +255,12 @@ func (s Suite) TestTextToBytes() {
 	s.Equal(uint64(num), text)
 }
 
-func (s Suite) TestReplaceStringInSlice() {
+func (s CommonSuite) TestReplaceStringInSlice() {
 	slice := ReplaceStringInSlice([]string{"a", "b", "c"}, "c", "new")
 	s.Equal([]string{"a", "b", "new"}, slice)
 }
 
-func (s Suite) TestSliceContains() {
+func (s CommonSuite) TestSliceContains() {
 	result := SliceContains([]string{"a", "b", "c"}, "c")
 	s.Equal(true, result)
 
@@ -268,7 +268,7 @@ func (s Suite) TestSliceContains() {
 	s.Equal(false, result)
 }
 
-func (s Suite) TestGetConfigPath() {
+func (s CommonSuite) TestGetConfigPath() {
 	OldGetConfigPathCmd := GetConfigPathCmd
 	NewGetConfigPathCmd := OldGetConfigPathCmd
 
@@ -321,5 +321,5 @@ func captureOutput(f func()) string {
 }
 
 func TestCommonSuite(t *testing.T) {
-	suite.Run(t, new(Suite))
+	suite.Run(t, new(CommonSuite))
 }
