@@ -4,6 +4,5 @@ cmd/web
 configs/auth.db
 vendor/
 
-*.out
-*.cov
-coverage.xml
+coverage.*
+
