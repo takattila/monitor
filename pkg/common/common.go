@@ -14,6 +14,9 @@ import (
 	"strings"
 )
 
+// GetConfigPathCmd contains the command that fetches the config path by hostname.
+var GetConfigPathCmd = []string{"bash", "-c", "hostnamectl | grep Operating | awk -F: '{print $2}' | xargs"}
+
 // -- logger ----------------------------------------------------------
 
 // TrackInfo holds debug information about the caller's:
@@ -26,16 +29,19 @@ type TrackInfo struct {
 	Function string
 }
 
+// Info writes Info to stdOut.
 func Info(args ...interface{}) {
 	track := getTrackingInfo(1)
 	log.Println("[INFO] File:", track.File, "Function:", track.Function, "Line:", track.Line, "Message:", args)
 }
 
+// Info writes Warning to stdOut.
 func Warning(args ...interface{}) {
 	track := getTrackingInfo(1)
 	log.Println("[WARNING] File:", track.File, "Function:", track.Function, "Line:", track.Line, "Message:", args)
 }
 
+// Info writes Error to stdOut.
 func Error(err error) {
 	if err != nil {
 		track := getTrackingInfo(1)
@@ -43,12 +49,22 @@ func Error(err error) {
 	}
 }
 
+// Fatal writes Error to stdOut and exit with exit code 1, if err doesn't nil.
 func Fatal(err error) {
 	if err != nil {
 		track := getTrackingInfo(1)
 		log.Println("[FATAL] File:", track.File, "Function:", track.Function, "Line:", track.Line, "Message:", err)
 		os.Exit(1)
 	}
+}
+
+// Tracking provides debug information about function invocations
+// on the calling goroutine's stack:
+//   - File (where Tracking was called)
+//   - Line (where function was called)
+//   - Function (name of the function)
+func Tracking(depth int) TrackInfo {
+	return getTrackingInfo(depth)
 }
 
 // getTrackingInfo provides debug information about function invocations
@@ -87,6 +103,7 @@ func fetchNameFromPath(fileName string) string {
 
 // -- logger ----------------------------------------------------------
 
+// DynamicSizeSI returns the value of the given number with unit dynamically.
 func DynamicSizeSI(b uint64) string {
 	const unit = 1000
 	if b < unit {
@@ -104,6 +121,7 @@ func DynamicSizeSI(b uint64) string {
 		math.Round(result*ratio)/ratio, "kMGTPE"[exp])
 }
 
+// DynamicSizeSI returns the size only of the given number with unit dynamically.
 func DynamicSizeSISize(b uint64) float64 {
 	const unit = 1000
 	if b < unit {
@@ -120,6 +138,7 @@ func DynamicSizeSISize(b uint64) float64 {
 	return math.Round(result*ratio) / ratio
 }
 
+// DynamicSizeSI returns the unit only of the given number dynamically.
 func DynamicSizeSIUnit(b uint64) string {
 	const unit = 1000
 	if b < unit {
@@ -133,6 +152,7 @@ func DynamicSizeSIUnit(b uint64) string {
 	return fmt.Sprintf("%cB", "kMGTPE"[exp])
 }
 
+// DynamicSizeIEC returns the value of the given number with unit dynamically.
 func DynamicSizeIEC(b uint64) string {
 	const unit = 1024
 	if b < unit {
@@ -150,6 +170,7 @@ func DynamicSizeIEC(b uint64) string {
 		math.Round(result*ratio)/ratio, "kMGTPE"[exp])
 }
 
+// DynamicSizeIECSize returns the size only of the given number with unit dynamically.
 func DynamicSizeIECSize(b uint64) float64 {
 	const unit = 1024
 	if b < unit {
@@ -166,6 +187,7 @@ func DynamicSizeIECSize(b uint64) float64 {
 	return math.Round(result*ratio) / ratio
 }
 
+// DynamicSizeIECUnit returns the unit only of the given number dynamically.
 func DynamicSizeIECUnit(b uint64) string {
 	const unit = 1024
 	if b < unit {
@@ -179,6 +201,7 @@ func DynamicSizeIECUnit(b uint64) string {
 	return fmt.Sprintf("%cB", "kMGTPE"[exp])
 }
 
+// GetPercent calculates what percentage of the number 'a' is of the number 'b'
 func GetPercent(a uint64, b uint64) float64 {
 	decimalPlaces := 1
 	result := (float64(a) / float64(b) * 100)
@@ -186,6 +209,7 @@ func GetPercent(a uint64, b uint64) float64 {
 	return math.Round(result*ratio) / ratio
 }
 
+// Cli issues a command passed as a string slice.
 func Cli(command []string) string {
 	cmd := exec.Command(command[0], command[1:]...)
 	var out bytes.Buffer
@@ -195,6 +219,7 @@ func Cli(command []string) string {
 	return out.String()
 }
 
+// GetProgramDir returns with the directory of the current program.
 func GetProgramDir() string {
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	base := filepath.Base(dir)
@@ -211,11 +236,13 @@ func FileExists(filename string) bool {
 	return !info.IsDir()
 }
 
+// GetString fetches a alphanumeric characters only.
 func GetString(str string) string {
 	re := regexp.MustCompile(`[^a-zA-Z]*`)
 	return re.ReplaceAllString(str, "")
 }
 
+// GetNum fetches numbers only from the string.
 func GetNum(str string) uint64 {
 	re := regexp.MustCompile(`[^0-9]*`)
 	num, err := strconv.ParseUint(re.ReplaceAllString(str, ""), 10, 64)
@@ -223,6 +250,7 @@ func GetNum(str string) uint64 {
 	return num
 }
 
+// TextToBytes converts a test to bytes, for example: TextToBytes("1kB") = 1024
 func TextToBytes(text string) uint64 {
 	unit := GetString(text)
 	size := GetNum(text)
@@ -244,6 +272,7 @@ func TextToBytes(text string) uint64 {
 	}
 }
 
+// ReplaceStringInSlice replaces a string in a slice.
 func ReplaceStringInSlice(s []string, old string, new string) []string {
 	newSlice := make([]string, 0)
 	for _, v := range s {
@@ -256,6 +285,7 @@ func ReplaceStringInSlice(s []string, old string, new string) []string {
 	return newSlice
 }
 
+// SliceContains checks wheter a slice contains a string or not.
 func SliceContains(slice []string, contains string) bool {
 	for _, elem := range slice {
 		if elem == contains {
@@ -265,9 +295,10 @@ func SliceContains(slice []string, contains string) bool {
 	return false
 }
 
+// GetConfigPath gives back the path of the service configuration file.
+// It fetches the kind of configuration file from the name of the OS.
 func GetConfigPath(service string) string {
-	cmd := []string{"bash", "-c", "hostnamectl | grep Operating | awk -F: '{print $2}' | xargs"}
-	check := Cli(cmd)
+	check := Cli(GetConfigPathCmd)
 	if strings.Contains(strings.ToLower(check), "raspbian") {
 		return filepath.Join(GetProgramDir(), "/configs/"+service+".raspbian.yaml")
 	}
