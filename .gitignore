@@ -4,5 +4,6 @@ cmd/web
 configs/auth.db
 vendor/
 
-coverage.*
+*.out
+report.xml
 
