@@ -28,6 +28,7 @@ type (
 	Processes []Process
 )
 
+// GetJSON returns with a JSON that holds information from processes that stored in the configuration.
 func GetJSON() string {
 	var out string
 	jsonArray := make([]string, 0)
@@ -78,54 +79,60 @@ func GetJSON() string {
 	return `{ "process_info": {` + strings.Join(jsonArray, ",") + `}}`
 }
 
+// getPid fetches PID from string.
 func getPid(s string) string {
 	res := strings.Split(s, " ")
-	if len(res) < 1 {
+	if (s == "") || (s == " ") || (len(res) == 1 && s == "") {
 		return "0"
 	}
 	return res[0]
 }
 
+// getUser fetches user from string.
 func getUser(s string) string {
 	res := strings.Split(s, " ")
-	if len(res) < 1 {
+	if len(res) < 2 {
 		return "unknown"
 	}
 	return res[1]
 }
 
+// getMem fetches mem from string.
 func getMem(s string) string {
 	res := strings.Split(s, " ")
-	if len(res) < 2 {
+	if len(res) < 3 {
 		return "0.0%"
 	}
 	return res[2]
 }
 
+// getCpu fetches CPU from string.
 func getCpu(s string) string {
 	res := strings.Split(s, " ")
-	if len(res) < 3 {
+	if len(res) < 4 {
 		return "0.0%"
 	}
 	return res[3]
 }
 
+// getCmd fetches command from string.
 func getCmd(s string) string {
 	array := strings.Split(s, " ")
 	res := "unknown"
-	if len(array) > 3 {
+	if len(array) > 4 {
 		res = strings.Join(append(array[4:]), " ")
-
 	}
 	return res
 }
 
+// escapeStr escapes special characters that breaks JSON creation.
 func escapeStr(str string) string {
 	str = strings.ReplaceAll(str, `"`, "'")
 	str = strings.ReplaceAll(str, `\`, "/")
 	return str
 }
 
+// getAllProcesses makes a Processes structure.
 func (p *Processes) getAllProcesses() *Processes {
 	processes, err := process.Processes()
 	common.Error(err)
@@ -153,9 +160,6 @@ func (p *Processes) getAllProcesses() *Processes {
 		pCmdline = escapeStr(pCmdline)
 
 		if pName != "" && !strings.Contains(pName, "cmd/api") {
-			if pCmdline == "" {
-				pCmdline = pName
-			}
 			filtered = append(filtered, Process{
 				Pid:           pId,
 				Name:          pName,
@@ -170,6 +174,7 @@ func (p *Processes) getAllProcesses() *Processes {
 	return &filtered
 }
 
+// orderByCPUPercent orders the Processes struct by CPU percentage.
 func (p *Processes) orderByCPUPercent() *Processes {
 	processes := *p
 
@@ -180,6 +185,7 @@ func (p *Processes) orderByCPUPercent() *Processes {
 	return &processes
 }
 
+// getFirst10Process returns with the first top 10 processes information.
 func (p *Processes) getFirst10Process() *Processes {
 	processes := *p
 	var filtered Processes
@@ -200,6 +206,7 @@ func (p *Processes) getFirst10Process() *Processes {
 	return &filtered
 }
 
+// getJSON makes a JSON object from the Processes struct.
 func (p *Processes) getJSON() string {
 	var lines []string
 
