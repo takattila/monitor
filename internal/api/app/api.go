@@ -8,6 +8,7 @@ import (
 	"github.com/takattila/monitor/internal/api/pkg/model"
 	"github.com/takattila/monitor/internal/api/pkg/network"
 	"github.com/takattila/monitor/internal/api/pkg/processes"
+	"github.com/takattila/monitor/internal/api/pkg/servers"
 	"github.com/takattila/monitor/internal/api/pkg/services"
 	"github.com/takattila/monitor/internal/api/pkg/storage"
 	"github.com/takattila/monitor/internal/common/pkg/config"
@@ -47,5 +48,5 @@ func main() {
 	router.Get(config.GetString(s, "on_start.routes.network"), handlers.Network)
 	router.Get(config.GetString(s, "on_start.routes.toggle"), handlers.Toggle)
 
-	handlers.ServeHTTP(config.GetInt(s, "on_start.port"), router)
+	servers.ServeHTTP(config.GetInt(s, "on_start.port"), router)
 }
