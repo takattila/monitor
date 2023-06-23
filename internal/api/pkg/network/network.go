@@ -13,21 +13,25 @@ var (
 	Cfg            *settings.Settings
 	StartMesureIn  = map[string]uint64{}
 	StartMesureOut = map[string]uint64{}
+	Sleep          = 2 * time.Second
 )
 
+// Stats collects network data into StartMesureIn and StartMesureOut variables.
+// It should be run in the background by starting with: 'go Stats()'.
 func Stats() {
 	for {
-		if Cfg.Data.Get("NetworkTraffic") == "true" {
+		if Cfg.Data.GetBool("NetworkTraffic") {
 			c, _ := net.IOCounters(true)
 			for _, n := range c {
 				StartMesureIn[n.Name] = n.BytesRecv
 				StartMesureOut[n.Name] = n.BytesSent
 			}
 		}
-		time.Sleep(2 * time.Second)
+		time.Sleep(Sleep)
 	}
 }
 
+// GetJSON returns with a JSON that holds information from network Traffic, from all interfaces.
 func GetJSON() string {
 	jsonArray := makeEmptyArray()
 	if Cfg.Data.GetBool("NetworkTraffic") {
@@ -53,6 +57,7 @@ func GetJSON() string {
 	return `{ "network_info": {` + strings.Join(jsonArray, ",") + `}}`
 }
 
+// makeEmptyArray creates an empty network array.
 func makeEmptyArray() []string {
 	jsonArray := make([]string, 0)
 	c, _ := net.Interfaces()
