@@ -13,8 +13,29 @@ import (
 	"github.com/takattila/monitor/internal/api/pkg/storage"
 )
 
-func GetJSON() string {
-	rawJSONs := []json.RawMessage{
+// AllJSONs holds a json.RawMessage array.
+type AllJSONs struct {
+	RawJSONs []json.RawMessage
+}
+
+// GetJSON returns a merged JSON of all hardware JSONs.
+func (r *AllJSONs) GetJSON() string {
+	rawDestination := json.RawMessage("{}")
+	var err error
+
+	for _, rawSource := range r.RawJSONs {
+		rawDestination, err = badjsonmerge.MergeJSON(rawSource, rawDestination)
+		if err != nil {
+			rawDestination = []byte("{}")
+		}
+	}
+
+	return string(rawDestination)
+}
+
+// GetRawJSONs populates a json.RawMessage array.
+func GetRawJSONs() *AllJSONs {
+	RawJSONs := []json.RawMessage{
 		json.RawMessage(model.GetJSON()),
 		json.RawMessage(cpu.GetJSON()),
 		json.RawMessage(memory.GetJSON()),
@@ -23,16 +44,5 @@ func GetJSON() string {
 		json.RawMessage(services.GetJSON()),
 		json.RawMessage(network.GetJSON()),
 	}
-
-	rawDestination := json.RawMessage("{}")
-	var err error
-
-	for _, rawSource := range rawJSONs {
-		rawDestination, err = badjsonmerge.MergeJSON(rawSource, rawDestination)
-		if err != nil {
-			rawDestination = []byte("{}")
-		}
-	}
-
-	return string(rawDestination)
+	return &AllJSONs{RawJSONs: RawJSONs}
 }

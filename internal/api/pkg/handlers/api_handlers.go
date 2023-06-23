@@ -23,7 +23,7 @@ var Cfg *settings.Settings
 // All ...
 func All(w http.ResponseWriter, r *http.Request) {
 	common.Info("All", "Request IP:", r.RemoteAddr)
-	fmt.Fprintf(w, "%s", string(all.GetJSON()))
+	fmt.Fprintf(w, "%s", string(all.GetRawJSONs().GetJSON()))
 }
 
 // Playground ...
