@@ -16,6 +16,7 @@ var (
 	Cfg *settings.Settings
 )
 
+// The CPU structure contains the necessary data about the CPU.
 type CPU struct {
 	ProcessorInfo struct {
 		Temp struct {
@@ -40,6 +41,7 @@ type CPU struct {
 	} `json:"processor_info"`
 }
 
+// GetJSON returns with a JSON that holds all necessary CPU information.
 func GetJSON() string {
 	c := CPU{}
 	c.getUsage()
@@ -52,6 +54,7 @@ func GetJSON() string {
 	return string(b)
 }
 
+// getUsage populates the usage data.
 func (c *CPU) getUsage() *CPU {
 	percentage, err := cpu.Percent(0, true)
 	common.Error(err)
@@ -75,6 +78,7 @@ func (c *CPU) getUsage() *CPU {
 	return c
 }
 
+// calculateTemptJSON populates the temperature data.
 func calculateTemp(temp, usage float64) float64 {
 	decimalPlaces := 1
 	divider := float64(0)
@@ -90,6 +94,7 @@ func calculateTemp(temp, usage float64) float64 {
 	return math.Round(result*ratio) / ratio
 }
 
+// getTempByUsage calculates the approximate temperature from the CPU usage.
 func (c *CPU) getTempByUsage() *CPU {
 	temp := 0.1
 	usage := float64(c.ProcessorInfo.Usage.Percent)
@@ -128,6 +133,7 @@ func (c *CPU) getTempByUsage() *CPU {
 	return c
 }
 
+// getTemp fetches the CPU temperature by running a command.
 func (c *CPU) getTemp() *CPU {
 	ret, _ := Cfg.GetStringSlice("on_runtime.commands.cpu_temp")
 	if len(ret) == 0 {
@@ -149,6 +155,7 @@ func (c *CPU) getTemp() *CPU {
 	return c
 }
 
+// getLoad populates the CPU loads: 1, 5 or 15.
 func (c *CPU) getLoad() *CPU {
 	load, err := load.Avg()
 	common.Error(err)
