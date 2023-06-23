@@ -40,7 +40,7 @@ The web interface is responsive, it has `desktop` and `mobile` modes.
 
 ## Installation
 
-You can choose to [download the pre-built binaries](https://github.com/takattila/monitor/releases/tag/v1.0.0) or build the service yourself.
+You can choose to [download the pre-built binaries](https://github.com/takattila/monitor/releases) or build the service yourself.
 
 ### By downloading the latest release
 
@@ -54,7 +54,7 @@ If you don't have go installed, and you don't want to install it, you can downlo
 
 ### By building the service from the sources
 
-If you cannot find the correct OS/architecture in the [releases](https://github.com/takattila/monitor/releases/tag/v1.0.0), you can optionally build the services yourself. 
+If you cannot find the correct OS/architecture in the [releases](https://github.com/takattila/monitor/releases), you can optionally build the services yourself. 
 
 1. Download and install Go
 
