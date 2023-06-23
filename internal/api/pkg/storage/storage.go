@@ -15,6 +15,17 @@ var (
 	Cfg *settings.Settings
 )
 
+// GetJSON returns with a JSON that holds information from storage:
+// - total
+// - actual
+// - free
+// - percent
+//
+// Example data, that should be parsed wit this function:
+// /dev/root       125781323776   11170361344 109469069312  10% /
+// /dev/sdd1          267374592      52252672    215121920  20% /boot
+// /dev/sde1       750152314880   43766321152 706385993728   6% /media/hdd1_name
+// /dev/sdb2      1000052097024   43090182144 956961914880   5% /media/hdd2_name
 func GetJSON() string {
 	storageLines := strings.Split(common.Cli(config.GetStringSlice(Cfg, "on_runtime.commands.storage")), "\n")
 
@@ -73,6 +84,9 @@ func GetJSON() string {
 	return `{ "storage_info": {` + result + `}}`
 }
 
+// getStorageName fetches the storage name from the string.
+// Example data, that should be parsed wit this function:
+// /dev/root       125781323776   11170361344 109469069312  10% ->[ / ]<-
 func getStorageName(s string) string {
 	ret := "unknown"
 	arr := strings.Split(s, " ")
@@ -82,6 +96,9 @@ func getStorageName(s string) string {
 	return ret
 }
 
+// getTotal fetches the storage name from the string.
+// Example data, that should be parsed wit this function:
+// /dev/root       ->[ 125781323776 ]<-   11170361344 109469069312  10% /
 func getTotal(s string) uint64 {
 	sizeInt := uint64(0)
 	arr := strings.Split(s, " ")
@@ -92,6 +109,9 @@ func getTotal(s string) uint64 {
 	return sizeInt
 }
 
+// getUsed fetches the used space from the string.
+// Example data, that should be parsed wit this function:
+// /dev/root       125781323776   ->[ 11170361344 ]<- 109469069312  10% /
 func getUsed(s string) uint64 {
 	sizeInt := uint64(0)
 	arr := strings.Split(s, " ")
@@ -102,6 +122,9 @@ func getUsed(s string) uint64 {
 	return sizeInt
 }
 
+// getAvailable fetches the available space from the string.
+// Example data, that should be parsed wit this function:
+// /dev/root       125781323776   11170361344 ->[ 109469069312 ]<-  10% /
 func getAvailable(s string) uint64 {
 	sizeInt := uint64(0)
 	arr := strings.Split(s, " ")
@@ -112,6 +135,9 @@ func getAvailable(s string) uint64 {
 	return sizeInt
 }
 
+// getPercent fetches the used space percentage from the string.
+// Example data, that should be parsed wit this function:
+// /dev/root       125781323776   11170361344 109469069312  ->[ 10% ]<- /
 func getPercent(s string) string {
 	ret := 0
 	arr := strings.Split(s, " ")
