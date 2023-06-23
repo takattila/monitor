@@ -13,8 +13,11 @@ import (
 var (
 	Cfg    *settings.Settings
 	output = ""
+	Sleep  = 2 * time.Second
 )
 
+// Watcher collects services data into output variable.
+// It should be run in the background by starting with: 'go Watcher()'.
 func Watcher() {
 	ServicesList := config.GetStringSlice(Cfg, "on_runtime.services_list")
 	output = getProcessesStatus(ServicesList)
@@ -23,10 +26,11 @@ func Watcher() {
 			ServicesList := config.GetStringSlice(Cfg, "on_runtime.services_list")
 			output = getProcessesStatus(ServicesList)
 		}
-		time.Sleep(2 * time.Second)
+		time.Sleep(Sleep)
 	}
 }
 
+// GetJSON returns with a JSON that holds information from services: 'is_active' and 'is_enabled'.
 func GetJSON() string {
 	processLines := strings.Split(output, "\n")
 
@@ -53,6 +57,8 @@ func GetJSON() string {
 	return obj
 }
 
+// getProcessesStatus collects status information about a service: 'is_active' and 'is_enabled'.
+// Output example: 'service_name active enabled'.
 func getProcessesStatus(services []string) (output string) {
 	for _, service := range services {
 		if service != "" {
@@ -69,10 +75,12 @@ func getProcessesStatus(services []string) (output string) {
 	return output
 }
 
+// getServiceName fetches the service name from a string.
 func getServiceName(s string) string {
 	return strings.Split(s, " ")[0]
 }
 
+// isActive fetches the 'active' state from a string.
 func isActive(s string) string {
 	arr := strings.Split(s, " ")
 	if len(arr) < 3 {
@@ -81,6 +89,7 @@ func isActive(s string) string {
 	return arr[1]
 }
 
+// isEnabled fetches 'enabled' state from a string.
 func isEnabled(s string) string {
 	arr := strings.Split(s, " ")
 	if len(arr) < 3 {
