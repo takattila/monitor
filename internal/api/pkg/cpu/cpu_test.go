@@ -11,12 +11,12 @@ import (
 )
 
 type (
-	ApiAllSuite struct {
+	ApiCpuSuite struct {
 		suite.Suite
 	}
 )
 
-func (a ApiAllSuite) TestGetJSONWithGetTempByUsage() {
+func (a ApiCpuSuite) TestGetJSONWithGetTempByUsage() {
 	s := getConfig("api", "linux")
 	Cfg = s
 
@@ -32,7 +32,7 @@ func (a ApiAllSuite) TestGetJSONWithGetTempByUsage() {
 
 }
 
-func (a ApiAllSuite) TestGetJSONWithGetTemp() {
+func (a ApiCpuSuite) TestGetJSONWithGetTemp() {
 	s := getConfig("api", "linux")
 	s.Data.Set("on_runtime.commands.cpu_temp", []string{"bash", "-c", "echo 40"})
 	Cfg = s
@@ -49,7 +49,7 @@ func (a ApiAllSuite) TestGetJSONWithGetTemp() {
 
 }
 
-func (a ApiAllSuite) TestCalculateTemp() {
+func (a ApiCpuSuite) TestCalculateTemp() {
 	for _, test := range []struct {
 		usage    float64
 		expected float64
@@ -67,7 +67,7 @@ func (a ApiAllSuite) TestCalculateTemp() {
 	}
 }
 
-func (a ApiAllSuite) TestGetTempByUsage() {
+func (a ApiCpuSuite) TestGetTempByUsage() {
 	c := CPU{}
 	for _, test := range []struct {
 		percent  int
@@ -124,6 +124,6 @@ func getConfig(service, system string) *settings.Settings {
 	return s
 }
 
-func TestApiAllSuite(t *testing.T) {
-	suite.Run(t, new(ApiAllSuite))
+func TestApiCpuSuite(t *testing.T) {
+	suite.Run(t, new(ApiCpuSuite))
 }

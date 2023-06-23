@@ -12,6 +12,7 @@ var (
 	Cfg *settings.Settings
 )
 
+// The Mem structure contains the necessary data about the memory.
 type Mem struct {
 	MemoryInfo struct {
 		Total struct {
@@ -66,6 +67,7 @@ type Mem struct {
 	} `json:"memory_info"`
 }
 
+// GetJSON provides a JSON object with all the memory information.
 func GetJSON() string {
 	m := Mem{}
 	if Cfg.Data.GetBool("Memory") {
@@ -88,6 +90,7 @@ func GetJSON() string {
 	return string(b)
 }
 
+// getPhysicalMemory decides whether the memory information is set in the configuration or not.
 func getPhysicalMemory(vm *mem.VirtualMemoryStat) uint64 {
 	ret, _ := Cfg.GetString("on_runtime.physical_memory")
 	if ret == "" {
@@ -96,6 +99,7 @@ func getPhysicalMemory(vm *mem.VirtualMemoryStat) uint64 {
 	return common.TextToBytes(ret)
 }
 
+// getTotal populates Total memory data.
 func (m *Mem) getTotal(vm *mem.VirtualMemoryStat) *Mem {
 	PhysicalMemoryInBytes := getPhysicalMemory(vm)
 	size_physical := common.DynamicSizeIECSize(PhysicalMemoryInBytes)
@@ -112,6 +116,7 @@ func (m *Mem) getTotal(vm *mem.VirtualMemoryStat) *Mem {
 	return m
 }
 
+// getUsed populates Used memory data.
 func (m *Mem) getUsed(vm *mem.VirtualMemoryStat) *Mem {
 	m.MemoryInfo.Used.Total = common.DynamicSizeIECSize(vm.Total)
 	m.MemoryInfo.Used.TotalUnit = common.DynamicSizeIECUnit(vm.Total)
@@ -122,6 +127,7 @@ func (m *Mem) getUsed(vm *mem.VirtualMemoryStat) *Mem {
 	return m
 }
 
+// getFree populates Free memory data.
 func (m *Mem) getFree(vm *mem.VirtualMemoryStat) *Mem {
 	m.MemoryInfo.Free.Total = common.DynamicSizeIECSize(vm.Total)
 	m.MemoryInfo.Free.TotalUnit = common.DynamicSizeIECUnit(vm.Total)
@@ -132,6 +138,7 @@ func (m *Mem) getFree(vm *mem.VirtualMemoryStat) *Mem {
 	return m
 }
 
+// getCached populates Cached memory data.
 func (m *Mem) getCached(vm *mem.VirtualMemoryStat) *Mem {
 	m.MemoryInfo.Cached.Total = common.DynamicSizeIECSize(vm.Total)
 	m.MemoryInfo.Cached.TotalUnit = common.DynamicSizeIECUnit(vm.Total)
@@ -142,6 +149,7 @@ func (m *Mem) getCached(vm *mem.VirtualMemoryStat) *Mem {
 	return m
 }
 
+// getAvailable populates Available memory data.
 func (m *Mem) getAvailable(vm *mem.VirtualMemoryStat) *Mem {
 	m.MemoryInfo.Available.Total = common.DynamicSizeIECSize(vm.Total)
 	m.MemoryInfo.Available.TotalUnit = common.DynamicSizeIECUnit(vm.Total)
@@ -152,6 +160,7 @@ func (m *Mem) getAvailable(vm *mem.VirtualMemoryStat) *Mem {
 	return m
 }
 
+// getSwap populates Swap memory data.
 func (m *Mem) getSwap(swp *mem.SwapMemoryStat) *Mem {
 	m.MemoryInfo.Swap.Total = common.DynamicSizeIECSize(swp.Total)
 	m.MemoryInfo.Swap.TotalUnit = common.DynamicSizeIECUnit(swp.Total)
@@ -162,6 +171,7 @@ func (m *Mem) getSwap(swp *mem.SwapMemoryStat) *Mem {
 	return m
 }
 
+// getVideo populates Video memory data.
 func (m *Mem) getVideo(vm *mem.VirtualMemoryStat) *Mem {
 	PhysicalMemoryInBytes := getPhysicalMemory(vm)
 	videoMemory := PhysicalMemoryInBytes - vm.Total
