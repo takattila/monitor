@@ -20,61 +20,61 @@ import (
 
 var Cfg *settings.Settings
 
-// All ...
+// All provides JSON from all sections.
 func All(w http.ResponseWriter, r *http.Request) {
 	common.Info("All", "Request IP:", r.RemoteAddr)
 	fmt.Fprintf(w, "%s", string(all.GetRawJSONs().GetJSON()))
 }
 
-// Playground ...
+// Playground for testing stuff.
 func Playground(w http.ResponseWriter, r *http.Request) {
 	common.Info("Playground", "Request IP:", r.RemoteAddr)
 	fmt.Fprintf(w, "%s", string(playground.Playground()))
 }
 
-// Model ...
+// Model provides JSON from model name.
 func Model(w http.ResponseWriter, r *http.Request) {
 	common.Info("Model", "Request IP:", r.RemoteAddr)
 	fmt.Fprintf(w, "%s", string(model.GetJSON()))
 }
 
-// Cpu ...
+// Cpu provides JSON from cpu.
 func Cpu(w http.ResponseWriter, r *http.Request) {
 	common.Info("Cpu", "Request IP:", r.RemoteAddr)
 	fmt.Fprintf(w, "%s", string(cpu.GetJSON()))
 }
 
-// Memory ...
+// Memory provides JSON from memory.
 func Memory(w http.ResponseWriter, r *http.Request) {
 	common.Info("Memory", "Request IP:", r.RemoteAddr)
 	fmt.Fprintf(w, "%s", string(memory.GetJSON()))
 }
 
-// Process ...
+// Process provides JSON from processes.
 func Process(w http.ResponseWriter, r *http.Request) {
 	common.Info("Process", "Request IP:", r.RemoteAddr)
 	fmt.Fprintf(w, "%s", string(processes.GetJSON()))
 }
 
-// Storages ...
+// Storages provides JSON from storages.
 func Storages(w http.ResponseWriter, r *http.Request) {
 	common.Info("Storages", "Request IP:", r.RemoteAddr)
 	fmt.Fprintf(w, "%s", string(storage.GetJSON()))
 }
 
-// Services ...
+// Services provides JSON from services.
 func Services(w http.ResponseWriter, r *http.Request) {
 	common.Info("Services", "Request IP:", r.RemoteAddr)
 	fmt.Fprintf(w, "%s", string(services.GetJSON()))
 }
 
-// Network ...
+// Network provides JSON from network.
 func Network(w http.ResponseWriter, r *http.Request) {
 	common.Info("Network", "Request IP:", r.RemoteAddr)
 	fmt.Fprintf(w, "%s", string(network.GetJSON()))
 }
 
-// Toggle ...
+// Toggle turns a specific JSON provider on or off.
 func Toggle(w http.ResponseWriter, r *http.Request) {
 	section := chi.URLParam(r, "section")
 	status := chi.URLParam(r, "status")
