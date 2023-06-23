@@ -7,6 +7,7 @@ import (
 	"github.com/matishsiao/goInfo"
 )
 
+// Playground for testing stuff.
 func Playground() string {
 	html := "<html><head><title>Go Playground</title></head><body><h1>Go</h1>"
 
