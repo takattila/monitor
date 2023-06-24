@@ -22,7 +22,6 @@ func Authenticate(authFile, name, pass string) bool {
 
 	for scanner.Scan() {
 		if authString == scanner.Text() {
-
 			return true
 		}
 	}
