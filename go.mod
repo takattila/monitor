@@ -8,6 +8,7 @@ require (
 	github.com/go-chi/chi v4.0.3+incompatible
 	github.com/gorilla/securecookie v1.1.1
 	github.com/matishsiao/goInfo v0.0.0-20210923090445-da2e3fa8d45f
+	github.com/phayes/freeport v0.0.0-20220201140144-74d24b5ae9f5
 	github.com/sagernet/sing-box v1.2.7
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/stretchr/testify v1.8.3
