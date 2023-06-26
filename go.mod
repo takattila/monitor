@@ -11,7 +11,7 @@ require (
 	github.com/phayes/freeport v0.0.0-20220201140144-74d24b5ae9f5
 	github.com/sagernet/sing-box v1.2.7
 	github.com/shirou/gopsutil v3.21.11+incompatible
-	github.com/stretchr/testify v1.8.3
+	github.com/stretchr/testify v1.8.4
 	github.com/takattila/settings-manager v1.0.1
 	golang.org/x/crypto v0.9.0
 )

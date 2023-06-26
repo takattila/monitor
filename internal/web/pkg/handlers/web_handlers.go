@@ -36,12 +36,17 @@ type (
 	}
 )
 
+var getUsername = func(r *http.Request) string {
+	return auth.GetUserName(r)
+}
+
 // Internal serves statistics page.
 func (h *Handler) Internal(w http.ResponseWriter, r *http.Request) {
-	userName := auth.GetUserName(r)
+	userName := getUsername(r)
 	common.Info("userName:", userName)
 	if userName == "" {
 		http.Redirect(w, r, h.LoginRoute, 302)
+		return
 	}
 
 	if IPisAllowed(r.RemoteAddr, config.GetString(h.Cfg, "on_runtime.allowed_ip")) {
@@ -116,10 +121,11 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 // SystemCtl queries or sends control commands to the systemd manager.
 func (h *Handler) SystemCtl(w http.ResponseWriter, r *http.Request) {
-	userName := auth.GetUserName(r)
+	userName := getUsername(r)
 	common.Info("userName:", userName)
 	if userName == "" {
 		http.Redirect(w, r, h.LoginRoute, 302)
+		return
 	}
 
 	if IPisAllowed(r.RemoteAddr, config.GetString(h.Cfg, "on_runtime.allowed_ip")) {
@@ -140,10 +146,11 @@ func (h *Handler) SystemCtl(w http.ResponseWriter, r *http.Request) {
 
 // Power runs power actions: shutdown or reboot.
 func (h *Handler) Power(w http.ResponseWriter, r *http.Request) {
-	userName := auth.GetUserName(r)
+	userName := getUsername(r)
 	common.Info("userName:", userName)
 	if userName == "" {
 		http.Redirect(w, r, h.LoginRoute, 302)
+		return
 	}
 
 	if IPisAllowed(r.RemoteAddr, config.GetString(h.Cfg, "on_runtime.allowed_ip")) {
@@ -164,10 +171,11 @@ func (h *Handler) Power(w http.ResponseWriter, r *http.Request) {
 // Api handler sends requests to the MONITOR-API service.
 // Basicaly it is a proxy.
 func (h *Handler) Api(w http.ResponseWriter, r *http.Request) {
-	userName := auth.GetUserName(r)
+	userName := getUsername(r)
 	common.Info("userName:", userName)
 	if userName == "" {
 		http.Redirect(w, r, h.LoginRoute, 302)
+		return
 	}
 
 	if IPisAllowed(r.RemoteAddr, config.GetString(h.Cfg, "on_runtime.allowed_ip")) {
@@ -183,9 +191,8 @@ func (h *Handler) Api(w http.ResponseWriter, r *http.Request) {
 		common.Info(requestURL, "client: status code:", res.StatusCode)
 
 		resBody, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			common.Error(fmt.Errorf("client: could not read response body: %v", err))
-		}
+		common.Error(err)
+
 		fmt.Fprintf(w, "%s", resBody)
 	}
 }
@@ -214,10 +221,11 @@ func (h *Handler) Logout(response http.ResponseWriter, request *http.Request) {
 
 // Toggle ...
 func (h *Handler) Toggle(w http.ResponseWriter, r *http.Request) {
-	userName := auth.GetUserName(r)
+	userName := getUsername(r)
 	common.Info("userName:", userName)
 	if userName == "" {
 		http.Redirect(w, r, h.LoginRoute, 302)
+		return
 	}
 
 	if IPisAllowed(r.RemoteAddr, config.GetString(h.Cfg, "on_runtime.allowed_ip")) {
@@ -241,9 +249,8 @@ func (h *Handler) Toggle(w http.ResponseWriter, r *http.Request) {
 		common.Info(requestURL, "client: status code:", res.StatusCode)
 
 		resBody, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			common.Error(fmt.Errorf("client: could not read response body: %v", err))
-		}
+		common.Error(err)
+
 		fmt.Fprintf(w, "%s", resBody)
 	}
 }
