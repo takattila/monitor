@@ -70,6 +70,7 @@ func (a WebHandlersSuite) TestLoginOk() {
 	defer func() { _ = os.Remove(authdb) }()
 
 	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
 
 	go startWebServer(a.T())
 	time.Sleep(100 * time.Millisecond)
@@ -87,8 +88,6 @@ func (a WebHandlersSuite) TestLoginOk() {
 	resp, err = req("GET", loginURL, strings.NewReader(form.Encode()))
 	a.Equal(nil, err)
 	a.Equal(200, resp.StatusCode)
-
-	getUsername = oldGetUsernameFunc
 }
 
 func (a WebHandlersSuite) TestSystemCtlOk() {
@@ -99,6 +98,7 @@ func (a WebHandlersSuite) TestSystemCtlOk() {
 	defer func() { _ = os.Remove(authdb) }()
 
 	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
 
 	go startWebServer(a.T())
 	time.Sleep(100 * time.Millisecond)
@@ -116,8 +116,6 @@ func (a WebHandlersSuite) TestSystemCtlOk() {
 	resp, err = req("POST", systemctlURL, strings.NewReader(form.Encode()))
 	a.Equal(nil, err)
 	a.Equal(200, resp.StatusCode)
-
-	getUsername = oldGetUsernameFunc
 }
 
 func (a WebHandlersSuite) TestSystemCtlNotAuthenticated() {
@@ -135,6 +133,7 @@ func (a WebHandlersSuite) TestSystemCtlActionNotAllowed() {
 	defer func() { _ = os.Remove(authdb) }()
 
 	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
 
 	go startWebServer(a.T())
 	time.Sleep(100 * time.Millisecond)
@@ -152,8 +151,6 @@ func (a WebHandlersSuite) TestSystemCtlActionNotAllowed() {
 	resp, err = req("POST", systemctlURL, strings.NewReader(form.Encode()))
 	a.Equal(nil, err)
 	a.Equal(200, resp.StatusCode)
-
-	getUsername = oldGetUsernameFunc
 }
 
 func (a WebHandlersSuite) TestPowerOk() {
@@ -164,6 +161,7 @@ func (a WebHandlersSuite) TestPowerOk() {
 	defer func() { _ = os.Remove(authdb) }()
 
 	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
 
 	go startWebServer(a.T())
 	time.Sleep(100 * time.Millisecond)
@@ -181,8 +179,6 @@ func (a WebHandlersSuite) TestPowerOk() {
 	resp, err = req("POST", powerURL, strings.NewReader(form.Encode()))
 	a.Equal(nil, err)
 	a.Equal(200, resp.StatusCode)
-
-	getUsername = oldGetUsernameFunc
 }
 
 func (a WebHandlersSuite) TestPowerNotAuthenticated() {
@@ -200,6 +196,7 @@ func (a WebHandlersSuite) TestApiOk() {
 	defer func() { _ = os.Remove(authdb) }()
 
 	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
 
 	go startWebServer(a.T())
 	time.Sleep(100 * time.Millisecond)
@@ -220,8 +217,6 @@ func (a WebHandlersSuite) TestApiOk() {
 	resp, err = req("GET", apiURL, strings.NewReader(form.Encode()))
 	a.Equal(nil, err)
 	a.Equal(200, resp.StatusCode)
-
-	getUsername = oldGetUsernameFunc
 }
 
 func (a WebHandlersSuite) TestApiApiNotFound() {
@@ -232,6 +227,7 @@ func (a WebHandlersSuite) TestApiApiNotFound() {
 	defer func() { _ = os.Remove(authdb) }()
 
 	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
 
 	go startWebServer(a.T())
 	time.Sleep(100 * time.Millisecond)
@@ -249,8 +245,6 @@ func (a WebHandlersSuite) TestApiApiNotFound() {
 	resp, err = req("GET", apiURL, strings.NewReader(form.Encode()))
 	a.Equal(nil, err)
 	a.Equal(200, resp.StatusCode)
-
-	getUsername = oldGetUsernameFunc
 }
 
 func (a WebHandlersSuite) TestApiNotAuthenticated() {
@@ -278,6 +272,7 @@ func (a WebHandlersSuite) TestToggleOk() {
 	defer func() { _ = os.Remove(authdb) }()
 
 	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
 
 	go startWebServer(a.T())
 	time.Sleep(100 * time.Millisecond)
@@ -298,8 +293,6 @@ func (a WebHandlersSuite) TestToggleOk() {
 	resp, err = req("GET", toggleURL, strings.NewReader(form.Encode()))
 	a.Equal(nil, err)
 	a.Equal(200, resp.StatusCode)
-
-	getUsername = oldGetUsernameFunc
 }
 
 func (a WebHandlersSuite) TestToggleNotAuthenticated() {
@@ -317,6 +310,7 @@ func (a WebHandlersSuite) TestToggleApiNotFound() {
 	defer func() { _ = os.Remove(authdb) }()
 
 	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
 
 	go startWebServer(a.T())
 	time.Sleep(100 * time.Millisecond)
@@ -334,8 +328,6 @@ func (a WebHandlersSuite) TestToggleApiNotFound() {
 	resp, err = req("GET", toggleURL, strings.NewReader(form.Encode()))
 	a.Equal(nil, err)
 	a.Equal(200, resp.StatusCode)
-
-	getUsername = oldGetUsernameFunc
 }
 
 func (a WebHandlersSuite) TestIPisAllowedIPNotSet() {
