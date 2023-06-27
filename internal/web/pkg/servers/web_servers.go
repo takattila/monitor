@@ -25,8 +25,13 @@ type Server struct {
 	Cfg        *settings.Settings
 }
 
+var (
+	tlsPort  = 443
+	httpPort = 80
+)
+
 func (s *Server) Start() {
-	if s.Port == 443 {
+	if s.Port == tlsPort {
 		s.ServeTLS()
 	} else {
 		s.ServeHTTP()
@@ -71,7 +76,7 @@ func (s *Server) ServeTLS() {
 	}
 
 	go func() {
-		common.Fatal(http.ListenAndServe(":http", certManager.HTTPHandler(nil)))
+		common.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", httpPort), certManager.HTTPHandler(nil)))
 	}()
 
 	common.Fatal(server.ListenAndServeTLS("", "")) // Key and cert are coming from Let's Encrypt
@@ -103,12 +108,12 @@ func (s *Server) Files() {
 }
 
 // cacheDir makes a consistent cache directory inside /tmp. Returns "" on error.
-func cacheDir() (dir string) {
+func cacheDir() (directory string) {
 	if u, _ := user.Current(); u != nil {
-		dir = filepath.Join(os.TempDir(), "cache-golang-autocert-"+u.Username)
+		dir := filepath.Join(os.TempDir(), "cache-golang-autocert-"+u.Username)
 		if err := os.MkdirAll(dir, 0700); err == nil {
-			return dir
+			directory = dir
 		}
 	}
-	return ""
+	return directory
 }
