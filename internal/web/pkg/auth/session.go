@@ -14,6 +14,14 @@ var (
 	CookieHandler = securecookie.New(
 		securecookie.GenerateRandomKey(64),
 		securecookie.GenerateRandomKey(32))
+
+	terminalPrompt = func(prompt string) string {
+		return terminal.Prompt(prompt)
+	}
+
+	writeString = func(f *os.File, s string) (n int, err error) {
+		return f.WriteString(s)
+	}
 )
 
 // SetSession creates session cookie.
@@ -43,20 +51,6 @@ func ClearSession(response http.ResponseWriter) {
 	http.SetCookie(response, cookie)
 }
 
-// WriteSessionToFile saves session into SessionFile.
-func WriteSessionToFile(session string, sessionFile string) error {
-	f, err := os.OpenFile(sessionFile,
-		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	if _, err := f.WriteString(session + "\n"); err != nil {
-		return err
-	}
-	return nil
-}
-
 // GetUserName takes out userName from session cookie.
 func GetUserName(request *http.Request) (userName string) {
 	if cookie, err := request.Cookie("session"); err == nil {
@@ -71,8 +65,8 @@ func GetUserName(request *http.Request) (userName string) {
 // SaveCredentials writes user credentials into the AuthFile.
 func SaveCredentials(authFile string, saveCredentials bool) error {
 	if saveCredentials == true || !common.FileExists(authFile) {
-		user := terminal.Prompt("username: ")
-		pass := terminal.Prompt("password: ")
+		user := terminalPrompt("username: ")
+		pass := terminalPrompt("password: ")
 
 		f, err := os.OpenFile(authFile,
 			os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
@@ -82,7 +76,7 @@ func SaveCredentials(authFile string, saveCredentials bool) error {
 		defer f.Close()
 
 		authString := base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
-		if _, err := f.WriteString(authString + "\n"); err != nil {
+		if _, err := writeString(f, authString+"\n"); err != nil {
 			return err
 		}
 	}
