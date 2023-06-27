@@ -19,6 +19,15 @@ type (
 
 func (a ApiServicesSuite) TestGetJSON() {
 	Sleep = 10 * time.Millisecond
+	oldPetProcessesStatus := getProcessesStatus
+	defer func() { getProcessesStatus = oldPetProcessesStatus }()
+
+	getProcessesStatus = func(services []string) (output string) {
+		return `service1 active enabled
+		service2 inactive disabled
+		service3 active 
+		service4 `
+	}
 
 	s := getConfig("api", "linux")
 	s.Data.Set("Services", true)
@@ -29,10 +38,59 @@ func (a ApiServicesSuite) TestGetJSON() {
 
 	JSON := GetJSON()
 	a.Contains(JSON, "services_info")
+	a.Contains(JSON, "service1")
+	a.Contains(JSON, "service2")
+	a.Contains(JSON, "service3")
 
-	d := make(map[string]interface{})
+	type ServicesInfo struct {
+		ServicesInfo struct {
+			Service1 struct {
+				IsActive  string `json:"is_active"`
+				IsEnabled string `json:"is_enabled"`
+			} `json:"service1"`
+			Service2 struct {
+				IsActive  string `json:"is_active"`
+				IsEnabled string `json:"is_enabled"`
+			} `json:"service2"`
+			Service3 struct {
+				IsActive  string `json:"is_active"`
+				IsEnabled string `json:"is_enabled"`
+			} `json:"service3"`
+			Service4 struct {
+				IsActive  string `json:"is_active"`
+				IsEnabled string `json:"is_enabled"`
+			} `json:"service4"`
+		} `json:"services_info"`
+	}
+
+	d := ServicesInfo{}
+
 	err := json.Unmarshal([]byte(JSON), &d)
 	a.Equal(err, nil)
+
+	a.Equal("active", d.ServicesInfo.Service1.IsActive)
+	a.Equal("enabled", d.ServicesInfo.Service1.IsEnabled)
+
+	a.Equal("inactive", d.ServicesInfo.Service2.IsActive)
+	a.Equal("disabled", d.ServicesInfo.Service2.IsEnabled)
+
+	a.Equal("unknown", d.ServicesInfo.Service3.IsActive)
+	a.Equal("unknown", d.ServicesInfo.Service3.IsEnabled)
+
+	a.Equal("unknown", d.ServicesInfo.Service4.IsActive)
+	a.Equal("unknown", d.ServicesInfo.Service4.IsEnabled)
+}
+
+func (a ApiServicesSuite) TestGetProcessesStatus() {
+	output := getProcessesStatus([]string{
+		"bad_service1",
+		"bad_service2",
+		"bad_service3",
+	})
+
+	a.Contains(output, "bad_service1 inactive")
+	a.Contains(output, "bad_service2 inactive")
+	a.Contains(output, "bad_service3 inactive")
 }
 
 func getConfig(service, system string) *settings.Settings {

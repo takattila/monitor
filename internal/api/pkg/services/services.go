@@ -14,6 +14,24 @@ var (
 	Cfg    *settings.Settings
 	output = ""
 	Sleep  = 2 * time.Second
+
+	// getProcessesStatus collects status information about a service: 'is_active' and 'is_enabled'.
+	// Output example: 'service_name active enabled'.
+	getProcessesStatus = func(services []string) (output string) {
+		for _, service := range services {
+			if service != "" {
+				CommandServiceIsActive := config.GetStringSlice(Cfg, "on_runtime.commands.service_is_active")
+				CommandServiceIsEnabled := config.GetStringSlice(Cfg, "on_runtime.commands.service_is_enabled")
+				is_active := common.Cli(common.ReplaceStringInSlice(CommandServiceIsActive, "{service}", service))
+				is_enabled := common.Cli(common.ReplaceStringInSlice(CommandServiceIsEnabled, "{service}", service))
+				is_active = strings.ReplaceAll(is_active, "\n", "")
+				is_enabled = strings.ReplaceAll(is_enabled, "\n", "")
+				output += service + " " + is_active + " " + is_enabled + "\n"
+			}
+		}
+
+		return output
+	}
 )
 
 // Watcher collects services data into output variable.
@@ -55,24 +73,6 @@ func GetJSON() string {
 	common.Error(err)
 
 	return obj
-}
-
-// getProcessesStatus collects status information about a service: 'is_active' and 'is_enabled'.
-// Output example: 'service_name active enabled'.
-func getProcessesStatus(services []string) (output string) {
-	for _, service := range services {
-		if service != "" {
-			CommandServiceIsActive := config.GetStringSlice(Cfg, "on_runtime.commands.service_is_active")
-			CommandServiceIsEnabled := config.GetStringSlice(Cfg, "on_runtime.commands.service_is_enabled")
-			is_active := common.Cli(common.ReplaceStringInSlice(CommandServiceIsActive, "{service}", service))
-			is_enabled := common.Cli(common.ReplaceStringInSlice(CommandServiceIsEnabled, "{service}", service))
-			is_active = strings.ReplaceAll(is_active, "\n", "")
-			is_enabled = strings.ReplaceAll(is_enabled, "\n", "")
-			output += service + " " + is_active + " " + is_enabled + "\n"
-		}
-	}
-
-	return output
 }
 
 // getServiceName fetches the service name from a string.
