@@ -88,22 +88,18 @@ func (l Logger) Warning(args ...interface{}) {
 
 // Error writes Error to stdOut.
 func (l Logger) Error(err error) {
-	if l.Level >= ErrorLevel {
-		if err != nil {
-			track := getTrackingInfo(1)
-			l.print(color.HiRedString, "error", track.File, track.Function, track.Line, err)
-		}
+	if l.Level >= ErrorLevel && err != nil {
+		track := getTrackingInfo(1)
+		l.print(color.HiRedString, "error", track.File, track.Function, track.Line, err)
 	}
 }
 
 // Fatal writes Error to stdOut and exit with exit code 1, if err doesn't nil.
 func (l Logger) Fatal(err error) {
-	if l.Level >= FatalLevel {
-		if err != nil {
-			track := getTrackingInfo(1)
-			l.print(color.HiBlackString, "fatal", track.File, track.Function, track.Line, err)
-			os.Exit(1)
-		}
+	if l.Level >= FatalLevel && err != nil {
+		track := getTrackingInfo(1)
+		l.print(color.HiBlackString, "fatal", track.File, track.Function, track.Line, err)
+		os.Exit(1)
 	}
 }
 
