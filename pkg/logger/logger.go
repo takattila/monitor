@@ -64,7 +64,7 @@ func New(level LogLevel, color Color) Logger {
 func (l Logger) Debug(args ...interface{}) {
 	if l.Level >= DebugLevel {
 		track := getTrackingInfo(1)
-		l.print(color.HiMagentaString, "debug", track.File, track.Function, track.Line, args...)
+		l.print(color.HiGreenString, "debug", track.File, track.Function, track.Line, args...)
 	}
 }
 
@@ -72,7 +72,7 @@ func (l Logger) Debug(args ...interface{}) {
 func (l Logger) Info(args ...interface{}) {
 	if l.Level >= InfoLevel {
 		track := getTrackingInfo(1)
-		l.print(color.HiGreenString, "info", track.File, track.Function, track.Line, args...)
+		l.print(color.HiBlueString, "info", track.File, track.Function, track.Line, args...)
 	}
 }
 
