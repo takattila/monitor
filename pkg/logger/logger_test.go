@@ -41,6 +41,18 @@ func (s LoggerSuite) TestTracking() {
 	}()
 }
 
+func (s LoggerSuite) TestNoneLevel() {
+	l := Logger{Level: NoneLevel}
+	output := captureOutput(func() {
+		l.Debug("TestDebug")
+		l.Info("TestInfo")
+		l.Warning("TestWarning")
+		l.Error(fmt.Errorf("%s", "[TestError]"))
+		l.Fatal(fmt.Errorf("%s", "[TestFatal]"))
+	})
+	s.Equal(output, "")
+}
+
 func (s LoggerSuite) TestDebug() {
 	l := Logger{Level: DebugLevel}
 	output := captureOutput(func() {

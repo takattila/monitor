@@ -21,6 +21,8 @@ const (
 	ErrorLevel
 	// FatalLevel represents the Fatal function.
 	FatalLevel
+	// NoneLevel suppress all logger functions.
+	NoneLevel
 )
 
 // Logger initializes the tier of the logger functions.
