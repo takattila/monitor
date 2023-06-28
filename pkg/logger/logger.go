@@ -78,7 +78,7 @@ func (l Logger) Info(args ...interface{}) {
 	}
 }
 
-// Info writes Warning to stdOut.
+// Warning writes Warning to stdOut.
 func (l Logger) Warning(args ...interface{}) {
 	if l.Level >= WarningLevel {
 		track := getTrackingInfo(1)
@@ -86,7 +86,7 @@ func (l Logger) Warning(args ...interface{}) {
 	}
 }
 
-// Info writes Error to stdOut.
+// Error writes Error to stdOut.
 func (l Logger) Error(err error) {
 	if l.Level >= ErrorLevel {
 		if err != nil {
@@ -150,7 +150,7 @@ func fetchNameFromPath(fileName string) string {
 	return fileName
 }
 
-// print decides whether the color functionality should be turned on or off.
+// print writes logging messages into stdOut and also decides whether the color functionality should be turned on or off.
 func (l Logger) print(c func(format string, a ...interface{}) string, level, file, function, line string, args ...interface{}) {
 	if l.Colorize == ColorOn {
 		log.Println(c("["+strings.ToUpper(level)+"]"), c("File:"), file, c("Function:"), function, c("Line:"), line, c("Message:"), args)
