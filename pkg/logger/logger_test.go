@@ -42,19 +42,19 @@ func (s LoggerSuite) TestTracking() {
 }
 
 func (s LoggerSuite) TestNoneLevel() {
-	l := Logger{Level: NoneLevel}
+	l := New(NoneLevel, Off)
 	output := captureOutput(func() {
 		l.Debug("TestDebug")
 		l.Info("TestInfo")
 		l.Warning("TestWarning")
-		l.Error(fmt.Errorf("%s", "[TestError]"))
-		l.Fatal(fmt.Errorf("%s", "[TestFatal]"))
+		l.Error(fmt.Errorf("%s", "TestError"))
+		l.Fatal(fmt.Errorf("%s", "TestFatal"))
 	})
 	s.Equal(output, "")
 }
 
 func (s LoggerSuite) TestDebug() {
-	l := Logger{Level: DebugLevel}
+	l := New(DebugLevel, Off)
 	output := captureOutput(func() {
 		l.Debug("TestDebug")
 	})
@@ -65,7 +65,7 @@ func (s LoggerSuite) TestDebug() {
 }
 
 func (s LoggerSuite) TestInfo() {
-	l := Logger{Level: InfoLevel}
+	l := New(InfoLevel, Off)
 	output := captureOutput(func() {
 		l.Info("TestInfo")
 	})
@@ -76,7 +76,7 @@ func (s LoggerSuite) TestInfo() {
 }
 
 func (s LoggerSuite) TestWarning() {
-	l := Logger{Level: WarningLevel}
+	l := New(WarningLevel, Off)
 	output := captureOutput(func() {
 		l.Warning("TestWarning")
 	})
@@ -87,9 +87,9 @@ func (s LoggerSuite) TestWarning() {
 }
 
 func (s LoggerSuite) TestError() {
-	l := Logger{Level: ErrorLevel}
+	l := New(ErrorLevel, Off)
 	output := captureOutput(func() {
-		l.Error(fmt.Errorf("%s", "[TestError]"))
+		l.Error(fmt.Errorf("%s", "TestError"))
 	})
 	s.Contains(output, "[ERROR]")
 	s.Contains(output, "File: logger_test.go")
@@ -111,9 +111,9 @@ func (s LoggerSuite) TestFatal() {
 		s.T(),
 		ExpectedPanicText,
 		func() {
-			l := Logger{Level: FatalLevel}
+			l := New(FatalLevel, On)
 			output := captureOutput(func() {
-				l.Fatal(fmt.Errorf("%s", "[TestFatal]"))
+				l.Fatal(fmt.Errorf("%s", "TestFatal"))
 			})
 			s.Contains(output, "[FATAL]")
 			s.Contains(output, "File: logger_test.go")

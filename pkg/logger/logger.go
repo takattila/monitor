@@ -5,29 +5,40 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"strings"
+
+	"github.com/fatih/color"
 )
 
 // LogLevel sets the tier of the logging.
 type LogLevel int
 
 const (
-	// DebugLevel represents the Debug function.
-	DebugLevel LogLevel = iota
-	// InfoLevel represents the Info function.
-	InfoLevel
-	// WarningLevel represents the Warning function.
-	WarningLevel
-	// ErrorLevel represents the Error function.
-	ErrorLevel
+	// NoneLevel suppress all logger functions.
+	NoneLevel LogLevel = iota
 	// FatalLevel represents the Fatal function.
 	FatalLevel
-	// NoneLevel suppress all logger functions.
-	NoneLevel
+	// ErrorLevel represents the Error function.
+	ErrorLevel
+	// WarningLevel represents the Warning function.
+	WarningLevel
+	// InfoLevel represents the Info function.
+	InfoLevel
+	// DebugLevel represents the Debug function.
+	DebugLevel
+)
+
+type SetColor int
+
+const (
+	On SetColor = iota
+	Off
 )
 
 // Logger initializes the tier of the logger functions.
 type Logger struct {
 	Level LogLevel
+	Color SetColor
 }
 
 // TrackInfo holds debug information about the caller's:
@@ -40,46 +51,54 @@ type TrackInfo struct {
 	Function string
 }
 
+// New provides a Logger struct.
+func New(level LogLevel, color SetColor) Logger {
+	return Logger{
+		Level: level,
+		Color: color,
+	}
+}
+
 // Debug writes Debug to stdOut.
 func (l Logger) Debug(args ...interface{}) {
-	if l.Level <= DebugLevel {
+	if l.Level >= DebugLevel {
 		track := getTrackingInfo(1)
-		log.Println("[DEBUG] File:", track.File, "Function:", track.Function, "Line:", track.Line, "Message:", args)
+		l.print(color.HiMagentaString, "debug", track.File, track.Function, track.Line, args...)
 	}
 }
 
 // Info writes Info to stdOut.
 func (l Logger) Info(args ...interface{}) {
-	if l.Level <= InfoLevel {
+	if l.Level >= InfoLevel {
 		track := getTrackingInfo(1)
-		log.Println("[INFO] File:", track.File, "Function:", track.Function, "Line:", track.Line, "Message:", args)
+		l.print(color.HiGreenString, "info", track.File, track.Function, track.Line, args...)
 	}
 }
 
 // Info writes Warning to stdOut.
 func (l Logger) Warning(args ...interface{}) {
-	if l.Level <= WarningLevel {
+	if l.Level >= WarningLevel {
 		track := getTrackingInfo(1)
-		log.Println("[WARNING] File:", track.File, "Function:", track.Function, "Line:", track.Line, "Message:", args)
+		l.print(color.HiYellowString, "warning", track.File, track.Function, track.Line, args...)
 	}
 }
 
 // Info writes Error to stdOut.
 func (l Logger) Error(err error) {
-	if l.Level <= ErrorLevel {
+	if l.Level >= ErrorLevel {
 		if err != nil {
 			track := getTrackingInfo(1)
-			log.Println("[ERROR] File:", track.File, "Function:", track.Function, "Line:", track.Line, "Message:", err)
+			l.print(color.HiRedString, "error", track.File, track.Function, track.Line, err)
 		}
 	}
 }
 
 // Fatal writes Error to stdOut and exit with exit code 1, if err doesn't nil.
 func (l Logger) Fatal(err error) {
-	if l.Level <= FatalLevel {
+	if l.Level >= FatalLevel {
 		if err != nil {
 			track := getTrackingInfo(1)
-			log.Println("[FATAL] File:", track.File, "Function:", track.Function, "Line:", track.Line, "Message:", err)
+			l.print(color.HiBlackString, "fatal", track.File, track.Function, track.Line, err)
 			os.Exit(1)
 		}
 	}
@@ -126,4 +145,12 @@ func fetchNameFromPath(fileName string) string {
 		}
 	}
 	return fileName
+}
+
+func (l Logger) print(c func(format string, a ...interface{}) string, level, file, function, line string, args ...interface{}) {
+	if l.Color == On {
+		log.Println(c("["+strings.ToUpper(level)+"]"), color.HiBlueString("File:"), file, color.HiBlueString("Function:"), function, color.HiBlueString("Line:"), line, color.HiBlueString("Message:"), args)
+	} else {
+		log.Println("["+strings.ToUpper(level)+"]", "File:", file, "Function:", function, "Line:", line, "Message:", args)
+	}
 }

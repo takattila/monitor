@@ -5,6 +5,7 @@ go 1.20
 require (
 	bou.ke/monkey v1.0.2
 	github.com/bradfitz/slice v0.0.0-20180809154707-2b758aa73013
+	github.com/fatih/color v1.15.0
 	github.com/go-chi/chi v4.0.3+incompatible
 	github.com/gorilla/securecookie v1.1.1
 	github.com/matishsiao/goInfo v0.0.0-20210923090445-da2e3fa8d45f
@@ -23,6 +24,8 @@ require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.1 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/miekg/dns v1.1.54 // indirect
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/pelletier/go-toml v1.2.0 // indirect
