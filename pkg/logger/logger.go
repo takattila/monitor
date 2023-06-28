@@ -151,7 +151,7 @@ func fetchNameFromPath(fileName string) string {
 // print decides whether the color functionality should be turned on or off.
 func (l Logger) print(c func(format string, a ...interface{}) string, level, file, function, line string, args ...interface{}) {
 	if l.Colorize == ColorOn {
-		log.Println(c("["+strings.ToUpper(level)+"]"), color.HiBlueString("File:"), file, color.HiBlueString("Function:"), function, color.HiBlueString("Line:"), line, color.HiBlueString("Message:"), args)
+		log.Println(c("["+strings.ToUpper(level)+"]"), c("File:"), file, c("Function:"), function, c("Line:"), line, c("Message:"), args)
 	} else {
 		log.Println("["+strings.ToUpper(level)+"]", "File:", file, "Function:", function, "Line:", line, "Message:", args)
 	}
