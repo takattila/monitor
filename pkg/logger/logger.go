@@ -32,8 +32,10 @@ const (
 type Color int
 
 const (
-	ColorOn Color = iota
-	ColorOff
+	// ColorOff turns off color mode.
+	ColorOff Color = iota
+	// ColorOff turns on color mode.
+	ColorOn
 )
 
 // Logger initializes the tier of the logger functions.
