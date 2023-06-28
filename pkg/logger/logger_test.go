@@ -24,25 +24,8 @@ type (
 	}
 )
 
-func (s LoggerSuite) TestTracking() {
-	t := Tracking(1)
-	s.Equal("logger_test.go", t.File)
-	s.NotEqual(0, t.Line)
-	s.Equal("logger.LoggerSuite.TestTracking", t.Function)
-
-	func() {
-		t := Tracking(1)
-		s.Equal("logger.LoggerSuite.TestTracking.func1", t.Function)
-	}()
-
-	func() {
-		t := Tracking(2)
-		s.Equal("logger.LoggerSuite.TestTracking", t.Function)
-	}()
-}
-
 func (s LoggerSuite) TestNoneLevel() {
-	l := New(NoneLevel, Off)
+	l := New(NoneLevel, ColorOff)
 	output := captureOutput(func() {
 		l.Debug("TestDebug")
 		l.Info("TestInfo")
@@ -54,7 +37,7 @@ func (s LoggerSuite) TestNoneLevel() {
 }
 
 func (s LoggerSuite) TestDebug() {
-	l := New(DebugLevel, Off)
+	l := New(DebugLevel, ColorOff)
 	output := captureOutput(func() {
 		l.Debug("TestDebug")
 	})
@@ -65,7 +48,7 @@ func (s LoggerSuite) TestDebug() {
 }
 
 func (s LoggerSuite) TestInfo() {
-	l := New(InfoLevel, Off)
+	l := New(InfoLevel, ColorOff)
 	output := captureOutput(func() {
 		l.Info("TestInfo")
 	})
@@ -76,7 +59,7 @@ func (s LoggerSuite) TestInfo() {
 }
 
 func (s LoggerSuite) TestWarning() {
-	l := New(WarningLevel, Off)
+	l := New(WarningLevel, ColorOff)
 	output := captureOutput(func() {
 		l.Warning("TestWarning")
 	})
@@ -87,7 +70,7 @@ func (s LoggerSuite) TestWarning() {
 }
 
 func (s LoggerSuite) TestError() {
-	l := New(ErrorLevel, Off)
+	l := New(ErrorLevel, ColorOff)
 	output := captureOutput(func() {
 		l.Error(fmt.Errorf("%s", "TestError"))
 	})
@@ -111,7 +94,7 @@ func (s LoggerSuite) TestFatal() {
 		s.T(),
 		ExpectedPanicText,
 		func() {
-			l := New(FatalLevel, On)
+			l := New(FatalLevel, ColorOn)
 			output := captureOutput(func() {
 				l.Fatal(fmt.Errorf("%s", "TestFatal"))
 			})
@@ -121,6 +104,23 @@ func (s LoggerSuite) TestFatal() {
 			s.Contains(output, "Message: [TestFatal]")
 		},
 		"Fatal function was not called")
+}
+
+func (s LoggerSuite) TestTracking() {
+	t := Tracking(1)
+	s.Equal("logger_test.go", t.File)
+	s.NotEqual(0, t.Line)
+	s.Equal("logger.LoggerSuite.TestTracking", t.Function)
+
+	func() {
+		t := Tracking(1)
+		s.Equal("logger.LoggerSuite.TestTracking.func1", t.Function)
+	}()
+
+	func() {
+		t := Tracking(2)
+		s.Equal("logger.LoggerSuite.TestTracking", t.Function)
+	}()
 }
 
 func (s LoggerSuite) TestGetFuncName() {

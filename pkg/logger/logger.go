@@ -28,17 +28,18 @@ const (
 	DebugLevel
 )
 
-type SetColor int
+// Color turns color mode on or off.
+type Color int
 
 const (
-	On SetColor = iota
-	Off
+	ColorOn Color = iota
+	ColorOff
 )
 
 // Logger initializes the tier of the logger functions.
 type Logger struct {
-	Level LogLevel
-	Color SetColor
+	Level    LogLevel
+	Colorize Color
 }
 
 // TrackInfo holds debug information about the caller's:
@@ -52,10 +53,10 @@ type TrackInfo struct {
 }
 
 // New provides a Logger struct.
-func New(level LogLevel, color SetColor) Logger {
+func New(level LogLevel, color Color) Logger {
 	return Logger{
-		Level: level,
-		Color: color,
+		Level:    level,
+		Colorize: color,
 	}
 }
 
@@ -147,8 +148,9 @@ func fetchNameFromPath(fileName string) string {
 	return fileName
 }
 
+// print decides whether the color functionality should be turned on or off.
 func (l Logger) print(c func(format string, a ...interface{}) string, level, file, function, line string, args ...interface{}) {
-	if l.Color == On {
+	if l.Colorize == ColorOn {
 		log.Println(c("["+strings.ToUpper(level)+"]"), color.HiBlueString("File:"), file, color.HiBlueString("Function:"), function, color.HiBlueString("Line:"), line, color.HiBlueString("Message:"), args)
 	} else {
 		log.Println("["+strings.ToUpper(level)+"]", "File:", file, "Function:", function, "Line:", line, "Message:", args)
