@@ -383,7 +383,7 @@ Both the `skin` and the `logo` of the web service can be modified in the [config
 ```yaml
 on_runtime:
   theme:
-    skin: suse # can be: centos, fedora, manjaro, mint, opi, redhat, rpi, suse, ubuntu, vanilla
+    skin: suse # can be: centos, fedora,  github_blue, github_green, github_purple, github_red, github_yellow, manjaro, mint, opi, redhat, rpi, suse, ubuntu, vanilla
     logo: rpi  # can be: arch, centos, debian, fedora, tux, manjaro, mint, opi, pop, redhat, rpi, suse, ubuntu, vanilla, zorin
 ```
 
@@ -461,7 +461,32 @@ The logos can be found under the [web/img](web/img) directory.
 ![Monitor Service](assets/desktop-fedora-dark.png)
 ![Monitor Service](assets/desktop-fedora-light.png)
 
-Manjaro
+### github_blue
+
+![Monitor Service](assets/desktop-github_blue-dark.png)
+![Monitor Service](assets/desktop-github_blue-light.png)
+
+### github_green
+
+![Monitor Service](assets/desktop-github_green-dark.png)
+![Monitor Service](assets/desktop-github_green-light.png)
+
+### github_purple
+
+![Monitor Service](assets/desktop-github_purple-dark.png)
+![Monitor Service](assets/desktop-github_purple-light.png)
+
+### github_red
+
+![Monitor Service](assets/desktop-github_red-dark.png)
+![Monitor Service](assets/desktop-github_red-light.png)
+
+### github_yellow
+
+![Monitor Service](assets/desktop-github_yellow-dark.png)
+![Monitor Service](assets/desktop-github_yellow-light.png)
+
+### Manjaro
 
 ![Monitor Service](assets/desktop-manjaro-dark.png)
 ![Monitor Service](assets/desktop-manjaro-light.png)
