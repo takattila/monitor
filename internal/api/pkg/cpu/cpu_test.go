@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
@@ -19,6 +20,7 @@ type (
 func (a ApiCpuSuite) TestGetJSONWithGetTempByUsage() {
 	s := getConfig("api", "linux")
 	Cfg = s
+	L = logger.New(logger.NoneLevel, logger.ColorOff)
 
 	JSON := GetJSON()
 	a.Contains(JSON, "processor_info")
@@ -36,6 +38,7 @@ func (a ApiCpuSuite) TestGetJSONWithGetTemp() {
 	s := getConfig("api", "linux")
 	s.Data.Set("on_runtime.commands.cpu_temp", []string{"bash", "-c", "echo 40"})
 	Cfg = s
+	L = logger.New(logger.NoneLevel, logger.ColorOff)
 
 	JSON := GetJSON()
 	a.Contains(JSON, "processor_info")

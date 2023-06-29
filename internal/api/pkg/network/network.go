@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/shirou/gopsutil/net"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
@@ -14,6 +15,7 @@ var (
 	StartMesureIn  = map[string]uint64{}
 	StartMesureOut = map[string]uint64{}
 	Sleep          = 2 * time.Second
+	L              logger.Logger
 )
 
 // Stats collects network data into StartMesureIn and StartMesureOut variables.
@@ -21,7 +23,8 @@ var (
 func Stats() {
 	for {
 		if Cfg.Data.GetBool("NetworkTraffic") {
-			c, _ := net.IOCounters(true)
+			c, err := net.IOCounters(true)
+			L.Error(err)
 			for _, n := range c {
 				StartMesureIn[n.Name] = n.BytesRecv
 				StartMesureOut[n.Name] = n.BytesSent
@@ -35,7 +38,8 @@ func Stats() {
 func GetJSON() string {
 	jsonArray := makeEmptyArray()
 	if Cfg.Data.GetBool("NetworkTraffic") {
-		c, _ := net.IOCounters(true)
+		c, err := net.IOCounters(true)
+		L.Error(err)
 		for _, n := range c {
 			if StartMesureIn[n.Name] != 0 && StartMesureOut[n.Name] != 0 {
 				endMesureIn := n.BytesRecv
@@ -60,7 +64,8 @@ func GetJSON() string {
 // makeEmptyArray creates an empty network array.
 func makeEmptyArray() []string {
 	jsonArray := make([]string, 0)
-	c, _ := net.Interfaces()
+	c, err := net.Interfaces()
+	L.Error(err)
 	for _, n := range c {
 		jsonArray = append(jsonArray,
 			`"`+fmt.Sprint(n.Name)+`": {

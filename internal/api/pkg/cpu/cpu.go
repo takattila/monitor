@@ -9,11 +9,13 @@ import (
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/load"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
 var (
 	Cfg *settings.Settings
+	L   logger.Logger
 )
 
 // The CPU structure contains the necessary data about the CPU.
@@ -49,7 +51,7 @@ func GetJSON() string {
 	c.getLoad()
 
 	b, err := json.Marshal(c)
-	common.Error(err)
+	L.Error(err)
 
 	return string(b)
 }
@@ -57,7 +59,7 @@ func GetJSON() string {
 // getUsage populates the usage data.
 func (c *CPU) getUsage() *CPU {
 	percentage, err := cpu.Percent(0, true)
-	common.Error(err)
+	L.Error(err)
 
 	var percents float64
 	var numberOfCores int
@@ -144,7 +146,7 @@ func (c *CPU) getTemp() *CPU {
 		re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
 		floatStr := re.FindAllString(res, -1)[0]
 		temp, err := strconv.ParseFloat(floatStr, 64)
-		common.Error(err)
+		L.Error(err)
 
 		c.ProcessorInfo.Temp.Total = 100
 		c.ProcessorInfo.Temp.TotalUnit = "°C"
@@ -158,7 +160,7 @@ func (c *CPU) getTemp() *CPU {
 // getLoad populates the CPU loads: 1, 5 or 15.
 func (c *CPU) getLoad() *CPU {
 	load, err := load.Avg()
-	common.Error(err)
+	L.Error(err)
 
 	c.ProcessorInfo.Load.Min01 = load.Load1
 	c.ProcessorInfo.Load.Min05 = load.Load5

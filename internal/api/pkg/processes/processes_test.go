@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
@@ -22,6 +23,7 @@ func (a ApiProcessesSuite) TestGetJSONByConfigCommand() {
 	for _, toggle := range []bool{true, false} {
 		s.Data.Set("TopProcesses", toggle)
 		Cfg = s
+		L = logger.New(logger.NoneLevel, logger.ColorOff)
 
 		JSON := GetJSON()
 		a.Contains(JSON, "process_info")
@@ -38,6 +40,7 @@ func (a ApiProcessesSuite) TestGetJSONWithoutConfigCommand() {
 	s.Data.Set("TopProcesses", true)
 	s.Data.Set("on_runtime.commands.processes", []string{})
 	Cfg = s
+	L = logger.New(logger.NoneLevel, logger.ColorOff)
 
 	JSON := GetJSON()
 	a.Contains(JSON, "process_info")

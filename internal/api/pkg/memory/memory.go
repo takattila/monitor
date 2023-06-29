@@ -5,11 +5,13 @@ import (
 
 	"github.com/shirou/gopsutil/mem"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
 var (
 	Cfg *settings.Settings
+	L   logger.Logger
 )
 
 // The Mem structure contains the necessary data about the memory.
@@ -72,9 +74,9 @@ func GetJSON() string {
 	m := Mem{}
 	if Cfg.Data.GetBool("Memory") {
 		vm, err := mem.VirtualMemory()
-		common.Error(err)
+		L.Error(err)
 		swp, err := mem.SwapMemory()
-		common.Error(err)
+		L.Error(err)
 
 		m.getTotal(vm)
 		m.getUsed(vm)
@@ -85,7 +87,7 @@ func GetJSON() string {
 		m.getVideo(vm)
 	}
 	b, err := json.MarshalIndent(m, "", "  ")
-	common.Error(err)
+	L.Error(err)
 
 	return string(b)
 }

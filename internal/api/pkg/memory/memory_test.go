@@ -8,6 +8,7 @@ import (
 	"github.com/shirou/gopsutil/mem"
 	"github.com/stretchr/testify/suite"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
@@ -23,6 +24,7 @@ func (a ApiMemorySuite) TestGetJSON() {
 	for _, toggle := range []bool{true, false} {
 		s.Data.Set("Memory", toggle)
 		Cfg = s
+		L = logger.New(logger.NoneLevel, logger.ColorOff)
 
 		JSON := GetJSON()
 		a.Contains(JSON, "memory_info")
@@ -46,6 +48,7 @@ func (a ApiMemorySuite) TestGetPhysicalMemoryFromConfiguration() {
 	s.Data.Set("Memory", true)
 	s.Data.Set("on_runtime.physical_memory", "1GB")
 	Cfg = s
+	L = logger.New(logger.NoneLevel, logger.ColorOff)
 
 	vm, err := mem.VirtualMemory()
 	a.Equal(nil, err)

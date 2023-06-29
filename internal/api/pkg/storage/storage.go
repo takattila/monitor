@@ -8,11 +8,13 @@ import (
 
 	"github.com/takattila/monitor/internal/common/pkg/config"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
 var (
 	Cfg *settings.Settings
+	L   logger.Logger
 )
 
 // GetJSON returns with a JSON that holds information from storage:
@@ -140,11 +142,13 @@ func getAvailable(s string) uint64 {
 // /dev/root       125781323776   11170361344 109469069312  ->[ 10% ]<- /
 func getPercent(s string) string {
 	ret := 0
+	var err error
 	arr := strings.Split(s, " ")
 	if len(arr) > 0 {
 		percent := arr[4]
 		re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
-		ret, _ = strconv.Atoi(re.FindAllString(percent, -1)[0])
+		ret, err = strconv.Atoi(re.FindAllString(percent, -1)[0])
+		L.Error(err)
 	}
 	return fmt.Sprint(ret)
 }

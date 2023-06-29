@@ -17,6 +17,9 @@ on_start:
   pages:
     login: /html/login.html
     internal: /html/monitor.html
+  logger:
+    level: debug
+    color: on
 on_runtime:
   theme:
     skin: rpi

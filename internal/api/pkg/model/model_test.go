@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
@@ -19,6 +20,7 @@ type (
 func (a ApiModelSuite) TestGetJSON() {
 	s := getConfig("api", "linux")
 	Cfg = s
+	L = logger.New(logger.NoneLevel, logger.ColorOff)
 
 	JSON := GetJSON()
 	a.Contains(JSON, "model_name")
@@ -32,6 +34,7 @@ func (a ApiModelSuite) TestGetModelNameFromOS() {
 	s := getConfig("api", "linux")
 	s.Data.Set("on_runtime.commands.model_name", "")
 	Cfg = s
+	L = logger.New(logger.NoneLevel, logger.ColorOff)
 
 	m := Model{}
 	m.getModelName()

@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
@@ -21,6 +22,7 @@ func (a ApiStorageSuite) TestGetJSON() {
 		s := getConfig("api", "linux")
 		s.Data.Set("Storage", toggle)
 		Cfg = s
+		L = logger.New(logger.NoneLevel, logger.ColorOff)
 
 		JSON := GetJSON()
 		a.Contains(JSON, "storage_info")

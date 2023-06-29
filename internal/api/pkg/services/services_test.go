@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
@@ -32,6 +33,7 @@ func (a ApiServicesSuite) TestGetJSON() {
 	s := getConfig("api", "linux")
 	s.Data.Set("Services", true)
 	Cfg = s
+	L = logger.New(logger.NoneLevel, logger.ColorOff)
 
 	go Watcher()
 	time.Sleep(100 * time.Millisecond)

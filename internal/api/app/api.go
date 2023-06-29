@@ -7,12 +7,14 @@ import (
 	"github.com/takattila/monitor/internal/api/pkg/memory"
 	"github.com/takattila/monitor/internal/api/pkg/model"
 	"github.com/takattila/monitor/internal/api/pkg/network"
+	"github.com/takattila/monitor/internal/api/pkg/playground"
 	"github.com/takattila/monitor/internal/api/pkg/processes"
 	"github.com/takattila/monitor/internal/api/pkg/servers"
 	"github.com/takattila/monitor/internal/api/pkg/services"
 	"github.com/takattila/monitor/internal/api/pkg/storage"
 	"github.com/takattila/monitor/internal/common/pkg/config"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
@@ -28,7 +30,10 @@ func init() {
 	s.Data.Set("NetworkTraffic", false)
 	s.Data.Set("Storage", false)
 
-	handlers.Cfg, cpu.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s, s
+	cpu.Cfg, handlers.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s, s
+
+	l := logger.New(config.GetLogLevel(s, "on_start.logger.level"), config.GetLogColor(s, "on_start.logger.color"))
+	cpu.L, handlers.L, memory.L, model.L, network.L, playground.L, processes.L, servers.L, services.L, storage.L = l, l, l, l, l, l, l, l, l, l
 
 	go services.Watcher()
 	go network.Stats()

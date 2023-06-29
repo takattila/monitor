@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
@@ -23,6 +24,7 @@ func (a ApiNetworkSuite) TestGetJSON() {
 	s := getConfig("api", "linux")
 	s.Data.Set("NetworkTraffic", true)
 	Cfg = s
+	L = logger.New(logger.NoneLevel, logger.ColorOff)
 
 	go Stats()
 	time.Sleep(100 * time.Millisecond)

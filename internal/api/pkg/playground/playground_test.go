@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+	"github.com/takattila/monitor/pkg/logger"
 )
 
 type (
@@ -13,6 +14,7 @@ type (
 )
 
 func (a ApiPlaygroundSuite) TestPlayground() {
+	L = logger.New(logger.NoneLevel, logger.ColorOff)
 	content := Playground()
 	a.NotNil(content)
 }

@@ -8,11 +8,13 @@ import (
 	"github.com/bradfitz/slice"
 	"github.com/shirou/gopsutil/process"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
 var (
 	Cfg *settings.Settings
+	L   logger.Logger
 )
 
 type (
@@ -135,7 +137,7 @@ func escapeStr(str string) string {
 // getAllProcesses makes a Processes structure.
 func (p *Processes) getAllProcesses() *Processes {
 	processes, err := process.Processes()
-	common.Error(err)
+	L.Error(err)
 
 	var filtered Processes
 
@@ -144,19 +146,24 @@ func (p *Processes) getAllProcesses() *Processes {
 		ratio := math.Pow(10, float64(decimalPlaces))
 
 		pId := p.Pid
-		pName, _ := p.Name()
+		pName, err := p.Name()
+		L.Error(err)
 		pName = escapeStr(pName)
 
-		pUser, _ := p.Username()
+		pUser, err := p.Username()
+		L.Error(err)
 		pUser = escapeStr(pUser)
 
-		m, _ := p.MemoryPercent()
+		m, err := p.MemoryPercent()
+		L.Error(err)
 		pMem := math.Round(float64(m)*ratio) / ratio
 
-		pCpu, _ := p.CPUPercent()
+		pCpu, err := p.CPUPercent()
+		L.Error(err)
 		pCpu = math.Round(pCpu*ratio) / ratio
 
-		pCmdline, _ := p.Cmdline()
+		pCmdline, err := p.Cmdline()
+		L.Error(err)
 		pCmdline = escapeStr(pCmdline)
 
 		if pName != "" && !strings.Contains(pName, "cmd/api") {

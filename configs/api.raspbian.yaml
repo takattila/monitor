@@ -11,6 +11,9 @@ on_start:
     services: /services
     network: /network
     toggle: /toggle/{section}/{status}
+  logger:
+    level: debug
+    color: on
 on_runtime:
   physical_memory: 1GB
   commands:

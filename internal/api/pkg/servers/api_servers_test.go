@@ -10,6 +10,7 @@ import (
 	"github.com/phayes/freeport"
 	"github.com/stretchr/testify/suite"
 	"github.com/takattila/monitor/internal/api/pkg/handlers"
+	"github.com/takattila/monitor/pkg/logger"
 )
 
 type (
@@ -19,6 +20,8 @@ type (
 )
 
 func (a ApiServersSuite) TestServeHTTP() {
+	L = logger.New(logger.NoneLevel, logger.ColorOff)
+
 	port, err := freeport.GetFreePort()
 	if err != nil {
 		a.T().Errorf("[ERROR] freeport.GetFreePort: %s\n", err)

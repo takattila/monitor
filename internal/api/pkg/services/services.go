@@ -7,6 +7,7 @@ import (
 
 	"github.com/takattila/monitor/internal/common/pkg/config"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
@@ -14,6 +15,7 @@ var (
 	Cfg    *settings.Settings
 	output = ""
 	Sleep  = 2 * time.Second
+	L      logger.Logger
 
 	// getProcessesStatus collects status information about a service: 'is_active' and 'is_enabled'.
 	// Output example: 'service_name active enabled'.
@@ -70,7 +72,7 @@ func GetJSON() string {
 
 	ret := map[string]interface{}{}
 	err := json.Unmarshal([]byte(obj), &ret)
-	common.Error(err)
+	L.Error(err)
 
 	return obj
 }

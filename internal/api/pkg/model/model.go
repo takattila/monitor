@@ -7,11 +7,13 @@ import (
 
 	"github.com/matishsiao/goInfo"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
 var (
 	Cfg *settings.Settings
+	L   logger.Logger
 )
 
 // The Model structure contains the necessary data about the model name.
@@ -24,7 +26,7 @@ func GetJSON() string {
 	m := Model{}
 	m.getModelName()
 	b, err := json.Marshal(m)
-	common.Error(err)
+	L.Error(err)
 
 	return string(b)
 }
