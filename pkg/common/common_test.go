@@ -14,8 +14,6 @@ import (
 	"sync"
 	"testing"
 
-	"bou.ke/monkey"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -24,98 +22,6 @@ type (
 		suite.Suite
 	}
 )
-
-func (s CommonSuite) TestTracking() {
-	t := Tracking(1)
-	s.Equal("common_test.go", t.File)
-	s.NotEqual(0, t.Line)
-	s.Equal("common.CommonSuite.TestTracking", t.Function)
-
-	func() {
-		t := Tracking(1)
-		s.Equal("common.CommonSuite.TestTracking.func1", t.Function)
-	}()
-
-	func() {
-		t := Tracking(2)
-		s.Equal("common.CommonSuite.TestTracking", t.Function)
-	}()
-}
-
-func (s CommonSuite) TestInfo() {
-	output := captureOutput(func() {
-		Info("TestInfo")
-	})
-	s.Contains(output, "[INFO]")
-	s.Contains(output, "File: common_test.go")
-	s.Contains(output, "Function: common.CommonSuite.TestInfo.func1")
-	s.Contains(output, "Message: [TestInfo]")
-}
-
-func (s CommonSuite) TestWarning() {
-	output := captureOutput(func() {
-		Warning("TestWarning")
-	})
-	s.Contains(output, "[WARNING]")
-	s.Contains(output, "File: common_test.go")
-	s.Contains(output, "Function: common.CommonSuite.TestWarning.func1")
-	s.Contains(output, "Message: [TestWarning]")
-}
-
-func (s CommonSuite) TestError() {
-	output := captureOutput(func() {
-		Error(fmt.Errorf("%s", "[TestError]"))
-	})
-	s.Contains(output, "[ERROR]")
-	s.Contains(output, "File: common_test.go")
-	s.Contains(output, "Function: common.CommonSuite.TestError.func1")
-	s.Contains(output, "Message: [TestError]")
-}
-
-func (s CommonSuite) TestFatal() {
-	ExpectedPanicText := "Fatal function called"
-
-	panicFunc := func(int) {
-		panic(ExpectedPanicText)
-	}
-
-	patch := monkey.Patch(os.Exit, panicFunc)
-	defer patch.Unpatch()
-
-	assert.PanicsWithValue(
-		s.T(),
-		ExpectedPanicText,
-		func() {
-			output := captureOutput(func() {
-				Fatal(fmt.Errorf("%s", "[TestFatal]"))
-			})
-			s.Contains(output, "[FATAL]")
-			s.Contains(output, "File: common_test.go")
-			s.Contains(output, "Function: common.CommonSuite.TestFatal.func1")
-			s.Contains(output, "Message: [TestFatal]")
-		},
-		"Fatal function was not called")
-}
-
-func (s CommonSuite) TestGetFuncName() {
-	fn := getFuncName(0)
-	s.Equal("common.CommonSuite.TestGetFuncName", fn)
-
-	unknown := getFuncName(100)
-	s.Equal("unknown", unknown)
-}
-
-func (s CommonSuite) TestFetchNameFromPath() {
-	path := "/path/fo/testFuncName"
-
-	funcName := fetchNameFromPath(path)
-	s.Equal("testFuncName", funcName)
-
-	path = "testFuncName"
-
-	funcName = fetchNameFromPath(path)
-	s.Equal("testFuncName", funcName)
-}
 
 func (s CommonSuite) TestDynamicSizeSI() {
 	size := DynamicSizeSI(uint64(1))
@@ -288,6 +194,18 @@ func (s CommonSuite) TestGetConfigPath() {
 	s.Contains(result, "web.linux.yaml")
 
 	GetConfigPathCmd = OldGetConfigPathCmd
+}
+
+func (s CommonSuite) TestErrorIfErr() {
+	err := fmt.Errorf("%s", "error")
+
+	output := captureOutput(func() {
+		ErrorIfErr(err)
+	})
+	s.Contains(output, "[ERROR]")
+	s.Contains(output, "File: common_test.go")
+	s.Contains(output, "Function: common.CommonSuite.TestErrorIfErr.func1")
+	s.Contains(output, "Message: error")
 }
 
 func captureOutput(f func()) string {

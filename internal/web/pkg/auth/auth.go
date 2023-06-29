@@ -12,7 +12,7 @@ import (
 func Authenticate(authFile, name, pass string) bool {
 	file, err := os.Open(authFile)
 	if err != nil {
-		common.Error(err)
+		common.ErrorIfErr(err)
 		return false
 	}
 	defer file.Close()

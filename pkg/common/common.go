@@ -9,99 +9,15 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strconv"
 	"strings"
+
+	"github.com/fatih/color"
+	"github.com/takattila/monitor/pkg/logger"
 )
 
 // GetConfigPathCmd contains the command that fetches the config path by hostname.
 var GetConfigPathCmd = []string{"bash", "-c", "hostnamectl | grep Operating | awk -F: '{print $2}' | xargs"}
-
-// -- logger ----------------------------------------------------------
-
-// TrackInfo holds debug information about the caller's:
-//   - File name
-//   - Line number
-//   - Function name
-type TrackInfo struct {
-	File     string
-	Line     string
-	Function string
-}
-
-// Info writes Info to stdOut.
-func Info(args ...interface{}) {
-	track := getTrackingInfo(1)
-	log.Println("[INFO] File:", track.File, "Function:", track.Function, "Line:", track.Line, "Message:", args)
-}
-
-// Info writes Warning to stdOut.
-func Warning(args ...interface{}) {
-	track := getTrackingInfo(1)
-	log.Println("[WARNING] File:", track.File, "Function:", track.Function, "Line:", track.Line, "Message:", args)
-}
-
-// Info writes Error to stdOut.
-func Error(err error) {
-	if err != nil {
-		track := getTrackingInfo(1)
-		log.Println("[ERROR] File:", track.File, "Function:", track.Function, "Line:", track.Line, "Message:", err)
-	}
-}
-
-// Fatal writes Error to stdOut and exit with exit code 1, if err doesn't nil.
-func Fatal(err error) {
-	if err != nil {
-		track := getTrackingInfo(1)
-		log.Println("[FATAL] File:", track.File, "Function:", track.Function, "Line:", track.Line, "Message:", err)
-		os.Exit(1)
-	}
-}
-
-// Tracking provides debug information about function invocations
-// on the calling goroutine's stack:
-//   - File (where Tracking was called)
-//   - Line (where function was called)
-//   - Function (name of the function)
-func Tracking(depth int) TrackInfo {
-	return getTrackingInfo(depth)
-}
-
-// getTrackingInfo provides debug information about function invocations
-// on the calling goroutine's stack:
-//   - File (where Tracking was called)
-//   - Line (where function was called)
-//   - Function (name of the function)
-func getTrackingInfo(depth int) TrackInfo {
-	_, fileName, line, _ := runtime.Caller(depth + 1)
-	return TrackInfo{
-		File:     fetchNameFromPath(fileName),
-		Line:     fmt.Sprintf("%d", line),
-		Function: getFuncName(depth + 1),
-	}
-}
-
-// getFuncName returns with the caller's function name
-func getFuncName(depth int) string {
-	pc, _, _, _ := runtime.Caller(depth + 1)
-	me := runtime.FuncForPC(pc)
-	if me == nil {
-		return "unknown"
-	}
-	return fetchNameFromPath(me.Name())
-}
-
-// fetchNameFromPath extracts the name of a function from a path.
-func fetchNameFromPath(fileName string) string {
-	for i := len(fileName) - 1; i > 0; i-- {
-		if fileName[i] == '/' {
-			return fileName[i+1:]
-		}
-	}
-	return fileName
-}
-
-// -- logger ----------------------------------------------------------
 
 // DynamicSizeSI returns the value of the given number with unit dynamically.
 func DynamicSizeSI(b uint64) string {
@@ -215,7 +131,7 @@ func Cli(command []string) string {
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()
-	Error(err)
+	ErrorIfErr(err)
 	return out.String()
 }
 
@@ -223,7 +139,7 @@ func Cli(command []string) string {
 func GetProgramDir() string {
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	base := filepath.Base(dir)
-	Error(err)
+	ErrorIfErr(err)
 	return strings.Replace(dir, string(os.PathSeparator)+base, "", 1)
 }
 
@@ -246,7 +162,7 @@ func GetString(str string) string {
 func GetNum(str string) uint64 {
 	re := regexp.MustCompile(`[^0-9]*`)
 	num, err := strconv.ParseUint(re.ReplaceAllString(str, ""), 10, 64)
-	Error(err)
+	ErrorIfErr(err)
 	return num
 }
 
@@ -303,4 +219,12 @@ func GetConfigPath(service string) string {
 		return filepath.Join(GetProgramDir(), "/configs/"+service+".raspbian.yaml")
 	}
 	return filepath.Join(GetProgramDir(), "/configs/"+service+".linux.yaml")
+}
+
+// ErrorIfErr prints error message if the 'err' argument is not nil.
+func ErrorIfErr(err error) {
+	if err != nil {
+		track := logger.Tracking(2)
+		log.Println(color.HiRedString("[ERROR]"), color.HiRedString("File:"), track.File, color.HiRedString("Function:"), track.Function, color.HiRedString("Line:"), track.Line, color.HiRedString("Message:"), err)
+	}
 }

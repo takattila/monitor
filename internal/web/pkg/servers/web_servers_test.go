@@ -14,6 +14,7 @@ import (
 	"github.com/takattila/monitor/internal/common/pkg/config"
 	"github.com/takattila/monitor/internal/web/pkg/handlers"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
@@ -35,6 +36,7 @@ var (
 		LoginRoute:    config.GetString(s, "on_start.routes.login"),
 		InternalRoute: config.GetString(s, "on_start.routes.internal"),
 		Cfg:           s,
+		L:             logger.New(logger.NoneLevel, logger.ColorOff),
 	}
 
 	r = chi.NewRouter()
@@ -160,6 +162,7 @@ func startWebServer(t *testing.T, apiport, webport int) {
 		ProgramDir: h.FilesDir,
 		FilesDir:   config.GetString(s, "on_start.web_sources_directory"),
 		Cfg:        s,
+		L:          logger.New(logger.NoneLevel, logger.ColorOff),
 	}
 
 	s.Files()

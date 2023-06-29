@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi"
-	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 	"golang.org/x/crypto/acme/autocert"
 )
@@ -23,6 +23,7 @@ type Server struct {
 	ProgramDir string
 	FilesDir   string
 	Cfg        *settings.Settings
+	L          logger.Logger
 }
 
 var (
@@ -40,20 +41,20 @@ func (s *Server) Start() {
 
 // ServeHTTP will run service on specific port.
 func (s *Server) ServeHTTP() {
-	common.Info("Port:", s.Port)
+	s.L.Info("Port:", s.Port)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", s.Port),
 		Handler: s.Router,
 	}
 
-	common.Fatal(server.ListenAndServe())
+	s.L.Fatal(server.ListenAndServe())
 }
 
 // ServeTLS runs service with TLS config on a specific domain.
 func (s *Server) ServeTLS() {
-	common.Info("Port:", s.Port)
-	common.Info("Domain:", s.Domain)
+	s.L.Info("Port:", s.Port)
+	s.L.Info("Domain:", s.Domain)
 
 	certManager := autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
@@ -76,10 +77,10 @@ func (s *Server) ServeTLS() {
 	}
 
 	go func() {
-		common.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", httpPort), certManager.HTTPHandler(nil)))
+		s.L.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", httpPort), certManager.HTTPHandler(nil)))
 	}()
 
-	common.Fatal(server.ListenAndServeTLS("", "")) // Key and cert are coming from Let's Encrypt
+	s.L.Fatal(server.ListenAndServeTLS("", "")) // Key and cert are coming from Let's Encrypt
 }
 
 // Files conveniently sets up a http.FileServer handler to serve
@@ -87,7 +88,7 @@ func (s *Server) ServeTLS() {
 func (s *Server) Files() {
 	notAllowed := "{}*"
 	if strings.ContainsAny(s.RoutePath, notAllowed) {
-		common.Warning("Does not permit any URL parameters:", notAllowed)
+		s.L.Warning("Does not permit any URL parameters:", notAllowed)
 		return
 	}
 
@@ -102,7 +103,7 @@ func (s *Server) Files() {
 		pathPrefix := strings.TrimSuffix(rctx.RoutePattern(), "/*")
 		fs := http.StripPrefix(pathPrefix, http.FileServer(http.Dir(filepath.Join(s.ProgramDir, s.FilesDir))))
 
-		common.Info("r.URL.Path", r.URL.Path)
+		s.L.Info("r.URL.Path", r.URL.Path)
 		fs.ServeHTTP(w, r)
 	})
 }

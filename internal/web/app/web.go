@@ -9,12 +9,14 @@ import (
 	"github.com/takattila/monitor/internal/web/pkg/handlers"
 	"github.com/takattila/monitor/internal/web/pkg/servers"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
 var (
 	dir string
 	s   *settings.Settings
+	l   logger.Logger
 )
 
 func init() {
@@ -24,12 +26,17 @@ func init() {
 	s.AutoReload()
 
 	if err := auth.SaveCredentials((filepath.Join(dir, config.GetString(s, "on_start.auth_file"))), config.GetBool(s, "on_start.save_credentials")); err != nil {
-		common.Fatal(err)
+		l.Fatal(err)
 	}
 }
 
 func main() {
 	router := chi.NewRouter()
+
+	l := logger.New(
+		config.GetLogLevel(s, "on_start.logger.level"),
+		config.GetLogColor(s, "on_start.logger.color"),
+	)
 
 	h := handlers.Handler{
 		ProgramDir:    dir,
@@ -40,6 +47,7 @@ func main() {
 		LoginRoute:    config.GetString(s, "on_start.routes.login"),
 		InternalRoute: config.GetString(s, "on_start.routes.internal"),
 		Cfg:           s,
+		L:             l,
 	}
 
 	router.HandleFunc(config.GetString(s, "on_start.routes.index"), h.Index)
@@ -59,6 +67,7 @@ func main() {
 		ProgramDir: dir,
 		FilesDir:   config.GetString(s, "on_start.web_sources_directory"),
 		Cfg:        s,
+		L:          l,
 	}
 
 	s.Files()

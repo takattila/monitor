@@ -19,6 +19,7 @@ import (
 	"github.com/takattila/monitor/internal/api/pkg/memory"
 	"github.com/takattila/monitor/internal/api/pkg/model"
 	"github.com/takattila/monitor/internal/api/pkg/network"
+	"github.com/takattila/monitor/internal/api/pkg/playground"
 	"github.com/takattila/monitor/internal/api/pkg/processes"
 	apiservers "github.com/takattila/monitor/internal/api/pkg/servers"
 	"github.com/takattila/monitor/internal/api/pkg/services"
@@ -26,6 +27,7 @@ import (
 	"github.com/takattila/monitor/internal/common/pkg/config"
 	"github.com/takattila/monitor/internal/web/pkg/servers"
 	"github.com/takattila/monitor/pkg/common"
+	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
 
@@ -38,7 +40,7 @@ type (
 var (
 	gitRootPath = strings.ReplaceAll(common.Cli([]string{"bash", "-c", "git rev-parse --show-toplevel"}), "\n", "")
 	s           = getConfig("web", "linux")
-	h           = Handler{
+	h           = &Handler{
 		ProgramDir:    gitRootPath,
 		FilesDir:      config.GetString(s, "on_start.web_sources_directory"),
 		AuthFile:      config.GetString(s, "on_start.auth_file"),
@@ -47,6 +49,7 @@ var (
 		LoginRoute:    config.GetString(s, "on_start.routes.login"),
 		InternalRoute: config.GetString(s, "on_start.routes.internal"),
 		Cfg:           s,
+		L:             logger.New(logger.NoneLevel, logger.ColorOff),
 	}
 
 	r = chi.NewRouter()
@@ -99,6 +102,10 @@ func (a WebHandlersSuite) TestSystemCtlOk() {
 
 	oldGetUsernameFunc := bypassGetUsername(user)
 	defer func() { getUsername = oldGetUsernameFunc }()
+
+	oldSystemCtlCmd := h.Cfg.Data.Get("on_runtime.commands.systemctl")
+	h.Cfg.Data.Set("on_runtime.commands.systemctl", []string{"bash", "-c", "echo ok"})
+	defer func() { h.Cfg.Data.Set("on_runtime.commands.systemctl", oldSystemCtlCmd) }()
 
 	go startWebServer(a.T())
 	time.Sleep(100 * time.Millisecond)
@@ -331,22 +338,22 @@ func (a WebHandlersSuite) TestToggleApiNotFound() {
 }
 
 func (a WebHandlersSuite) TestIPisAllowedIPNotSet() {
-	allowed := IPisAllowed("127.0.0.1", "0.0.0.0")
+	allowed := IPisAllowed("127.0.0.1", "0.0.0.0", h)
 	a.Equal(true, allowed)
 }
 
 func (a WebHandlersSuite) TestIPisAllowedOK() {
-	allowed := IPisAllowed("127.0.0.1", "127.0.0.1")
+	allowed := IPisAllowed("127.0.0.1", "127.0.0.1", h)
 	a.Equal(true, allowed)
 }
 
 func (a WebHandlersSuite) TestIPisAllowedMultipleIPs() {
-	allowed := IPisAllowed("127.0.0.1", "10.1.1.100,127.0.0.1,192.18.0.1")
+	allowed := IPisAllowed("127.0.0.1", "10.1.1.100,127.0.0.1,192.18.0.1", h)
 	a.Equal(true, allowed)
 }
 
 func (a WebHandlersSuite) TestIPisAllowedNotAllowedIP() {
-	allowed := IPisAllowed("127.0.0.1", "192.18.0.1")
+	allowed := IPisAllowed("127.0.0.1", "192.18.0.1", h)
 	a.Equal(false, allowed)
 }
 
@@ -381,6 +388,7 @@ func startWebServer(t *testing.T) {
 		ProgramDir: h.FilesDir,
 		FilesDir:   config.GetString(s, "on_start.web_sources_directory"),
 		Cfg:        s,
+		L:          logger.New(logger.NoneLevel, logger.ColorOff),
 	}
 
 	s.Files()
@@ -398,6 +406,9 @@ func startApiServer(t *testing.T) {
 	s.Data.Set("Storage", false)
 
 	handlers.Cfg, cpu.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s, s
+
+	l := logger.New(logger.NoneLevel, logger.ColorOff)
+	cpu.L, handlers.L, memory.L, model.L, network.L, playground.L, processes.L, apiservers.L, services.L, storage.L = l, l, l, l, l, l, l, l, l, l
 
 	go services.Watcher()
 	go network.Stats()
