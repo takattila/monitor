@@ -17,6 +17,7 @@
     <!-- Header -->
     <header class="w3-container w3-red w3-center w3-margin-bottom" data-click-state="0">
         <p><img src="{{.RouteWebPath}}/img/{{.Logo}}.svg?v={{.Version}}" height="74"></p>
+        <p id="model_name">Hardware model</p>
     </header>
 
     <!-- Page Container -->
@@ -27,7 +28,7 @@
 
             <!-- Left column -->
             <div class="w3-third">
-
+                
                 <!-- CPU Usage Circle Progress Bar -->
                 <div id="cpu_usage_container" class="w3-container w3-card w3-white w3-margin-bottom">
                     <h2 id="cpu" class="w3-text-grey w3-padding-16" data-click-state="0">
@@ -159,7 +160,7 @@
 
     <!-- Footer -->
     <footer class="w3-container w3-red w3-center w3-margin-top" data-click-state="0">
-        <p id="model_name">Hardware model</p>
+        <p id="uptime_info"><b>UP:</b> 1 week, 4 days, 21 hours, 17 minutes</p>
     </footer>
     <script type="text/javascript">
         let ROUTE_SYSTEMCTL = "{{.RouteSystemCtl}}";

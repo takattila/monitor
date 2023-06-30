@@ -11,6 +11,7 @@ import (
 	"github.com/takattila/monitor/internal/api/pkg/processes"
 	"github.com/takattila/monitor/internal/api/pkg/services"
 	"github.com/takattila/monitor/internal/api/pkg/storage"
+	"github.com/takattila/monitor/internal/api/pkg/uptime"
 )
 
 // AllJSONs holds a json.RawMessage array.
@@ -43,6 +44,7 @@ func GetRawJSONs() *AllJSONs {
 		json.RawMessage(processes.GetJSON()),
 		json.RawMessage(services.GetJSON()),
 		json.RawMessage(network.GetJSON()),
+		json.RawMessage(uptime.GetJSON()),
 	}
 	return &AllJSONs{RawJSONs: RawJSONs}
 }

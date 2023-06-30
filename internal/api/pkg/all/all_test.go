@@ -41,6 +41,7 @@ func (a ApiAllSuite) TestGetJSON() {
 	a.Contains(JSON, "process_info")
 	a.Contains(JSON, "services_info")
 	a.Contains(JSON, "network_info")
+	a.Contains(JSON, "uptime_info")
 
 	d := make(map[string]interface{})
 	err := json.Unmarshal([]byte(JSON), &d)

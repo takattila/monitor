@@ -135,6 +135,9 @@ function monitor() {
 
         // Parse JSON only if has a specific field...
         if (data.processor_info) {
+            // Header section: write model name
+            $('#model_name').text(data.model_name);
+
             // CPU section
             var procInfo = data.processor_info;
 
@@ -405,8 +408,8 @@ function monitor() {
 
             $('#storage_container').html(storageHtml + '<p></p>');
 
-            // Footer section: write model name
-            $('#model_name').text(data.model_name);
+            // Uptime section
+            $('#uptime_info').text(data.uptime_info);
 
             window.onload = copyTableRows();
         }

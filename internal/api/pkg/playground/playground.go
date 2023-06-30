@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/shirou/gopsutil/host"
+	"github.com/takattila/monitor/internal/api/pkg/uptime"
 	"github.com/takattila/monitor/pkg/logger"
 )
 
@@ -13,12 +14,10 @@ var (
 
 // Playground for testing stuff.
 func Playground() string {
-	html := "<html><head><title>Go Playground</title></head><body><h1>Go</h1>"
+	style := `style="background-color:#0d1117;color:#ffffff;margin:20px"`
+	html := `<html><head><title>Go Playground</title></head><body ` + style + `><h1>Go</h1>`
 
-	up := GetUptime()
-	L.Error(up.Error)
-	L.Info(fmt.Sprintf("%d days, %d hours, %d minutes", up.Days, up.Hours, up.Minutes))
-	html = html + fmt.Sprintf("%d days, %d hours, %d minutes", up.Days, up.Hours, up.Minutes) + "<br>"
+	html = html + uptime.GetJSON() + "<br>"
 
 	p := GetPlatform()
 	L.Error(p.Error)
@@ -32,28 +31,6 @@ func Playground() string {
 
 	html = html + "</body></html>"
 	return html
-}
-
-type UpTime struct {
-	Days    uint64
-	Hours   uint64
-	Minutes uint64
-	Error   error
-}
-
-func GetUptime() (up UpTime) {
-	uptime, err := host.Uptime()
-	up.Error = err
-
-	days := uptime / (60 * 60 * 24)
-	hours := (uptime - (days * 60 * 60 * 24)) / (60 * 60)
-	minutes := ((uptime - (days * 60 * 60 * 24)) - (hours * 60 * 60)) / 60
-
-	up.Days = days
-	up.Hours = hours
-	up.Minutes = minutes
-
-	return up
 }
 
 type Platform struct {
