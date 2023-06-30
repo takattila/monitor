@@ -31,6 +31,10 @@ body {
     color: #FFF;
 }
 
+#page_container {
+    max-width:100%;
+}
+
 .circle-progress-value {
     stroke-width: 50px;
     stroke: #00ccff;

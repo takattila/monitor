@@ -135,6 +135,17 @@ function monitor() {
 
         // Parse JSON only if has a specific field...
         if (data.processor_info) {
+            // Calculate the width of the Memory section dynamically...
+            if (window.innerWidth > 600) {
+                $("#cpu_section").css("max-width", "520px")
+                cpuSectionWidth = $('#cpu_section').width();
+                fullWidth = $('#page_container').width();;
+                newMemorySectionWidth = fullWidth - cpuSectionWidth - 32;
+                $('#memory_section').css('width', newMemorySectionWidth + "px");
+            } else {
+                $('#memory_section').css('width', "");
+            }
+
             // Header section: write model name
             $('#model_name').text(data.model_name);
 
@@ -179,7 +190,7 @@ function monitor() {
                 heightCpuTempBlockNew = 150;
             } else {
                 // Landscape
-                heightCpuTempBlockNew = heightMemBlock - heightCpuUsageBlock - heightCpuLoadBlock - 32;
+                heightCpuTempBlockNew = heightMemBlock - heightCpuUsageBlock - heightCpuLoadBlock - 53;
             }
 
             if (heightMemBlock < 100 & window.innerWidth > 600) {
