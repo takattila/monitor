@@ -55,7 +55,7 @@ jobs:
       - name: ZIP
         uses: montudor/action-zip@v1
         with:
-          args: zip -qq -r monitor-${{ steps.vars.outputs.tag }}-${{ matrix.goos }}-${{ matrix.goarch }}.zip . -x *.git* -x *internal* -x *pkg* -x *scripts*
+          args: zip -qq -r monitor-${{ steps.vars.outputs.tag }}-${{ matrix.goos }}-${{ matrix.goarch }}.zip . -x *.git* -x *internal* -x *pkg* -x *scripts* -x *go.mod* -x *go.sum*
 
 
       - name: Release
