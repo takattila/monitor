@@ -23,6 +23,7 @@ The web interface is responsive, it has `desktop` and `mobile` modes.
 - `Top processes`
 - `Network traffic`
 - `Storage`
+- `Uptime`
 
 ![Monitor Service](assets/features.png)
 
@@ -44,7 +45,7 @@ You can choose to [download the pre-built binaries](https://github.com/takattila
 
 ### By downloading the latest release
 
-If you don't have go installed, and you don't want to install it, you can download install the latest pre-built binaries with: `get-latest-binaries.sh`.
+If you didn't install go, and you don't want to install it, you can download install the latest pre-built binaries with: `get-latest-binaries.sh`.
 
 1. Install the latest release for your architecture
 
@@ -297,75 +298,81 @@ The `on_runtime` section means that all settings belonging to this section can b
 
 ```yaml
 on_start:                                 # These settings can be applied only, when the service starts.
-  port: 7070                              # The service can be reached under this port.
-  routes:                                 # URL schema, which describe the interfaces for making requests to the service.
-    all: /all                             # All hardware information merged into one JSON.
-    model: /model                         # Provides a model name JSON.
-    cpu: /cpu                             # Provides a cpu statistics JSON.
-    memory: /memory                       # Provides a memory statistics JSON.
-    processes: /processes                 # Provides a top 10 processes JSON.
-    storages: /storages                   # Provides a storages JSON.
-    services: /services                   # Provides a services list JSON.
-    network: /network                     # Provides a network traffic JSON.
-    toggle: /toggle/{section}/{status}    # The processes, storages, services, network JSON provision can be turned on or off.
-on_runtime:                               # These settings can be applied during the service running.
-  physical_memory: 1GB                    # Set the memory amount 'by hand'. It can be commented out, and the program will get the total memory.
-  commands:                               # Commands to get hardware information.
+  port: 7070                              #  - The service can be reached under this port.
+  routes:                                 #  - URL schema, which describe the interfaces for making requests to the service.
+    all: /all                             #    - All hardware information merged into one JSON.
+    model: /model                         #    - Provides a model name JSON.
+    cpu: /cpu                             #    - Provides a cpu statistics JSON.
+    memory: /memory                       #    - Provides a memory statistics JSON.
+    processes: /processes                 #    - Provides a top 10 processes JSON.
+    storages: /storages                   #    - Provides a storages JSON.
+    services: /services                   #    - Provides a services list JSON.
+    network: /network                     #    - Provides a network traffic JSON.
+    toggle: /toggle/{section}/{status}    #    - The processes, storages, services, network JSON provision can be turned on or off.
+  logger:                                 #  - Setup logging functionality.
+    level: debug                          #    - From debug to none levels, the detail of the logging can be set.
+    color: on                             #    - Colorizing the log output.
+on_runtime:                               # - These settings can be applied during the service running.
+  physical_memory: 1GB                    #   - Set the memory amount 'by hand'. It can be commented out, and the program will get the total memory.
+  commands:                               #   - Commands to get hardware information.
     ...                                   # 
     processes:                            # 
-      - dash                              # The Dash linux shell roughly 4x times faster than Bash.
+      - dash                              #     - The Dash linux shell roughly 4x times faster than Bash.
       - -c                                # 
-      - |                                 # We can use 'pipe' in YAML to write multi-line blocks...
+      - |                                 #     - We can use 'pipe' in YAML to write multi-line blocks...
         ps -ewwo pid,user,%mem,%cpu,cmd \ # 
           --sort=-%cpu --no-headers \     # 
           | head -n 10 \                  # 
           | tail -n 10                    # 
     ...                                   # 
-  services_list:                          # List of services which we want to manage.
-    - smbd                                # The service checks in the background, whether the service is
-    - sshd                                # - active or enabled
-    - syslog                              # - and also we can start, stop, restart, enable, disable it.
+  services_list:                          #   - List of services which we want to manage.
+    - smbd                                #     - The service checks in the background, whether the service is
+    - sshd                                #       - active or enabled
+    - syslog                              #       - and also we can start, stop, restart, enable, disable it.
 ```
 
 ## web.yaml
 
 ```yaml
 on_start:                                            # These settings can be applied only, when the service starts.
-  port: 8383                                         # The service can be reached under this port.
-  domain: example.net                                # If you want to run this service as a stand-alone web service, you can set your domain here.
-  web_sources_directory: /web                        # The source files of the web interface can be found under this directory.
-  auth_file: /configs/auth.db                        # Usernames and passwords are stored here.
-  save_credentials: false                            # Do we want to initialize the user credentials each time when the service starts?
-  routes:                                            # URL schema, which describe the interfaces for making requests to the service.
-    index: /monitor                                  # Route to the index page.
-    login: /monitor/login                            # Route to the login page. (Login required)
-    logout: /monitor/logout                          # Route to the logout page. (Login required)
-    internal: /monitor/internal                      # Route to the internal page. (Login required)
-    api: /monitor/api/{statistics}                   # Route to the api page. (Login required)
-    systemctl: /monitor/systemctl/{action}/{service} # Route to the systemctl page. (Login required)
-    power: /monitor/power/{action}                   # Route to the power page. (Login required)
-    toggle: /monitor/toggle/{section}/{status}       # Route to the toggle page. (Login required)
-    web: /monitor/web                                # The files: html, js, css can be served under this route.
-  pages:                                             # HTML files path.
-    login: /html/login.html                          # Index file path.
-    internal: /html/monitor.html                     # The internal page file path.
-on_runtime:                                          # These settings can be applied during the service running.
-  theme:                                             # Themes configuration.
-    skin: suse                                       # Color scheme
-    logo: rpi                                        # Image
-  allowed_ip: 0.0.0.0                                # We can set the IP, from where the service can be reached.
-                                                     # - 0.0.0.0 -> means: any IP will be accepted.
-                                                     # - 10.1.1.34,10.3.4.5 -> means: multiple IP can be accepted.
-  interval_seconds: 1                                # How many seconds are we want to query the API?
-  api:                                               # API service related stuff.
-    url: "http://127.0.0.1"                          # URL of the API.
-    port: 7070                                       # Port of the API.
-  commands:                                          # Commands for the device management.
-    systemctl:                                       # Start, Stop, Restart, Enable, Disable a service
-      - dash                                         # 
-      - -c                                           # 
-      - systemctl {action} {service}                 # 
-    init:                                            # Restart or shutdown.
+  port: 8383                                         # - The service can be reached under this port.
+  domain: example.net                                # - If you want to run this service as a stand-alone web service, you can set your domain here.
+  web_sources_directory: /web                        # - The source files of the web interface can be found under this directory.
+  auth_file: /configs/auth.db                        # - Usernames and passwords are stored here.
+  save_credentials: false                            # - Do we want to initialize the user credentials each time when the service starts?
+  routes:                                            # - URL schema, which describe the interfaces for making requests to the service.
+    index: /monitor                                  #   - Route to the index page.
+    login: /monitor/login                            #   - Route to the login page. (Login required)
+    logout: /monitor/logout                          #   - Route to the logout page. (Login required)
+    internal: /monitor/internal                      #   - Route to the internal page. (Login required)
+    api: /monitor/api/{statistics}                   #   - Route to the api page. (Login required)
+    systemctl: /monitor/systemctl/{action}/{service} #   - Route to the systemctl page. (Login required)
+    power: /monitor/power/{action}                   #   - Route to the power page. (Login required)
+    toggle: /monitor/toggle/{section}/{status}       #   - Route to the toggle page. (Login required)
+    web: /monitor/web                                #   - The files: html, js, css can be served under this route.
+  pages:                                             # - HTML files path.
+    login: /html/login.html                          #   - Index file path.
+    internal: /html/monitor.html                     #   - The internal page file path.
+  logger:                                            # - Setup logging functionality.
+    level: debug                                     #   - From debug to none levels, the detail of the logging can be set.
+    color: on                                        #   - Colorizing the log output.
+on_runtime:                                          # - These settings can be applied during the service running.
+  theme:                                             #   - Themes configuration.
+    skin: suse                                       #     - Color scheme
+    logo: rpi                                        #     - Image
+  allowed_ip: 0.0.0.0                                #   - We can set the IP, from where the service can be reached.
+                                                     #     - 0.0.0.0 -> means: any IP will be accepted.
+                                                     #     - 10.1.1.34,10.3.4.5 -> means: multiple IP can be accepted.
+  interval_seconds: 1                                #   - How many seconds are we want to query the API?
+  api:                                               #   - API service related stuff.
+    url: "http://127.0.0.1"                          #     - URL of the API.
+    port: 7070                                       #     - Port of the API.
+  commands:                                          #   - Commands for the device management.
+    systemctl:                                       #     - Start, Stop, Restart, Enable, Disable a service
+      - dash                                         #   
+      - -c                                           #   
+      - systemctl {action} {service}                 #   
+    init:                                            #     - Restart or shutdown.
       - dash                                         # 
       - -c                                           # 
       - init {number}                                # 
@@ -383,9 +390,47 @@ Both the `skin` and the `logo` of the web service can be modified in the [config
 ```yaml
 on_runtime:
   theme:
-    skin: suse # can be: centos, fedora,  github_blue, github_green, github_purple, github_red, github_yellow, manjaro, mint, opi, redhat, rpi, suse, ubuntu, vanilla
-    logo: rpi  # can be: arch, centos, debian, fedora, tux, manjaro, mint, opi, pop, redhat, rpi, suse, ubuntu, vanilla, zorin
+    skin: suse
+    logo: rpi
 ```
+
+## Available skins
+
+- centos
+- fedora
+- github_blue
+- github_green
+- github_purple
+- github_red
+- github_yellow
+- manjaro
+- mint
+- opi
+- redhat
+- rpi
+- suse
+- ubuntu
+- vanilla
+
+## Available logos
+
+- arch
+- centos
+- debian
+- fedora
+- tux
+- manjaro
+- mint
+- opi
+- pop
+- redhat
+- rpi
+- suse
+- ubuntu
+- vanilla
+- zorin
+
+## Skins & logos location
 
 You can find the available skins under [web/css](web/css) directory.
 The logos can be found under the [web/img](web/img) directory.
