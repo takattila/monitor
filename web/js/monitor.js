@@ -457,6 +457,7 @@ function toggleSectionCpu() {
 function setLightSkin() {
     $('header').attr('data-click-state', 0);
     $('footer').attr('data-click-state', 0);
+    $('#model_name').attr('data-click-state', 0);
     $('.w3-dark').addClass('w3-white').removeClass('w3-dark');
     $('.w3-dark-grey').addClass('w3-light-grey').removeClass('w3-dark-grey');
     $('.w3-text-light-grey').addClass('w3-text-grey').removeClass('w3-text-light-grey');
@@ -467,6 +468,7 @@ function setLightSkin() {
 function setDarkSkin() {
     $('header').attr('data-click-state', 1);
     $('footer').attr('data-click-state', 1);
+    $('#model_name').attr('data-click-state', 1);
     $('.w3-white').addClass('w3-dark').removeClass('w3-white');
     $('.w3-light-grey').addClass('w3-dark-grey').removeClass('w3-light-grey');
     $('.w3-text-grey').addClass('w3-text-light-grey').removeClass('w3-text-grey');
@@ -475,7 +477,7 @@ function setDarkSkin() {
 }
 
 function toggleThemeOnHeaderOrFooterClick() {
-    $('header, footer').on('click', function() {
+    $('header, footer, #model_name').on('click', function() {
         if ($(this).attr('data-click-state') == 1) {
             setLightSkin();
         } else {
@@ -507,7 +509,17 @@ function collapseSectionsExceptCpu() {
     $('#logout').click();
 }
 
+function sticyHeader() {
+    if (window.pageYOffset > sticky) {
+        header.classList.add("sticky");
+    } else {
+        header.classList.remove("sticky");
+    }
+}
+
 var loop;
+var header = document.getElementById("model_name");
+var sticky = header.offsetTop;
 
 function start() {
     monitor();
@@ -522,6 +534,8 @@ function stop() {
     clearInterval(loop);
     console.log("stopped setInterval");
 }
+
+window.onscroll = function() { sticyHeader() };
 
 $(document).ready(function() {
     logoutIfSessionEnded();

@@ -14,6 +14,23 @@ body {
     -ms-overflow-style: none;
 }
 
+.sticky {
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+#model_name {
+    background-color: #ce1a2d !important;
+    display: block !important;
+    width: 100% !important;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    text-align: center;
+    cursor: pointer;
+    color: #FFF;
+}
+
 .circle-progress-value {
     stroke-width: 50px;
     stroke: #ffbc2b;
