@@ -48,14 +48,19 @@ jobs:
           env CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o cmd internal/api/app/api.go
           env CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o cmd internal/web/app/web.go
           env CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o cmd internal/credentials/app/credentials.go
-          echo "# Version: ${{ steps.vars.outputs.tag }}" > VERSION.md
-          echo ""                                        >> VERSION.md
-          echo "${{ steps.vars.outputs.tag_msg }}"       >> VERSION.md
+
+          echo "# Version: ${{ steps.vars.outputs.tag }}"                                                   > VERSION.md
+          echo ""                                                                                          >> VERSION.md
+          echo "${{ steps.vars.outputs.tag_msg }}"                                                         >> VERSION.md
+
+          echo "# Info"                                                                                     > INFO.md
+          echo ""                                                                                          >> INFO.md
+          echo "For more information, please visit: https://github.com/takattila/monitor#monitor-services" >> INFO.md
 
       - name: ZIP
         uses: montudor/action-zip@v1
         with:
-          args: zip -qq -r monitor-${{ steps.vars.outputs.tag }}-${{ matrix.goos }}-${{ matrix.goarch }}.zip . -x *.git* -x *internal* -x *pkg* -x *scripts* -x *go.mod* -x *go.sum*
+          args: zip -qq -r monitor-${{ steps.vars.outputs.tag }}-${{ matrix.goos }}-${{ matrix.goarch }}.zip . -x *.git* -x *internal* -x *pkg* -x *scripts* -x *assets* -x *README.md* -x *go.mod* -x *go.sum*
 
 
       - name: Release
