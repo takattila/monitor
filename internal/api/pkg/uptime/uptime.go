@@ -113,6 +113,7 @@ func (up Up) String() (string, error) {
 	return strings.Join(uptimeSlice, ", "), nil
 }
 
+// plural prints uptime units in plural if the unit is greater than 1.
 func plural(unit string, num uint64) string {
 	if num > 1 {
 		return fmt.Sprintf("%d %ss", num, unit)
