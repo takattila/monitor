@@ -82,25 +82,25 @@ func (up Up) String() (string, error) {
 	var years, months, weeks, days, hours, minutes, seconds string
 
 	if up.Years > 0 {
-		years = fmt.Sprintf("%d years", up.Years)
+		years = plural("year", up.Years)
 	}
 	if up.Months > 0 {
-		months = fmt.Sprintf("%d months", up.Months)
+		months = plural("month", up.Months)
 	}
 	if up.Weeks > 0 {
-		weeks = fmt.Sprintf("%d weeks", up.Weeks)
+		weeks = plural("week", up.Weeks)
 	}
 	if up.Days > 0 {
-		days = fmt.Sprintf("%d days", up.Days)
+		days = plural("day", up.Days)
 	}
 	if up.Hours > 0 {
-		hours = fmt.Sprintf("%d hours", up.Hours)
+		hours = plural("hour", up.Hours)
 	}
 	if up.Minutes > 0 {
-		minutes = fmt.Sprintf("%d minutes", up.Minutes)
+		minutes = plural("minute", up.Minutes)
 	}
 	if up.Seconds > 0 {
-		seconds = fmt.Sprintf("%d seconds", up.Seconds)
+		seconds = plural("second", up.Seconds)
 	}
 
 	var uptimeSlice []string
@@ -111,4 +111,11 @@ func (up Up) String() (string, error) {
 	}
 
 	return strings.Join(uptimeSlice, ", "), nil
+}
+
+func plural(unit string, num uint64) string {
+	if num > 1 {
+		return fmt.Sprintf("%d %ss", num, unit)
+	}
+	return fmt.Sprintf("%d %s", num, unit)
 }

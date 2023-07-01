@@ -33,6 +33,11 @@ func (a ApiUptimeSuite) TestString() {
 		err   error
 	}{
 		{
+			field: Up{Years: 1},
+			want:  "1 year",
+			err:   nil,
+		},
+		{
 			field: Up{Years: 2},
 			want:  "2 years",
 			err:   nil,
