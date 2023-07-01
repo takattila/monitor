@@ -396,21 +396,21 @@ on_runtime:
 
 ## Available skins
 
-- centos
-- fedora
-- github_blue
-- github_green
-- github_purple
-- github_red
-- github_yellow
-- manjaro
-- mint
-- opi
-- redhat
-- rpi
-- suse
-- ubuntu
-- vanilla
+- [centos](#centos)
+- [fedora](#fedora)
+- [github_blue](#github_blue)
+- [github_green](#github_green)
+- [github_purple](#github_purple)
+- [github_red](#github_red)
+- [github_yellow](#github_yellow)
+- [manjaro](#manjaro)
+- [mint](#mint)
+- [opi](#opi)
+- [redhat](#redhat)
+- [rpi](#rpi)
+- [suse](#suse)
+- [ubuntu](#ubuntu)
+- [vanilla](#vanilla)
 
 ## Available logos
 
@@ -536,12 +536,12 @@ The logos can be found under the [web/img](web/img) directory.
 ![Monitor Service](assets/desktop-manjaro-dark.png)
 ![Monitor Service](assets/desktop-manjaro-light.png)
 
-### Linux Mint
+### Mint
 
 ![Monitor Service](assets/desktop-mint-dark.png)
 ![Monitor Service](assets/desktop-mint-light.png)
 
-### Orange PI
+### OPI
 
 ![Monitor Service](assets/desktop-opi-dark.png)
 ![Monitor Service](assets/desktop-opi-light.png)
@@ -550,6 +550,11 @@ The logos can be found under the [web/img](web/img) directory.
 
 ![Monitor Service](assets/desktop-redhat-dark.png)
 ![Monitor Service](assets/desktop-redhat-light.png)
+
+### RPI
+
+![Monitor Service](assets/desktop-dark.png)
+![Monitor Service](assets/desktop-light.png)
 
 ### Suse
 
