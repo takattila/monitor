@@ -580,35 +580,3 @@ If the service crashes, panics delete the `.cache/go-build` folder:
 ```
 sudo rm -rf $HOME/.cache/go-build
 ```
-
-## If python is not installed
-
-1. Check your python installation
-
-   Before installing python, you should check whether other version of python is installed or not:
-   
-   ```
-   ls /usr/bin | grep python
-   ```
-
-   If there is a python version installed, you should see:
-
-   ```
-   python2
-   python2.7
-   python3
-   python3.9
-   ```
-
-1. Create a symlink to your existing python installation
-
-   Choose your preferd python version, and create a symlink:
-
-   ```
-   ln -s $(which python3) /usr/bin
-   ```
-
-1. If there is no other python version installed
-
-   - Install python with your package manager.
-     You can find instructions [here](https://www.google.com/search?q=install+python+on+linux).

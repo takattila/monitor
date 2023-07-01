@@ -13,7 +13,6 @@ REQUIRED_PROGRAMS=(
     getconf
     grep
     hostnamectl
-    python
     sed
     systemctl
     tr
@@ -103,26 +102,6 @@ function checkProgramIsInstalled {
     echo $?
 }
 
-function checkPythonsIsInstalled {
-    local program="$1"
-    local python
-
-    if [[ "$program" = "python" ]]; then
-        python=$(ls /usr/bin/* | grep python | head -n 1)
-        if [[ "$python" != "" ]]; then
-            echo -e "    - There is another version of python installed: '${YELLOW}${python}${ENDCOLOR}'."
-            read -r -p $'    - '$(echo -e "${YELLOW}")'Do you want to use this python version?'$(echo -e "${ENDCOLOR}")' [y/N] ' backupCfg
-            if [[ "$backupCfg" =~ ^([yY][eE][sS]|[yY])$ ]]; then
-                echo -e "      - Creating symlink: '${YELLOW}ln -s $(which "${python}") /usr/bin/python${ENDCOLOR}'..."
-                sudo ln -s $(which "${python}") /usr/bin/python
-                main
-            else
-                echo -e "      - The symlink cration of: '${YELLOW}${python}${ENDCOLOR}' skipped..."
-            fi
-        fi
-    fi
-}
-
 function checkAllProgramsInstalled {
     local shouldBeInstalled
     local check
@@ -149,7 +128,6 @@ function checkAllProgramsInstalled {
         for program in ${!shouldBeInstalled[@]}; do
             if [[ "${shouldBeInstalled[$program]}" = "1" ]]; then
                 echo "  - $program"
-                checkPythonsIsInstalled "$program"
             fi
         done
         exit 1
