@@ -7,9 +7,20 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"time"
 
 	"github.com/takattila/monitor/pkg/common"
+)
+
+var (
+	osCreate = func(stdout string) (*os.File, error) {
+		return os.Create(stdout)
+	}
+	cmdStdoutPipe = func(cmd *exec.Cmd) (io.ReadCloser, error) {
+		return cmd.StdoutPipe()
+	}
+	cmdStart = func(cmd *exec.Cmd) error {
+		return cmd.Start()
+	}
 )
 
 // Exec starts a spacific command by its name.
@@ -35,21 +46,21 @@ func GetRunByName(name string) string {
 
 // Run issues a specific command.
 func Run(name, command string) (err error) {
-	time.Sleep(500 * time.Millisecond)
+	// time.Sleep(500 * time.Millisecond)
 
-	stdout := "./cmd/" + name + ".stdout"
-	finish := "./cmd/" + name + ".finish"
+	stdout := CmdFolder + name + ".stdout"
+	finish := CmdFolder + name + ".finish"
 
 	execute := func(stdout, finish, command string) (err error) {
 		cmd := exec.Command("bash", "-c", command)
 
-		outfile, err := os.Create(stdout)
+		outfile, err := osCreate(stdout)
 		if err != nil {
 			return err
 		}
 		defer outfile.Close()
 
-		stdoutPipe, err := cmd.StdoutPipe()
+		stdoutPipe, err := cmdStdoutPipe(cmd)
 		if err != nil {
 			return err
 		}
@@ -60,7 +71,7 @@ func Run(name, command string) (err error) {
 			_ = os.Rename(stdout, finish)
 		}()
 
-		err = cmd.Start()
+		err = cmdStart(cmd)
 		if err != nil {
 			return err
 		}

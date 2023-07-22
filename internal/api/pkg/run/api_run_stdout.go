@@ -8,8 +8,8 @@ import (
 
 // StdOut provides a specific command output.
 func StdOut(name string) (content string) {
-	stdout := "./cmd/" + name + ".stdout"
-	finish := "./cmd/" + name + ".finish"
+	stdout := CmdFolder + name + ".stdout"
+	finish := CmdFolder + name + ".finish"
 
 	if common.FileExists(stdout) {
 		if b, err := os.ReadFile(stdout); err == nil {

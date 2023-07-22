@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
@@ -199,6 +200,85 @@ func (a ApiHandlersSuite) TestToggle() {
 	a.Equal(200, request.status)
 	a.Contains(request.responsebody, "Memory")
 	a.Contains(request.responsebody, "true")
+}
+
+func (a ApiHandlersSuite) TestRunList() {
+	s := getConfig("api", "linux")
+	run.Cfg = s
+
+	r := chi.NewRouter()
+	r.Get("/run/list", RunList)
+
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+	request := request(ts, "GET", "/run/list", nil)
+
+	a.Equal(200, request.status)
+	a.Contains(request.responsebody, "run_list")
+}
+
+func (a ApiHandlersSuite) TestRunExec() {
+	s := getConfig("api", "linux")
+	run.Cfg = s
+	run.Cleanup()
+
+	r := chi.NewRouter()
+	r.Get("/run/exec/{name}", RunExec)
+
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+	request := request(ts, "GET", "/run/exec/get_storages", nil)
+
+	a.Equal(200, request.status)
+	a.Contains(request.responsebody, `"started": "get_storages"`)
+}
+
+func (a ApiHandlersSuite) TestRunStdOut() {
+	s := getConfig("api", "linux")
+	run.Cfg = s
+	defer func() { run.Cleanup() }()
+
+	gitRootPath := strings.ReplaceAll(common.Cli([]string{"bash", "-c", "git rev-parse --show-toplevel"}), "\n", "")
+
+	oldCmdFolder := run.CmdFolder
+	run.CmdFolder = gitRootPath + "/cmd/"
+	defer func() {
+		run.CmdFolder = oldCmdFolder
+		run.Cleanup()
+	}()
+
+	run.Cleanup()
+
+	content := "/dev/root 125781323776 11785846784 108853583872 10% /"
+	err := createFile(run.CmdFolder+"get_storages.stdout", content)
+	a.Equal(nil, err)
+
+	r := chi.NewRouter()
+	r.Get("/run/stdout/{name}", RunStdOut)
+
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+	request := request(ts, "GET", "/run/stdout/get_storages", nil)
+
+	a.Equal(200, request.status)
+	a.Contains(request.responsebody, content)
+}
+
+func createFile(path, content string) error {
+	_ = os.Remove(path)
+
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+
+	_, err = f.WriteString(content)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func getConfig(service, system string) *settings.Settings {

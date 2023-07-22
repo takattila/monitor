@@ -14,27 +14,20 @@ func Cleanup() {
 // deleteFilesByExtension removes all files under the ./cmd directory by extension.
 func deleteFilesByExtension(ext string) {
 	ext = "." + ext
-	dirname := "./cmd/"
 
-	d, err := os.Open(dirname)
-	if err != nil {
-		L.Error(err)
-		return
-	}
+	d, err := os.Open(CmdFolder)
+	L.Error(err)
 	defer d.Close()
 
 	files, err := d.Readdir(-1)
-	if err != nil {
-		L.Error(err)
-		return
-	}
+	L.Error(err)
 
-	L.Info("reading", dirname)
+	L.Info("reading", CmdFolder)
 
 	for _, file := range files {
 		if file.Mode().IsRegular() {
 			if filepath.Ext(file.Name()) == ext {
-				filepath := dirname + file.Name()
+				filepath := CmdFolder + file.Name()
 				_ = os.Remove(filepath)
 				L.Info("deleted", filepath)
 			}

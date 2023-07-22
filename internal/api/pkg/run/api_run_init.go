@@ -6,6 +6,7 @@ import (
 )
 
 var (
-	Cfg *settings.Settings
-	L   logger.Logger
+	Cfg       *settings.Settings
+	L         logger.Logger
+	CmdFolder = "./cmd/"
 )
