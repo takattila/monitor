@@ -17,6 +17,7 @@ import (
 	"github.com/takattila/monitor/internal/api/pkg/network"
 	"github.com/takattila/monitor/internal/api/pkg/playground"
 	"github.com/takattila/monitor/internal/api/pkg/processes"
+	"github.com/takattila/monitor/internal/api/pkg/run"
 	"github.com/takattila/monitor/internal/api/pkg/servers"
 	"github.com/takattila/monitor/internal/api/pkg/services"
 	"github.com/takattila/monitor/internal/api/pkg/storage"
@@ -45,10 +46,10 @@ func (a ApiHandlersSuite) TestAll() {
 	s.Data.Set("NetworkTraffic", false)
 	s.Data.Set("Storage", false)
 
-	cpu.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s
+	cpu.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, run.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s, s
 
 	l := logger.New(logger.NoneLevel, logger.ColorOff)
-	cpu.L, L, memory.L, model.L, network.L, playground.L, processes.L, servers.L, services.L, storage.L = l, l, l, l, l, l, l, l, l, l
+	cpu.L, L, memory.L, model.L, network.L, playground.L, processes.L, run.L, servers.L, services.L, storage.L = l, l, l, l, l, l, l, l, l, l, l
 
 	r := chi.NewRouter()
 	r.Get("/all", All)

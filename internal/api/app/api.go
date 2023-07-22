@@ -9,6 +9,7 @@ import (
 	"github.com/takattila/monitor/internal/api/pkg/network"
 	"github.com/takattila/monitor/internal/api/pkg/playground"
 	"github.com/takattila/monitor/internal/api/pkg/processes"
+	"github.com/takattila/monitor/internal/api/pkg/run"
 	"github.com/takattila/monitor/internal/api/pkg/servers"
 	"github.com/takattila/monitor/internal/api/pkg/services"
 	"github.com/takattila/monitor/internal/api/pkg/storage"
@@ -30,13 +31,15 @@ func init() {
 	s.Data.Set("NetworkTraffic", false)
 	s.Data.Set("Storage", false)
 
-	cpu.Cfg, handlers.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s, s
+	cpu.Cfg, handlers.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, run.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s, s, s
 
 	l := logger.New(config.GetLogLevel(s, "on_start.logger.level"), config.GetLogColor(s, "on_start.logger.color"))
-	cpu.L, handlers.L, memory.L, model.L, network.L, playground.L, processes.L, servers.L, services.L, storage.L = l, l, l, l, l, l, l, l, l, l
+	cpu.L, handlers.L, memory.L, model.L, network.L, playground.L, processes.L, servers.L, run.L, services.L, storage.L = l, l, l, l, l, l, l, l, l, l, l
 
 	go services.Watcher()
 	go network.Stats()
+
+	run.Cleanup()
 }
 
 func main() {
@@ -52,6 +55,9 @@ func main() {
 	router.Get(config.GetString(s, "on_start.routes.services"), handlers.Services)
 	router.Get(config.GetString(s, "on_start.routes.network"), handlers.Network)
 	router.Get(config.GetString(s, "on_start.routes.toggle"), handlers.Toggle)
+	router.Get(config.GetString(s, "on_start.routes.run.list"), handlers.RunList)
+	router.Get(config.GetString(s, "on_start.routes.run.exec"), handlers.RunExec)
+	router.Get(config.GetString(s, "on_start.routes.run.stdout"), handlers.RunStdOut)
 
 	servers.ServeHTTP(config.GetInt(s, "on_start.port"), router)
 }

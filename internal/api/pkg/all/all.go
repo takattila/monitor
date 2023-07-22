@@ -9,6 +9,7 @@ import (
 	"github.com/takattila/monitor/internal/api/pkg/model"
 	"github.com/takattila/monitor/internal/api/pkg/network"
 	"github.com/takattila/monitor/internal/api/pkg/processes"
+	"github.com/takattila/monitor/internal/api/pkg/run"
 	"github.com/takattila/monitor/internal/api/pkg/services"
 	"github.com/takattila/monitor/internal/api/pkg/storage"
 	"github.com/takattila/monitor/internal/api/pkg/uptime"
@@ -44,6 +45,7 @@ func GetRawJSONs() *AllJSONs {
 		json.RawMessage(processes.GetJSON()),
 		json.RawMessage(services.GetJSON()),
 		json.RawMessage(network.GetJSON()),
+		json.RawMessage(run.GetJSON()),
 		json.RawMessage(uptime.GetJSON()),
 	}
 	return &AllJSONs{RawJSONs: RawJSONs}

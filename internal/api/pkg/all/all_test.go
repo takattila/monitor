@@ -11,6 +11,7 @@ import (
 	"github.com/takattila/monitor/internal/api/pkg/model"
 	"github.com/takattila/monitor/internal/api/pkg/network"
 	"github.com/takattila/monitor/internal/api/pkg/processes"
+	"github.com/takattila/monitor/internal/api/pkg/run"
 	"github.com/takattila/monitor/internal/api/pkg/services"
 	"github.com/takattila/monitor/internal/api/pkg/storage"
 	"github.com/takattila/monitor/pkg/common"
@@ -31,7 +32,7 @@ func (a ApiAllSuite) TestGetJSON() {
 	s.Data.Set("NetworkTraffic", false)
 	s.Data.Set("Storage", false)
 
-	cpu.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s
+	cpu.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, run.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s, s
 
 	r := GetRawJSONs()
 	JSON := r.GetJSON()
@@ -57,7 +58,7 @@ func (a ApiAllSuite) TestGetJSONMergeJSONError() {
 	s.Data.Set("NetworkTraffic", false)
 	s.Data.Set("Storage", false)
 
-	cpu.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s
+	cpu.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, run.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s, s
 
 	oldGetRawJSONs := GetRawJSONs
 	GetRawJSONs := func() *AllJSONs {

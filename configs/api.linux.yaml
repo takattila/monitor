@@ -11,6 +11,10 @@ on_start:
     services: /services
     network: /network
     toggle: /toggle/{section}/{status}
+    run:
+      list: /run/list
+      exec: /run/exec/{name}
+      stdout: /run/stdout/{name}
   logger:
     level: debug
     color: on
@@ -64,3 +68,19 @@ on_runtime:
     - smbd
     - sshd
     - syslog
+  run:
+    ping_10_localhost:
+      - ping -c 10 localhost
+    ping_50_localhost:
+      - ping -c 50 localhost
+    find_pi:
+      - |
+        dash -c 'find /home/pi /usr -name pi'
+    get_storages:
+      - |
+        df -B1 \
+          | grep -v tmpfs \
+          | grep -v none \
+          | grep -v snap \
+          | awk '(NR>1)' \
+          | sort -k 6
