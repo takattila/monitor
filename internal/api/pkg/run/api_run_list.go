@@ -3,6 +3,7 @@ package run
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -17,6 +18,7 @@ func GetJSON() string {
 		commands = append(commands, `"`+command+`":`+string(b))
 	}
 
+	sort.Strings(commands)
 	var ret string
 
 	if len(commands) > 0 {
