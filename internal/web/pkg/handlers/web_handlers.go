@@ -70,6 +70,7 @@ func (h *Handler) Internal(w http.ResponseWriter, r *http.Request) {
 			RouteToggle     string
 			RouteLogout     string
 			RouteApi        string
+			RouteRun        string
 			RouteIndex      string
 			RouteWebPath    string
 			IntervalSeconds int
@@ -82,6 +83,7 @@ func (h *Handler) Internal(w http.ResponseWriter, r *http.Request) {
 			RouteToggle:     config.GetString(h.Cfg, "on_start.routes.toggle"),
 			RouteLogout:     config.GetString(h.Cfg, "on_start.routes.logout"),
 			RouteApi:        config.GetString(h.Cfg, "on_start.routes.api"),
+			RouteRun:        config.GetString(h.Cfg, "on_start.routes.run"),
 			RouteIndex:      config.GetString(h.Cfg, "on_start.routes.index"),
 			RouteWebPath:    config.GetString(h.Cfg, "on_start.routes.web"),
 			IntervalSeconds: config.GetInt(h.Cfg, "on_runtime.interval_seconds"),
@@ -184,6 +186,40 @@ func (h *Handler) Api(w http.ResponseWriter, r *http.Request) {
 		statistics := chi.URLParam(r, "statistics")
 
 		requestURL := fmt.Sprintf("%s:%d/%s", config.GetString(h.Cfg, "on_runtime.api.url"), config.GetInt(h.Cfg, "on_runtime.api.port"), statistics)
+		res, err := http.Get(requestURL)
+		if err != nil {
+			h.L.Error(fmt.Errorf("making http request: %v", err))
+			return
+		}
+
+		h.L.Debug(requestURL, "client: status code:", res.StatusCode)
+
+		resBody, err := ioutil.ReadAll(res.Body)
+		h.L.Error(err)
+
+		fmt.Fprintf(w, "%s", resBody)
+	}
+}
+
+// Run makes an API request to the run endpoint: /run/{action}/{name}.
+func (h *Handler) Run(w http.ResponseWriter, r *http.Request) {
+	userName := getUsername(r)
+	h.L.Debug("userName:", userName)
+	if userName == "" {
+		http.Redirect(w, r, h.LoginRoute, 302)
+		return
+	}
+
+	if IPisAllowed(r.RemoteAddr, config.GetString(h.Cfg, "on_runtime.allowed_ip"), h) {
+		action := chi.URLParam(r, "action")
+		name := chi.URLParam(r, "name")
+
+		requestURL := fmt.Sprintf("%s:%d/run/%s/%s",
+			config.GetString(h.Cfg, "on_runtime.api.url"),
+			config.GetInt(h.Cfg, "on_runtime.api.port"),
+			action,
+			name)
+
 		res, err := http.Get(requestURL)
 		if err != nil {
 			h.L.Error(fmt.Errorf("making http request: %v", err))

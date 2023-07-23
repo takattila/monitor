@@ -6,6 +6,12 @@
 // - let ROUTE_API = "{{.RouteApi}}";
 // - let INTERVAL_SECONDS = "{{.QuerySeconds}}";
 
+var loop;
+var stdoutLoop;
+var header = document.getElementById("model_name");
+var sticky = header.offsetTop;
+var autoScroll = true;
+
 function setCookie(cname, cvalue, exdays) {
     const d = new Date();
     d.setTime(d.getTime() + (exdays*24*60*60*1000));
@@ -116,6 +122,87 @@ function copyTableRows() {
 
         currentRow.onclick = createClickHandler(currentRow);
     }
+}
+
+function tail(id) {
+    if (autoScroll) {
+        let window = $(id);
+        if (window.length > 0) {
+            const height = window.get(0).scrollHeight;
+            window.animate({
+                scrollTop: height + 20
+            }, 100);
+        }
+    }
+}
+
+function startLoopStdout(id) {
+    stdoutLoop = setInterval(function() {
+        var stdout = $.ajax({
+            type: "GET",
+            url: ROUTE_RUN.replace("{action}", "stdout").replace("{name}", id)
+        });
+
+        stdout.done(function(stdout_response) {
+            if (stdout_response) {
+                $('#modal_loader_' + id).css("display", "none");
+                $('#modal_content_' + id).css("height", ($('#modal_' + id).height() - 80) + "px");
+                $('#modal_content_' + id).css("display", "block");
+                $('#modal_data_' + id).html(stdout_response);
+            }
+        });
+
+        tail('#modal_content_' + id);
+    }, INTERVAL_SECONDS * 1000);
+}
+
+function stopLoopStdout() {
+    clearInterval(stdoutLoop);
+}
+
+function modalOpen(id) {
+    stop();
+
+    autoScroll = true;
+
+    $('#modal_' + id).css('display', "block");
+    skin = getCookie("skin");
+    if (skin == "light") {
+        $('#modal_box_'+ id).addClass('w3-white').removeClass('w3-dark');
+    } else {
+        $('#modal_box_'+ id).addClass('w3-dark').removeClass('w3-white');
+    }
+
+    var run = $.ajax({
+        type: "GET",
+        url: ROUTE_RUN.replace("{action}", "exec").replace("{name}", id)
+    });
+
+    run.done(function() {
+        startLoopStdout(id);
+    });
+
+    $('#modal_header_' + id).on('click', function() {
+        if ($(this).attr('data-click-state') == 1) {
+            stopLoopStdout();
+            autoScroll = false;
+            $(this).attr('data-click-state', 0);
+        } else {
+            startLoopStdout(id);
+            autoScroll = true;
+            $(this).attr('data-click-state', 1);
+        }
+    });
+}
+
+function modalClose(id) {
+    start();
+
+    $('#modal_' + id).css('display', "none");
+    $('#modal_loader_' + id).css("display", "block");
+    $('#modal_content_' + id).css("display", "none");
+
+    stopLoopStdout();
 }
 
 function monitor() {
@@ -419,6 +506,62 @@ function monitor() {
 
             $('#storage_container').html(storageHtml + '<p></p>');
 
+            // Run section
+            var runList = data.run_list;
+            var runModal = '';
+            var runHtml = '';
+
+            for (var id in runList) {
+                if (runList.hasOwnProperty(id)) {
+                    var obj = runList[id];
+
+                    runHtml += `<p>`;
+
+                    runHtml += `<h3>`;
+                    runHtml += `<i class="fa fa-chevron-right"></i><i class="fa fa-chevron-right"></i>`;
+                    runHtml += `&nbsp;&nbsp;`+id+`&nbsp;&nbsp;`
+                    runHtml += `<i class="fa fa-chevron-right"></i><i class="fa fa-chevron-right"></i>`;
+                    runHtml += `</h3>`;
+
+
+                    runHtml += `<pre class="w3-medium w3-card w3-panel w3-padding-16" style="overflow-x: auto; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">`;
+                    runHtml += obj.trim()
+                    runHtml += `</pre>`;
+
+                    runHtml += `</p>`;
+
+                    runHtml +=`<button onclick="modalOpen('`+ id +`');" class="service-button w3-button w3-red round-left">run</button>`;
+                    runHtml += `<br><br>`;
+
+                    runModal += `
+                    <div id="modal_`+ id +`" class="w3-modal" style="backdrop-filter:blur(5px); z-index:999999999999;">
+                        <div id="modal_box_`+ id +`" class="w3-modal-content w3-animate-top w3-white w3-card" style="width:99%; height:99%;">
+                            <header class="w3-container w3-red"> 
+                                <span onclick="modalClose('`+ id +`')" class="w3-button w3-display-topright" style="font-size:32px;">&times;</span>
+                                <h2 id="modal_header_`+ id +`" data-click-state="1">Run: "`+ id +`"</h2>
+                            </header>
+                            <div class="w3-container w3-margin-bottom">
+
+                                <div id="modal_loader_`+ id +`" class="w3-display-middle w3-medium">
+                                    <i class="fa fa-spinner w3-spin" style="animation-duration:1s;"></i> Loading data...
+                                </div>
+                                
+                                <div id="modal_content_`+ id +`" class="w3-medium custom-scrollbar" style="display: none; overflow-y: scroll;">
+                                    <pre id="modal_data_`+ id +`" class="w3-medium w3-panel w3-padding-16">
+                                        -= CONTENT =-
+                                    </pre>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }
+            }
+
+            $('#modal_container').html(runModal + '<p></p>');
+            $('#run_container').html(runHtml + '<p></p>');
+
             // Uptime section
             $('#uptime_info').text(data.uptime_info);
 
@@ -516,6 +659,7 @@ function collapseSectionsExceptCpu() {
     $('#process').click();
     $('#network').click();
     $('#storage').click();
+    $('#run').click();
     $('#power').click();
     $('#logout').click();
 }
@@ -527,10 +671,6 @@ function sticyHeader() {
         header.classList.remove("sticky");
     }
 }
-
-var loop;
-var header = document.getElementById("model_name");
-var sticky = header.offsetTop;
 
 function start() {
     monitor();

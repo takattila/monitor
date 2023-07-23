@@ -21,6 +21,7 @@ import (
 	"github.com/takattila/monitor/internal/api/pkg/network"
 	"github.com/takattila/monitor/internal/api/pkg/playground"
 	"github.com/takattila/monitor/internal/api/pkg/processes"
+	"github.com/takattila/monitor/internal/api/pkg/run"
 	apiservers "github.com/takattila/monitor/internal/api/pkg/servers"
 	"github.com/takattila/monitor/internal/api/pkg/services"
 	"github.com/takattila/monitor/internal/api/pkg/storage"
@@ -261,6 +262,72 @@ func (a WebHandlersSuite) TestApiNotAuthenticated() {
 	a.Equal(200, resp.StatusCode)
 }
 
+func (a WebHandlersSuite) TestRunOk() {
+	user := "username"
+	pass := "password"
+
+	authdb := newTestAuthDB(a.T(), user, pass)
+	defer func() { _ = os.Remove(authdb) }()
+
+	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
+
+	go startWebServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	go startApiServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	form := url.Values{}
+	form.Add("uname", user)
+	form.Add("psw", pass)
+
+	loginURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), config.GetString(s, "on_start.routes.index"))
+	resp, err := req("POST", loginURL, strings.NewReader(form.Encode()))
+	a.Equal(nil, err)
+	a.Equal(200, resp.StatusCode)
+
+	runURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), "/monitor/run/exec/get_storages")
+	resp, err = req("GET", runURL, strings.NewReader(form.Encode()))
+	a.Equal(nil, err)
+	a.Equal(200, resp.StatusCode)
+}
+
+func (a WebHandlersSuite) TestRunApiNotFound() {
+	user := "username"
+	pass := "password"
+
+	authdb := newTestAuthDB(a.T(), user, pass)
+	defer func() { _ = os.Remove(authdb) }()
+
+	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
+
+	go startWebServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	form := url.Values{}
+	form.Add("uname", user)
+	form.Add("psw", pass)
+
+	loginURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), config.GetString(s, "on_start.routes.index"))
+	resp, err := req("POST", loginURL, strings.NewReader(form.Encode()))
+	a.Equal(nil, err)
+	a.Equal(200, resp.StatusCode)
+
+	runURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), "/monitor/run/exec/get_storages")
+	resp, err = req("GET", runURL, strings.NewReader(form.Encode()))
+	a.Equal(nil, err)
+	a.Equal(200, resp.StatusCode)
+}
+
+func (a WebHandlersSuite) TestRunNotAuthenticated() {
+	runURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), "/monitor/run/exec/get_storages")
+	resp, err := req("GET", runURL, nil)
+	a.Equal(nil, err)
+	a.Equal(200, resp.StatusCode)
+}
+
 func (a WebHandlersSuite) TestLogoutOk() {
 	go startWebServer(a.T())
 	time.Sleep(100 * time.Millisecond)
@@ -379,6 +446,7 @@ func startWebServer(t *testing.T) {
 	r.Get(config.GetString(s, "on_start.routes.toggle"), h.Toggle)
 	r.Post(config.GetString(s, "on_start.routes.systemctl"), h.SystemCtl)
 	r.Post(config.GetString(s, "on_start.routes.power"), h.Power)
+	r.Get(config.GetString(s, "on_start.routes.run"), h.Run)
 
 	s := servers.Server{
 		Port:       config.GetInt(s, "on_start.port"),
@@ -405,10 +473,10 @@ func startApiServer(t *testing.T) {
 	s.Data.Set("NetworkTraffic", false)
 	s.Data.Set("Storage", false)
 
-	handlers.Cfg, cpu.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s, s
+	handlers.Cfg, cpu.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, run.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s, s, s
 
 	l := logger.New(logger.NoneLevel, logger.ColorOff)
-	cpu.L, handlers.L, memory.L, model.L, network.L, playground.L, processes.L, apiservers.L, services.L, storage.L = l, l, l, l, l, l, l, l, l, l
+	cpu.L, handlers.L, memory.L, model.L, network.L, playground.L, processes.L, apiservers.L, run.L, services.L, storage.L = l, l, l, l, l, l, l, l, l, l, l
 
 	go services.Watcher()
 	go network.Stats()
@@ -425,6 +493,9 @@ func startApiServer(t *testing.T) {
 	router.Get(config.GetString(s, "on_start.routes.services"), handlers.Services)
 	router.Get(config.GetString(s, "on_start.routes.network"), handlers.Network)
 	router.Get(config.GetString(s, "on_start.routes.toggle"), handlers.Toggle)
+	router.Get(config.GetString(s, "on_start.routes.run.list"), handlers.RunList)
+	router.Get(config.GetString(s, "on_start.routes.run.exec"), handlers.RunExec)
+	router.Get(config.GetString(s, "on_start.routes.run.stdout"), handlers.RunStdOut)
 
 	apiservers.ServeHTTP(config.GetInt(s, "on_start.port"), router)
 }

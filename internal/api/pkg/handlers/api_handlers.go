@@ -15,6 +15,7 @@ import (
 	"github.com/takattila/monitor/internal/api/pkg/run"
 	"github.com/takattila/monitor/internal/api/pkg/services"
 	"github.com/takattila/monitor/internal/api/pkg/storage"
+	"github.com/takattila/monitor/pkg/common"
 	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
 )
@@ -109,7 +110,8 @@ func RunExec(w http.ResponseWriter, r *http.Request) {
 	if name != "" {
 		go func() {
 			err := run.Exec(name)
-			L.Warning(err)
+			L.Error(err)
+			L.Warning(common.GetProgramDir())
 		}()
 	}
 	fmt.Fprintf(w, `{ "started": "%s" }`, name)

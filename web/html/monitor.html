@@ -14,6 +14,8 @@
 </head>
 
 <body class="w3-light-grey scroll-hidden custom-scrollbar" style="scroll-bar-width: thin !important;">
+    <!-- Modal -->
+    <div id="modal_container"></div>
     <!-- Header -->
     <header class="w3-container w3-red w3-center" data-click-state="0">
         <p><img src="{{.RouteWebPath}}/img/{{.Logo}}.svg?v={{.Version}}" height="74"></p>
@@ -81,7 +83,7 @@
             </div>
 
             <!-- Bottom column -->
-            <div class="w3-col">
+            <div id="bottom_container" class="w3-col">
 
                 <!-- Services Container -->
                 <div class="w3-container w3-card w3-white w3-margin-bottom">
@@ -113,6 +115,14 @@
                         <i class="fa fa-hdd fa-fw w3-margin-right w3-xxlarge"></i> Storage
                     </h2>
                     <div class="w3-container" id="storage_container"> </div>
+                </div>
+
+                <!-- Run Container -->
+                <div class="w3-container w3-card w3-white w3-margin-bottom">
+                    <h2 id="run" class="w3-text-grey w3-padding-16" data-click-state="1">
+                        <i class="fa fa-terminal fa-fw w3-margin-right w3-xxlarge"></i> Run Commands
+                    </h2>
+                    <div class="w3-container" id="run_container"> </div>
                 </div>
 
                 <!-- Power Management Container -->
@@ -168,6 +178,7 @@
         let ROUTE_TOGGLE = "{{.RouteToggle}}";
         let ROUTE_LOGOUT = "{{.RouteLogout}}";
         let ROUTE_API = "{{.RouteApi}}";
+        let ROUTE_RUN = "{{.RouteRun}}";
         let INTERVAL_SECONDS = "{{.IntervalSeconds}}";
     </script>
     <script src="{{.RouteWebPath}}/js/circle-progress.js?v={{.Version}}"></script>

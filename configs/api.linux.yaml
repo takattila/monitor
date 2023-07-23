@@ -84,3 +84,21 @@ on_runtime:
           | grep -v snap \
           | awk '(NR>1)' \
           | sort -k 6
+    list_media:
+      - |
+        for f in $(ls -d /media/*); do 
+          echo "- Content of $f:";
+          echo "$(for d in $(ls -d $f/* 2>/dev/null); do echo "  - $d"; done)";
+        done
+    processes:
+      - dash
+      - -c
+      - |
+        "
+          ps -ewwo pid,user,%mem,%cpu,cmd \
+            --sort=-%cpu --no-headers \
+            | head -n 10 \
+            | tail -n 10
+        " 
+    services:
+      - systemctl list-units --type=service
