@@ -140,7 +140,11 @@ function startLoopStdout(id) {
     stdoutLoop = setInterval(function() {
         var stdout = $.ajax({
             type: "GET",
-            url: ROUTE_RUN.replace("{action}", "stdout").replace("{name}", id)
+            url: ROUTE_RUN.replace("{action}", "stdout").replace("{name}", id),
+            dataType: 'text',
+            timeout: 500,
+            cache: false,
+            async: true
         });
 
         stdout.done(function(stdout_response) {
@@ -148,7 +152,7 @@ function startLoopStdout(id) {
                 $('#modal_loader_' + id).css("display", "none");
                 $('#modal_content_' + id).css("height", ($('#modal_' + id).height() - 80) + "px");
                 $('#modal_content_' + id).css("display", "block");
-                $('#modal_data_' + id).html(stdout_response);
+                $('#modal_data_' + id).text(stdout_response.split("\r").join("\n"));
             }
         });
 
