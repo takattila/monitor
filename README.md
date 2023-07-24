@@ -29,7 +29,8 @@ The web interface is responsive, it has `desktop` and `mobile` modes.
 
 **Management features:**
 
-- `Run` pre-definied `programs` or `commands`
+- `run` pre-definied `programs` or `commands`
+   _(executable commands or programs can be defined in: `configs/api.linux|raspbian.yaml`)_
 - `restart` or `shutdown` the device
 - `start`/`stop`/`restart` or `enable`/`disable` services
 
