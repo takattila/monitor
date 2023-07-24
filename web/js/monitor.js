@@ -544,8 +544,8 @@ function monitor() {
                     runHtml += `<br><br>`;
 
                     runModal += `
-                    <div id="modal_`+ id +`" class="w3-modal" style="backdrop-filter:blur(5px); z-index:999999999999;">
-                        <div id="modal_box_`+ id +`" class="w3-modal-content w3-animate-top w3-white w3-card" style="width:99%; height:99%;">
+                    <div id="modal_`+ id +`" class="w3-modal" style="backdrop-filter:blur(5px); z-index:999999999999; padding-top:10px;">
+                        <div id="modal_box_`+ id +`" class="w3-modal-content w3-animate-top w3-white w3-card" style="width:99%; height:98%;">
                             <header class="w3-container w3-red"> 
                                 <span onclick="modalClose('`+ id +`')" class="w3-button w3-display-topright" style="font-size:32px;">&times;</span>
                                 <h2 id="modal_header_`+ id +`" data-click-state="1">Run: "`+ id +`"</h2>
