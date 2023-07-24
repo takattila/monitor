@@ -31,8 +31,7 @@ The web interface is responsive, it has `desktop` and `mobile` modes.
 
 - `restart` or `shutdown` the device
 - `start`/`stop`/`restart` or `enable`/`disable` services
-- `run` pre-definied `programs` or `commands`
-   _(executable commands or programs can be defined in: `configs/api.linux|raspbian.yaml`)_
+- `run` `programs`, `scripts` or `commands` defined in: `configs/api.linux|raspbian.yaml`
 
 **Parts:**
 
@@ -301,47 +300,47 @@ The `on_runtime` section means that all settings belonging to this section can b
 ## api.yaml
 
 ```yaml
-on_start:                                 # These settings can be applied only, when the service starts.
-  port: 7070                              #  - The service can be reached under this port.
-  routes:                                 #  - URL schema, which describe the interfaces for making requests to the service.
-    all: /all                             #    - All hardware information merged into one JSON.
-    model: /model                         #    - Provides a model name JSON.
-    cpu: /cpu                             #    - Provides a cpu statistics JSON.
-    memory: /memory                       #    - Provides a memory statistics JSON.
-    processes: /processes                 #    - Provides a top 10 processes JSON.
-    storages: /storages                   #    - Provides a storages JSON.
-    services: /services                   #    - Provides a services list JSON.
-    network: /network                     #    - Provides a network traffic JSON.
-    toggle: /toggle/{section}/{status}    #    - The processes, storages, services, network JSON provision can be turned on or off.
-    run:                                  #    - Specific commands or programs can be executed.
-      list: /run/list                     #      - List the pre-definied commands or programs.
-      exec: /run/exec/{name}              #      - Execute a specific command or program.
-      stdout: /run/stdout/{name}          #      - Returns the output of a specific command or program after it is executed.
-  logger:                                 #  - Setup logging functionality.
-    level: debug                          #    - From debug to none levels, the detail of the logging can be set.
-    color: on                             #    - Colorizing the log output.
-on_runtime:                               # - These settings can be applied during the service running.
-  physical_memory: 1GB                    #   - Set the memory amount 'by hand'. It can be commented out, and the program will get the total memory.
-  commands:                               #   - Commands to get hardware information.
-    ...                                   # 
-    processes:                            # 
-      - dash                              #     - The Dash linux shell roughly 4x times faster than Bash.
-      - -c                                # 
-      - |                                 #     - We can use 'pipe' in YAML to write multi-line blocks...
-        ps -ewwo pid,user,%mem,%cpu,cmd \ # 
-          --sort=-%cpu --no-headers \     # 
-          | head -n 10 \                  # 
-          | tail -n 10                    # 
-    ...                                   # 
-  services_list:                          #   - List of services which we want to manage.
-    - smbd                                #     - The service checks in the background, whether the service is:
-    - sshd                                #       - active or enabled,
-    - syslog                              #       - and also we can start, stop, restart, enable, disable it.
-   run:                                   #   - Here can be defined command or programs, that can be executed.
-    services:                             #     - Lists the services.
-      - |                                 #
-        systemctl list-units \            #
-          --type=service                  #
+on_start:                                   # These settings can be applied only, when the service starts.
+  port: 7070                                #  - The service can be reached under this port.
+  routes:                                   #  - URL schema, which describe the interfaces for making requests to the service.
+    all: /all                               #    - All hardware information merged into one JSON.
+    model: /model                           #    - Provides a model name JSON.
+    cpu: /cpu                               #    - Provides a cpu statistics JSON.
+    memory: /memory                         #    - Provides a memory statistics JSON.
+    processes: /processes                   #    - Provides a top 10 processes JSON.
+    storages: /storages                     #    - Provides a storages JSON.
+    services: /services                     #    - Provides a services list JSON.
+    network: /network                       #    - Provides a network traffic JSON.
+    toggle: /toggle/{section}/{status}      #    - The processes, storages, services, network JSON provision can be turned on or off.
+    run:                                    #    - Specific commands or programs can be executed.
+      list: /run/list                       #      - List the pre-definied commands or programs.
+      exec: /run/exec/{name}                #      - Execute a specific command or program.
+      stdout: /run/stdout/{name}            #      - Returns the output of a specific command or program after it is executed.
+  logger:                                   #  - Setup logging functionality.
+    level: debug                            #    - From debug to none levels, the detail of the logging can be set.
+    color: on                               #    - Colorizing the log output.
+on_runtime:                                 # - These settings can be applied during the service running.
+  physical_memory: 1GB                      #   - Set the memory amount 'by hand'. It can be commented out, and the program will get the total memory.
+  commands:                                 #   - Commands to get hardware information.
+    ...                                     #
+    processes:                              #     - List processes ordered by CPU usage
+      - dash                                #       - The Dash linux shell roughly 4x times faster than Bash.
+      - -c                                  #
+      - |                                   #       - We can use 'pipe' in YAML to write multi-line blocks...
+        ps -ewwo pid,user,%mem,%cpu,cmd \   #
+          --sort=-%cpu --no-headers \       #
+          | head -n 10 \                    #
+          | tail -n 10                      #
+    ...                                     #
+  services_list:                            #   - List of services which we want to manage.
+    - smbd                                  #     - The service checks in the background, whether the service is:
+    - sshd                                  #       - active or enabled,
+    - syslog                                #       - and also we can start, stop, restart, enable, disable it.
+   run:                                     #   - Under this section can be defined commands, scripts or programs that can be executed.
+    services:                               #     - Run command: lists services.
+      - |                                   #
+        systemctl list-units \              #
+          --type=service                    #
 
 ```
 
