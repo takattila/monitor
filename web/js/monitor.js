@@ -164,6 +164,12 @@ function stopLoopStdout() {
     clearInterval(stdoutLoop);
 }
 
+function confirmModalOpen(id) {
+    if (confirm('Are you sure you want to run the [ ' + id + ' ] command?')) {
+        modalOpen(id)
+    }
+}
+
 function modalOpen(id) {
     stop();
 
@@ -534,7 +540,7 @@ function monitor() {
 
                     runHtml += `</p>`;
 
-                    runHtml +=`<button onclick="modalOpen('`+ id +`');" class="service-button w3-button w3-red round-left">run</button>`;
+                    runHtml +=`<button onclick="confirmModalOpen('`+ id +`');" class="service-button w3-button w3-red round-left">run</button>`;
                     runHtml += `<br><br>`;
 
                     runModal += `
