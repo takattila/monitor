@@ -29,6 +29,7 @@ The web interface is responsive, it has `desktop` and `mobile` modes.
 
 **Management features:**
 
+- `Run` pre-definied `programs` or `commands`
 - `restart` or `shutdown` the device
 - `start`/`stop`/`restart` or `enable`/`disable` services
 
@@ -227,6 +228,7 @@ go mod vendor
    -    power: /monitor/power/{action}
    -    toggle: /monitor/toggle/{section}/{status}
    -    web: /monitor/web
+   -    run: /monitor/run/{action}/{name}
    +    index: /
    +    login: /login
    +    logout: /logout
@@ -236,6 +238,7 @@ go mod vendor
    +    power: /power/{action}
    +    toggle: /toggle/{section}/{status}
    +    web: /web
+   +    run: /run/{action}/{name}
    ```
 
    After that you can reach the web interface on: `http://<IP-OF-THE-DEVICE>:8383`
@@ -309,6 +312,10 @@ on_start:                                 # These settings can be applied only, 
     services: /services                   #    - Provides a services list JSON.
     network: /network                     #    - Provides a network traffic JSON.
     toggle: /toggle/{section}/{status}    #    - The processes, storages, services, network JSON provision can be turned on or off.
+    run:                                  #    - Specific commands or programs can be executed.
+      list: /run/list                     #      - List the pre-definied commands or programs.
+      exec: /run/exec/{name}              #      - Execute a specific command or program.
+      stdout: /run/stdout/{name}          #      - Returns the output of a specific command or program after it is executed.
   logger:                                 #  - Setup logging functionality.
     level: debug                          #    - From debug to none levels, the detail of the logging can be set.
     color: on                             #    - Colorizing the log output.
@@ -326,9 +333,15 @@ on_runtime:                               # - These settings can be applied duri
           | tail -n 10                    # 
     ...                                   # 
   services_list:                          #   - List of services which we want to manage.
-    - smbd                                #     - The service checks in the background, whether the service is
-    - sshd                                #       - active or enabled
+    - smbd                                #     - The service checks in the background, whether the service is:
+    - sshd                                #       - active or enabled,
     - syslog                              #       - and also we can start, stop, restart, enable, disable it.
+   run:                                   #   - Here can be defined command or programs, that can be executed.
+    services:                             #     - Lists the services.
+      - |                                 #
+        systemctl list-units \            #
+          --type=service                  #
+
 ```
 
 ## web.yaml
@@ -350,6 +363,7 @@ on_start:                                            # These settings can be app
     power: /monitor/power/{action}                   #   - Route to the power page. (Login required)
     toggle: /monitor/toggle/{section}/{status}       #   - Route to the toggle page. (Login required)
     web: /monitor/web                                #   - The files: html, js, css can be served under this route.
+    run: /monitor/run/{action}/{name}                #   - Route to the run commands page. (Login required)
   pages:                                             # - HTML files path.
     login: /html/login.html                          #   - Index file path.
     internal: /html/monitor.html                     #   - The internal page file path.
