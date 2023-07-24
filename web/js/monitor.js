@@ -165,8 +165,12 @@ function stopLoopStdout() {
 }
 
 function confirmModalOpen(id) {
+    stop();
+
     if (confirm('Are you sure you want to run the [ ' + id + ' ] command?')) {
         modalOpen(id)
+    } else {
+        start();
     }
 }
 
@@ -528,11 +532,8 @@ function monitor() {
                     runHtml += `<p>`;
 
                     runHtml += `<h3>`;
-                    runHtml += `<i class="fa fa-chevron-right"></i><i class="fa fa-chevron-right"></i>`;
-                    runHtml += `&nbsp;&nbsp;`+id+`&nbsp;&nbsp;`
-                    runHtml += `<i class="fa fa-chevron-right"></i><i class="fa fa-chevron-right"></i>`;
+                    runHtml += id;
                     runHtml += `</h3>`;
-
 
                     runHtml += `<pre class="w3-medium w3-card w3-panel w3-padding-16" style="overflow-x: auto; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">`;
                     runHtml += obj.trim()
@@ -548,7 +549,7 @@ function monitor() {
                         <div id="modal_box_`+ id +`" class="w3-modal-content w3-animate-top w3-white w3-card" style="width:99%; height:98%;">
                             <header class="w3-container w3-red"> 
                                 <span onclick="modalClose('`+ id +`')" class="w3-button w3-display-topright" style="font-size:32px;">&times;</span>
-                                <h2 id="modal_header_`+ id +`" data-click-state="1">Run: "`+ id +`"</h2>
+                                <h2 id="modal_header_`+ id +`" data-click-state="1">Running: "`+ id +`"</h2>
                             </header>
                             <div class="w3-container w3-margin-bottom">
 
