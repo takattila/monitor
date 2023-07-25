@@ -6,7 +6,7 @@
 [![main release](https://github.com/takattila/monitor/actions/workflows/main-release.yaml/badge.svg)](https://github.com/takattila/monitor/actions/workflows/main-release.yaml)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/takattila/monitor)](https://github.com/takattila/monitor/releases)
 
-This repository is a service stack written in Go language **for monitoring a Raspberry PI device** (or any linux systems).
+This repository is a service stack written in Go language **for monitoring and managing a Raspberry PI device (or any linux systems)**.
 
 Currently, it is tested on: Raspberry PI 3 Model B, but it can be used on other devices as well.
 
