@@ -149,14 +149,18 @@ function startLoopStdout(id) {
 
         stdout.done(function(stdout_response) {
             if (stdout_response) {
+                tail('#modal_content_' + id);
                 $('#modal_loader_' + id).css("display", "none");
                 $('#modal_content_' + id).css("height", ($('#modal_' + id).height() - 80) + "px");
                 $('#modal_content_' + id).css("display", "block");
-                $('#modal_data_' + id).text(stdout_response.split("\r").join("\n"));
+                if (stdout_response.indexOf('~x~o(f)o~x~') >= 0) {
+                    stopLoopStdout();
+                    autoScroll = false;
+                }
+                $('#modal_data_' + id).text(stdout_response.replace("~x~o(f)o~x~", "").split("\r").join("\n"));
             }
         });
 
-        tail('#modal_content_' + id);
     }, INTERVAL_SECONDS * 1000);
 }
 
@@ -549,7 +553,7 @@ function monitor() {
                         <div id="modal_box_`+ id +`" class="w3-modal-content w3-animate-top w3-white w3-card" style="width:99%; height:98%;">
                             <header class="w3-container w3-red"> 
                                 <span onclick="modalClose('`+ id +`')" class="w3-button w3-display-topright" style="font-size:32px;">&times;</span>
-                                <h2 id="modal_header_`+ id +`" data-click-state="1">Running: "`+ id +`"</h2>
+                                <h2 id="modal_header_`+ id +`" data-click-state="1" style="white-space: nowrap; overflow: hidden; text-overflow: clip;">Running: "`+ id +`"</h2>
                             </header>
                             <div class="w3-container w3-margin-bottom">
 

@@ -67,6 +67,7 @@ func Run(name, command string) (err error) {
 
 		writer := bufio.NewWriter(outfile)
 		defer func() {
+			_, _ = writer.WriteString("~x~o(f)o~x~")
 			writer.Flush()
 			_ = os.Rename(stdout, finish)
 		}()
