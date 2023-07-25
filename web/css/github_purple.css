@@ -29,6 +29,7 @@ body {
     text-align: center;
     cursor: pointer;
     color: #FFF;
+    z-index: 99999;
 }
 
 #page_container {
