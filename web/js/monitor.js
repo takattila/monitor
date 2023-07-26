@@ -613,12 +613,49 @@ function toggleSectionCpu() {
             $('#cpu').attr('data-click-state', 1);
             $('#cpu_usage_wrapper').hide(200);
             $('#cpu_load_container').hide(200);
-            $('#vertical_progress_container').hide(200);
+            $('#vertical_progress_container').hide(100);
         } else {
             $('#cpu').attr('data-click-state', 0);
             $('#cpu_usage_wrapper').show(200);
             $('#cpu_load_container').show(200);
             $('#vertical_progress_container').show(200);
+        }
+    });
+}
+
+function toggleSectionMemory() {
+    let memoryVisible = false
+    let cpuVisible = false
+
+    $('#memory').on('click', function() {
+        if (window.innerWidth > 600) {
+            if ($('#memory').attr('data-click-state') == 1) {
+                $('#memory').attr('data-click-state', 1);
+                memoryVisible = true
+            } else {
+                $('#memory').attr('data-click-state', 0);
+                memoryVisible = false
+            }
+
+            if ($('#cpu').attr('data-click-state') == 1) {
+                cpuVisible = false
+            } else {
+                cpuVisible = true
+            }
+
+            if (!memoryVisible && cpuVisible) {
+                $('#cpu').attr('data-click-state', 1);
+                $('#cpu_usage_wrapper').hide(200);
+                $('#cpu_load_container').hide(200);
+                $('#vertical_progress_container').hide(100);
+            }
+
+            if (memoryVisible && !cpuVisible) {
+                $('#cpu').attr('data-click-state', 0);
+                $('#cpu_usage_wrapper').show(200);
+                $('#cpu_load_container').show(200);
+                $('#vertical_progress_container').show(200);
+            }
         }
     });
 }
@@ -708,6 +745,7 @@ $(document).ready(function() {
     start();
     toggleSection();
     toggleSectionCpu();
+    toggleSectionMemory();
     toggleThemeOnHeaderOrFooterClick();
     collapseSectionsExceptCpu();
     applySkin();
