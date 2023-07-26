@@ -213,6 +213,20 @@ function modalOpen(id) {
     });
 }
 
+function copyContent(id) {
+    var aux = document.createElement("div");
+
+    aux.setAttribute("contentEditable", true);
+    aux.innerHTML = document.getElementById('modal_content_' + id).innerHTML;
+    aux.setAttribute("onfocus", "document.execCommand('selectAll',false,null)"); 
+    document.body.appendChild(aux);
+    aux.focus();
+    document.execCommand("copy");
+    document.body.removeChild(aux);
+
+    alert("Copied to clipboard:\n\n" + $('#modal_content_' + id).text());
+}
+
 function modalClose(id) {
     start();
 
@@ -545,24 +559,24 @@ function monitor() {
 
                     runHtml += `</p>`;
 
-                    runHtml +=`<button onclick="confirmModalOpen('`+ id +`');" class="service-button w3-button w3-red round-left">run</button>`;
+                    runHtml +=`<button onclick="confirmModalOpen('` + id + `');" class="service-button w3-button w3-red round-left">run</button>`;
                     runHtml += `<br><br>`;
 
                     runModal += `
-                    <div id="modal_`+ id +`" class="w3-modal" style="backdrop-filter:blur(5px); z-index:999999999999; padding-top:10px;">
-                        <div id="modal_box_`+ id +`" class="w3-modal-content w3-animate-top w3-white w3-card" style="width:99%; height:98%;">
+                    <div id="modal_` + id + `" class="w3-modal" style="backdrop-filter:blur(5px); z-index:999999999999; padding-top:10px;">
+                        <div id="modal_box_` + id + `" class="w3-modal-content w3-animate-top w3-white w3-card" style="width:99%; height:98%;">
                             <header class="w3-container w3-red"> 
-                                <span onclick="modalClose('`+ id +`')" class="w3-button w3-display-topright" style="font-size:32px;">&times;</span>
-                                <h2 id="modal_header_`+ id +`" data-click-state="1" style="white-space: nowrap; overflow: hidden; text-overflow: clip;">Running: "`+ id +`"</h2>
+                                <span onclick="modalClose('` + id + `')" class="w3-button w3-display-topright" style="font-size:32px;">&times;</span>
+                                <h2 id="modal_header_` + id + `" data-click-state="1" style="white-space: nowrap; overflow: hidden; text-overflow: clip;">Running: "` + id + `"</h2>
                             </header>
                             <div class="w3-container w3-margin-bottom">
 
-                                <div id="modal_loader_`+ id +`" class="w3-display-middle w3-medium">
+                                <div id="modal_loader_` + id + `" class="w3-display-middle w3-medium">
                                     <i class="fa fa-spinner w3-spin" style="animation-duration:1s;"></i> Loading data...
                                 </div>
                                 
-                                <div id="modal_content_`+ id +`" class="w3-medium custom-scrollbar" style="display: none; overflow-y: scroll;">
-                                    <pre id="modal_data_`+ id +`" class="w3-medium w3-panel w3-padding-16">
+                                <div id="modal_content_` + id + `" class="w3-medium custom-scrollbar" style="display: none; overflow-y: scroll;"">
+                                    <pre id="modal_data_` + id + `" class="w3-medium w3-panel w3-padding-16" ondblclick="copyContent('` + id + `')">
                                         -= CONTENT =-
                                     </pre>
                                 </div>
