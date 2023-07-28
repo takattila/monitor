@@ -752,6 +752,27 @@ function stop() {
     console.log("stopped setInterval");
 }
 
+function loadCSS(skin) {
+
+    var oldlink = $('#css');
+    console.log(oldlink);
+
+    var newlink = document.createElement("link");
+    newlink.setAttribute("rel", "stylesheet");
+    newlink.setAttribute("type", "text/css");
+    newlink.setAttribute("href", "/monitor/web/css/" + skin + ".css");
+
+    oldlink.replaceWith(newlink);
+}
+
+// setCookie("css", "rpi", 30);
+function loadCssFromCookie() {
+    css = getCookie("css");
+    if (css) {
+        loadCSS(css);
+    }
+}
+
 window.onscroll = function() { sticyHeader() };
 
 $(document).ready(function() {
@@ -762,5 +783,6 @@ $(document).ready(function() {
     toggleSectionMemory();
     toggleThemeOnHeaderOrFooterClick();
     collapseSectionsExceptCpu();
+    loadCssFromCookie();
     applySkin();
 });
