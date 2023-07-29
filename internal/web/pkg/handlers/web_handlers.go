@@ -63,8 +63,6 @@ func (h *Handler) Internal(w http.ResponseWriter, r *http.Request) {
 
 		data := struct {
 			Version         string
-			Skin            string
-			Logo            string
 			RouteSystemCtl  string
 			RoutePower      string
 			RouteToggle     string
@@ -76,8 +74,6 @@ func (h *Handler) Internal(w http.ResponseWriter, r *http.Request) {
 			IntervalSeconds int
 		}{
 			Version:         fmt.Sprint(t.Year()) + fmt.Sprint(int(t.Month())) + fmt.Sprint(t.YearDay()) + fmt.Sprint(t.Minute()) + fmt.Sprint(t.Second()) + fmt.Sprint(t.Nanosecond()),
-			Skin:            config.GetString(h.Cfg, "on_runtime.theme.skin"),
-			Logo:            config.GetString(h.Cfg, "on_runtime.theme.logo"),
 			RouteSystemCtl:  config.GetString(h.Cfg, "on_start.routes.systemctl"),
 			RoutePower:      config.GetString(h.Cfg, "on_start.routes.power"),
 			RouteToggle:     config.GetString(h.Cfg, "on_start.routes.toggle"),
@@ -107,14 +103,10 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 		data := struct {
 			Version      string
-			Skin         string
-			Logo         string
 			RouteIndex   string
 			RouteWebPath string
 		}{
 			Version:      fmt.Sprint(t.Year()) + fmt.Sprint(int(t.Month())) + fmt.Sprint(t.YearDay()) + fmt.Sprint(t.Minute()) + fmt.Sprint(t.Second()) + fmt.Sprint(t.Nanosecond()),
-			Skin:         config.GetString(h.Cfg, "on_runtime.theme.skin"),
-			Logo:         config.GetString(h.Cfg, "on_runtime.theme.logo"),
 			RouteIndex:   config.GetString(h.Cfg, "on_start.routes.index"),
 			RouteWebPath: config.GetString(h.Cfg, "on_start.routes.web"),
 		}

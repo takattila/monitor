@@ -22,9 +22,6 @@ on_start:
     level: debug
     color: on
 on_runtime:
-  theme:
-    skin: rpi
-    logo: tux
   allowed_ip: 0.0.0.0
   interval_seconds: 1
   api:

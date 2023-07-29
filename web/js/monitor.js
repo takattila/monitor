@@ -865,6 +865,10 @@ function sticyHeader() {
     }
 }
 
+function loader() {
+    $("body").hide(0).delay(0).fadeIn(500)
+}
+
 function start() {
     monitor();
     loop = setInterval(function() {
@@ -882,6 +886,7 @@ function stop() {
 window.onscroll = function() { sticyHeader() };
 
 $(document).ready(function() {
+    loader();
     logoutIfSessionEnded();
     start();
     applySkin();

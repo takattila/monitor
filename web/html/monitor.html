@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="{{.RouteWebPath}}/css/{{.Skin}}.css?v={{.Version}}" id="css">
+<link rel="stylesheet" href="{{.RouteWebPath}}/css/dark.css?v={{.Version}}" id="css">
 <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto'>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 <link rel="icon" href="{{.RouteWebPath}}/img/{{.Logo}}.png?v={{.Version}}" type="image/png" id="logo_png">
@@ -13,7 +13,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 
-<body class="w3-light-grey scroll-hidden custom-scrollbar" style="scroll-bar-width: thin !important;">
+<body class="w3-dark-grey scroll-hidden custom-scrollbar" style="scroll-bar-width: thin !important;">
+
     <!-- Header -->
     <header class="w3-container w3-red w3-center" data-click-state="0">
         <p><img src="{{.RouteWebPath}}/img/{{.Logo}}.svg?v={{.Version}}" height="74" id="logo_svg"></p>
@@ -33,7 +34,7 @@
             <div id="cpu_section" class="w3-third">
                 
                 <!-- CPU Usage Circle Progress Bar -->
-                <div id="cpu_usage_container" class="w3-container w3-card w3-white w3-margin-bottom">
+                <div id="cpu_usage_container" class="w3-container w3-card w3-dark w3-margin-bottom">
                     <h2 id="cpu" class="w3-text-grey w3-padding-16" data-click-state="0">
                         <i class="fa fa-braille fa-fw w3-margin-right w3-xxlarge w3-text-red"></i> CPU
                     </h2>
@@ -43,7 +44,7 @@
                 </div>
 
                 <!-- CPU Load -->
-                <div id="cpu_load_container" class="w3-container w3-card w3-white w3-margin-bottom">
+                <div id="cpu_load_container" class="w3-container w3-card w3-dark w3-margin-bottom">
                     <div id="cpu_load_wrapper" class="w3-center">
                         <div id="cpu_load_01_minute_avg" class="cpu-load w3-yellow">
                             0.0
@@ -59,7 +60,7 @@
 
                 <!-- CPU Temperature Progress Bar -->
                 <div id="vertical_progress_container"
-                    class="w3-container w3-card w3-white w3-margin-bottom w3-center w3-xlarge">
+                    class="w3-container w3-card w3-dark w3-margin-bottom w3-center w3-xlarge">
                     <span id="vertical_progress_span" style="top: 115px;">0°C</span>
                     <div id="vertical_progress_wrapper" style="height: 200px;">
                         <div id="vertical_progress_mask" style="height: 0px;"> </div>
@@ -73,7 +74,7 @@
             <div id="memory_section" class="w3-twothird">
 
                 <!-- Memory Container -->
-                <div class="w3-container w3-card w3-white w3-margin-bottom" id="memory_section">
+                <div class="w3-container w3-card w3-dark w3-margin-bottom" id="memory_section">
                     <h2 id="memory" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fa fa-memory fa-fw w3-margin-right w3-xxlarge"></i> Memory
                     </h2>
@@ -87,7 +88,7 @@
             <div id="bottom_container" class="w3-col">
 
                 <!-- Services Container -->
-                <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <div class="w3-container w3-card w3-dark w3-margin-bottom">
                     <h2 id="services" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fa fa-tasks fa-fw w3-margin-right w3-xxlarge"></i> Services
                     </h2>
@@ -95,7 +96,7 @@
                 </div>
 
                 <!-- Process Container -->
-                <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <div class="w3-container w3-card w3-dark w3-margin-bottom">
                     <h2 id="process" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fab fa-think-peaks fa-fw w3-margin-right w3-xxlarge"></i> Top Processes
                     </h2>
@@ -103,7 +104,7 @@
                 </div>
 
                 <!-- Network Container -->
-                <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <div class="w3-container w3-card w3-dark w3-margin-bottom">
                     <h2 id="network" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fa fa-network-wired fa-fw w3-margin-right w3-xxlarge"></i> Network Traffic
                     </h2>
@@ -111,7 +112,7 @@
                 </div>
 
                 <!-- Storage Container -->
-                <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <div class="w3-container w3-card w3-dark w3-margin-bottom">
                     <h2 id="storage" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fa fa-hdd fa-fw w3-margin-right w3-xxlarge"></i> Storage
                     </h2>
@@ -119,7 +120,7 @@
                 </div>
 
                 <!-- Run Container -->
-                <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <div class="w3-container w3-card w3-dark w3-margin-bottom">
                     <h2 id="run" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fa fa-terminal fa-fw w3-margin-right w3-xxlarge"></i> Run Commands
                     </h2>
@@ -127,7 +128,7 @@
                 </div>
 
                 <!-- Settings Container -->
-                <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <div class="w3-container w3-card w3-dark w3-margin-bottom">
                     <h2 id="settings" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fa fa-wrench fa-fw w3-margin-right w3-xxlarge"></i> Settings
                     </h2>
@@ -135,7 +136,7 @@
                 </div>
 
                 <!-- Power Management Container -->
-                <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <div class="w3-container w3-card w3-dark w3-margin-bottom">
                     <h2 id="power" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fas fa-power-off fa-fw w3-margin-right w3-xxlarge"></i> Power
                     </h2>
@@ -156,7 +157,7 @@
                 </div>
 
                 <!-- Logout Container -->
-                <div class="w3-container w3-card w3-white">
+                <div class="w3-container w3-card w3-dark">
                     <h2 id="logout" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fas fa-sign-out-alt fa-fw w3-margin-right w3-xxlarge"></i> Logout
                     </h2>
