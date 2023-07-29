@@ -229,7 +229,6 @@ go mod vendor
    -    toggle: /monitor/toggle/{section}/{status}
    -    web: /monitor/web
    -    run: /monitor/run/{action}/{name}
-   -    skins: /monitor/run/{action}/{name}
    +    index: /
    +    login: /login
    +    logout: /logout
