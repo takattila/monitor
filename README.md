@@ -229,6 +229,7 @@ go mod vendor
    -    toggle: /monitor/toggle/{section}/{status}
    -    web: /monitor/web
    -    run: /monitor/run/{action}/{name}
+   -    skins: /monitor/run/{action}/{name}
    +    index: /
    +    login: /login
    +    logout: /logout
@@ -316,6 +317,7 @@ on_start:                                   # These settings can be applied only
       list: /run/list                       #      - List the pre-definied commands or programs.
       exec: /run/exec/{name}                #      - Execute a specific command or program.
       stdout: /run/stdout/{name}            #      - Returns the output of a specific command or program after it is executed.
+    skins: /skins                           #      - Returns a list from available skins.
   logger:                                   #  - Setup logging functionality.
     level: debug                            #    - From debug to none levels, the detail of the logging can be set.
     color: on                               #    - Colorizing the log output.
