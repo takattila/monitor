@@ -883,10 +883,10 @@ window.onscroll = function() { sticyHeader() };
 
 $(document).ready(function() {
     logoutIfSessionEnded();
-    loadLogoFromCookie();
-    loadCssFromCookie();
-    applySkin();
     start();
+    applySkin();
+    loadCssFromCookie();
+    loadLogoFromCookie();
     toggleSection();
     toggleSectionCpu();
     toggleSectionMemory();
