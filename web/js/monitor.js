@@ -883,13 +883,13 @@ window.onscroll = function() { sticyHeader() };
 
 $(document).ready(function() {
     logoutIfSessionEnded();
+    loadLogoFromCookie();
+    loadCssFromCookie();
+    applySkin();
     start();
     toggleSection();
     toggleSectionCpu();
     toggleSectionMemory();
     toggleThemeOnHeaderOrFooterClick();
     collapseSectionsExceptCpu();
-    loadLogoFromCookie();
-    loadCssFromCookie();
-    applySkin();
 });
