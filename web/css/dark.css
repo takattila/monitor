@@ -39,6 +39,10 @@ body {
     background-color: #797979 !important;
 }
 
+.color-text-light-blue, .color-hover-text-light-blue:hover {
+    color: #797979 !important;
+}
+
 .w3-green, .w3-hover-green:hover {
     color: #fff !important;
     background-color: #797979 !important;
@@ -279,13 +283,13 @@ footer:hover {
 
 .color-text-light-blue,
 .color-hover-text-light-blue:hover {
-    color: #1c7ece !important;
+    color: #838383 !important;
 }
 
 .color-dark-blue,
 .color-hover-dark-blue:hover {
     color: #fff !important;
-    background-color: #3f3f3f !important;
+    background-color: #7e7d7d !important;
 }
 
 .color-text-dark-blue,
