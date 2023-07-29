@@ -54,16 +54,14 @@ function loadLogoPng(logo) {
     var newlink = document.createElement("link");
     newlink.setAttribute("rel", "icon");
     newlink.setAttribute("type", "image/png");
-    newlink.setAttribute("href", ROUTE_WEB + "/img/" + logo + ".png");
+    newlink.setAttribute("href", ROUTE_WEB + "/img/" + logo + ".png?v=" + VERSION);
 
     oldlink.replaceWith(newlink);
-    console.log(newlink);
 }
 
 function loadLogoSvg(logo) {
-    var img = ROUTE_WEB + "/img/" + logo + ".svg"
+    var img = ROUTE_WEB + "/img/" + logo + ".svg?v=" + VERSION
     $('#logo_svg').attr("src", img);
-    console.log(img);
 }
 
 function loadLogoFromCookie() {
@@ -79,7 +77,7 @@ function loadCSS(skin) {
     var newlink = document.createElement("link");
     newlink.setAttribute("rel", "stylesheet");
     newlink.setAttribute("type", "text/css");
-    newlink.setAttribute("href", "/monitor/web/css/" + skin + ".css");
+    newlink.setAttribute("href", "/monitor/web/css/" + skin + ".css?v=" + VERSION);
 
     oldlink.replaceWith(newlink);
 }
@@ -87,7 +85,6 @@ function loadCSS(skin) {
 function loadCssFromCookie() {
     css = getCookie("css");
     if (css) {
-        console.log(css);
         loadCSS(css);
     }
 }
