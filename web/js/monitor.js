@@ -237,6 +237,60 @@ function modalClose(id) {
     stopLoopStdout();
 }
 
+function reload() {
+    window.location.reload();
+}
+
+function loadLogoPng(logo) {
+    var oldlink = $('#logo_png');
+    var newlink = document.createElement("link");
+    newlink.setAttribute("rel", "icon");
+    newlink.setAttribute("type", "image/png");
+    newlink.setAttribute("href", ROUTE_WEB + "/img/" + logo + ".png");
+
+    oldlink.replaceWith(newlink);
+    console.log(newlink);
+}
+
+function loadLogoSvg(logo) {
+    var img = ROUTE_WEB + "/img/" + logo + ".svg"
+    $('#logo_svg').attr("src", img);
+    console.log(img);
+}
+
+function setLogoToCookies(logo) {
+    setCookie("logo", logo, 30);
+    reload();
+}
+
+function loadLogoFromCookie() {
+    logo = getCookie("logo");
+    if (logo) {
+        loadLogoPng(logo);
+        loadLogoSvg(logo);
+    }
+}
+
+function getLogos() {
+    var promise = $.ajax({
+        type: "GET",
+        async: false,
+        url: ROUTE_API.replace("{statistics}", "logos")
+    });
+
+    var logos
+
+    promise.done(function(response) {
+        var data = $.parseJSON(response);
+
+        if (data.logos) {
+            logos = data.logos
+        }
+    });
+
+    return logos
+}
+
 function loadCSS(skin) {
     var oldlink = $('#css');
     var newlink = document.createElement("link");
@@ -247,13 +301,9 @@ function loadCSS(skin) {
     oldlink.replaceWith(newlink);
 }
 
-function reloadCSS() {
-    window.location.reload();
-}
-
 function setCssToCookies(skin) {
     setCookie("css", skin, 30);
-    reloadCSS();
+    reload();
 }
 
 function loadCssFromCookie() {
@@ -653,6 +703,22 @@ function monitor() {
             
             $('#settings_container').html(skinHtml);
 
+            var logoHtml = '<div class="w3-row-padding w3-margin-bottom"><h3>Set logo</h3>';
+            var logos = getLogos();
+
+            for (let i = 0; i < logos.length; i++) {
+                logoHtml += `
+                <div class="w3-half w3-card w3-padding w3-margin-top" style="cursor: pointer;" onclick="setLogoToCookies('` + logos[i] + `');">
+                    <i class="fa fa-angle-right" style="animation-duration:1s;"></i> ` + logos[i] + `
+                </div>
+                `;
+            }
+
+            logoHtml += `</div>`
+
+            var settingsHtml = skinHtml+logoHtml
+            $('#settings_container').html(settingsHtml);
+
             // Uptime section
             $('#uptime_info').text(data.uptime_info);
 
@@ -825,6 +891,7 @@ $(document).ready(function() {
     toggleSectionMemory();
     toggleThemeOnHeaderOrFooterClick();
     collapseSectionsExceptCpu();
+    loadLogoFromCookie();
     loadCssFromCookie();
     applySkin();
 });

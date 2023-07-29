@@ -49,6 +49,31 @@ function toggleThemeOnHeaderOrFooterClick() {
     });
 }
 
+function loadLogoPng(logo) {
+    var oldlink = $('#logo_png');
+    var newlink = document.createElement("link");
+    newlink.setAttribute("rel", "icon");
+    newlink.setAttribute("type", "image/png");
+    newlink.setAttribute("href", ROUTE_WEB + "/img/" + logo + ".png");
+
+    oldlink.replaceWith(newlink);
+    console.log(newlink);
+}
+
+function loadLogoSvg(logo) {
+    var img = ROUTE_WEB + "/img/" + logo + ".svg"
+    $('#logo_svg').attr("src", img);
+    console.log(img);
+}
+
+function loadLogoFromCookie() {
+    logo = getCookie("logo");
+    if (logo) {
+        loadLogoPng(logo);
+        loadLogoSvg(logo);
+    }
+}
+
 function loadCSS(skin) {
     var oldlink = $('#css');
     var newlink = document.createElement("link");
@@ -79,6 +104,7 @@ function applySkin() {
 
 $(document).ready(function() {
     toggleThemeOnHeaderOrFooterClick();
+    loadLogoFromCookie();
     loadCssFromCookie();
     applySkin();
 });
