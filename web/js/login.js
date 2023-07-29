@@ -86,6 +86,8 @@ function loadCssFromCookie() {
     css = getCookie("css");
     if (css) {
         loadCSS(css);
+    } else {
+        loadCSS("rpi");
     }
 }
 
