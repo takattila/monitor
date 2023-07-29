@@ -21,6 +21,7 @@ import (
 	"github.com/takattila/monitor/internal/api/pkg/run"
 	"github.com/takattila/monitor/internal/api/pkg/servers"
 	"github.com/takattila/monitor/internal/api/pkg/services"
+	"github.com/takattila/monitor/internal/api/pkg/skins"
 	"github.com/takattila/monitor/internal/api/pkg/storage"
 	"github.com/takattila/monitor/pkg/common"
 	"github.com/takattila/monitor/pkg/logger"
@@ -262,6 +263,28 @@ func (a ApiHandlersSuite) TestRunStdOut() {
 
 	a.Equal(200, request.status)
 	a.Contains(request.responsebody, content)
+}
+
+func (a ApiHandlersSuite) TestSkins() {
+	s := getConfig("api", "linux")
+	run.Cfg = s
+	defer func() { run.Cleanup() }()
+
+	gitRootPath := strings.ReplaceAll(common.Cli([]string{"bash", "-c", "git rev-parse --show-toplevel"}), "\n", "")
+
+	oldSkinsPath := skins.SkinsPath
+	skins.SkinsPath = gitRootPath + "/web/css"
+	defer func() { skins.SkinsPath = oldSkinsPath }()
+
+	r := chi.NewRouter()
+	r.Get("/skins", Skins)
+
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+	request := request(ts, "GET", "/skins", nil)
+
+	a.Equal(200, request.status)
+	a.Contains(request.responsebody, "skins")
 }
 
 func createFile(path, content string) error {

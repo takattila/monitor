@@ -14,6 +14,7 @@ import (
 	"github.com/takattila/monitor/internal/api/pkg/processes"
 	"github.com/takattila/monitor/internal/api/pkg/run"
 	"github.com/takattila/monitor/internal/api/pkg/services"
+	"github.com/takattila/monitor/internal/api/pkg/skins"
 	"github.com/takattila/monitor/internal/api/pkg/storage"
 	"github.com/takattila/monitor/pkg/common"
 	"github.com/takattila/monitor/pkg/logger"
@@ -123,4 +124,10 @@ func RunStdOut(w http.ResponseWriter, r *http.Request) {
 	L.Info("RunStdOut", "Request IP:", r.RemoteAddr)
 	output := run.StdOut(name)
 	fmt.Fprintf(w, `%s`, output)
+}
+
+// Skins returns with a list of skins.
+func Skins(w http.ResponseWriter, r *http.Request) {
+	L.Info("Skins", "Request IP:", r.RemoteAddr)
+	fmt.Fprintf(w, `%s`, skins.GetJSON())
 }
