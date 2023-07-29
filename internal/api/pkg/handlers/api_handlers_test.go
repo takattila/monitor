@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/stretchr/testify/suite"
 	"github.com/takattila/monitor/internal/api/pkg/cpu"
+	"github.com/takattila/monitor/internal/api/pkg/logos"
 	"github.com/takattila/monitor/internal/api/pkg/memory"
 	"github.com/takattila/monitor/internal/api/pkg/model"
 	"github.com/takattila/monitor/internal/api/pkg/network"
@@ -285,6 +286,28 @@ func (a ApiHandlersSuite) TestSkins() {
 
 	a.Equal(200, request.status)
 	a.Contains(request.responsebody, "skins")
+}
+
+func (a ApiHandlersSuite) TestLogos() {
+	s := getConfig("api", "linux")
+	run.Cfg = s
+	defer func() { run.Cleanup() }()
+
+	gitRootPath := strings.ReplaceAll(common.Cli([]string{"bash", "-c", "git rev-parse --show-toplevel"}), "\n", "")
+
+	oldLogosPath := logos.LogosPath
+	logos.LogosPath = gitRootPath + "/web/img"
+	defer func() { logos.LogosPath = oldLogosPath }()
+
+	r := chi.NewRouter()
+	r.Get("/logos", Logos)
+
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+	request := request(ts, "GET", "/logos", nil)
+
+	a.Equal(200, request.status)
+	a.Contains(request.responsebody, "logos")
 }
 
 func createFile(path, content string) error {

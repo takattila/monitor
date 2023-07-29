@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/takattila/monitor/internal/api/pkg/all"
 	"github.com/takattila/monitor/internal/api/pkg/cpu"
+	"github.com/takattila/monitor/internal/api/pkg/logos"
 	"github.com/takattila/monitor/internal/api/pkg/memory"
 	"github.com/takattila/monitor/internal/api/pkg/model"
 	"github.com/takattila/monitor/internal/api/pkg/network"
@@ -130,4 +131,10 @@ func RunStdOut(w http.ResponseWriter, r *http.Request) {
 func Skins(w http.ResponseWriter, r *http.Request) {
 	L.Info("Skins", "Request IP:", r.RemoteAddr)
 	fmt.Fprintf(w, `%s`, skins.GetJSON())
+}
+
+// Logos returns with a list of logos.
+func Logos(w http.ResponseWriter, r *http.Request) {
+	L.Info("Logos", "Request IP:", r.RemoteAddr)
+	fmt.Fprintf(w, `%s`, logos.GetJSON())
 }

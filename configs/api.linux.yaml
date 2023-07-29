@@ -16,6 +16,7 @@ on_start:
       exec: /run/exec/{name}
       stdout: /run/stdout/{name}
     skins: /skins
+    logos: /logos
   logger:
     level: debug
     color: on
