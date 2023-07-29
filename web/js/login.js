@@ -49,6 +49,24 @@ function toggleThemeOnHeaderOrFooterClick() {
     });
 }
 
+function loadCSS(skin) {
+    var oldlink = $('#css');
+    var newlink = document.createElement("link");
+    newlink.setAttribute("rel", "stylesheet");
+    newlink.setAttribute("type", "text/css");
+    newlink.setAttribute("href", "/monitor/web/css/" + skin + ".css");
+
+    oldlink.replaceWith(newlink);
+}
+
+function loadCssFromCookie() {
+    css = getCookie("css");
+    if (css) {
+        console.log(css);
+        loadCSS(css);
+    }
+}
+
 function applySkin() {
     skin = getCookie("skin");
 
@@ -61,5 +79,6 @@ function applySkin() {
 
 $(document).ready(function() {
     toggleThemeOnHeaderOrFooterClick();
+    loadCssFromCookie();
     applySkin();
 });

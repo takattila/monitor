@@ -237,6 +237,52 @@ function modalClose(id) {
     stopLoopStdout();
 }
 
+function loadCSS(skin) {
+    var oldlink = $('#css');
+    var newlink = document.createElement("link");
+    newlink.setAttribute("rel", "stylesheet");
+    newlink.setAttribute("type", "text/css");
+    newlink.setAttribute("href", "/monitor/web/css/" + skin + ".css");
+
+    oldlink.replaceWith(newlink);
+}
+
+function reloadCSS() {
+    window.location.reload();
+}
+
+function setCssToCookies(skin) {
+    setCookie("css", skin, 30);
+    reloadCSS();
+}
+
+function loadCssFromCookie() {
+    css = getCookie("css");
+    if (css) {
+        loadCSS(css);
+    }
+}
+
+function getSkins() {
+    var promise = $.ajax({
+        type: "GET",
+        async: false,
+        url: ROUTE_API.replace("{statistics}", "skins")
+    });
+
+    var skins
+
+    promise.done(function(response) {
+        var data = $.parseJSON(response);
+
+        if (data.skins) {
+            skins = data.skins
+        }
+    });
+
+    return skins
+}
+
 function monitor() {
     var cpuUsage = new CircleProgress('#percent_cpu_usage_circle', {
         max: 100,
@@ -591,6 +637,22 @@ function monitor() {
             $('#modal_container').html(runModal + '<p></p>');
             $('#run_container').html(runHtml + '<p></p>');
 
+            // Settings section
+            var skinHtml = '<div class="w3-row-padding w3-margin-bottom"><h3>Set skin</h3>';
+            var skins = getSkins();
+
+            for (let i = 0; i < skins.length; i++) {
+                skinHtml += `
+                <div class="w3-half w3-card w3-padding w3-margin-top" style="cursor: pointer;" onclick="setCssToCookies('` + skins[i] + `');">
+                    <i class="fa fa-angle-right" style="animation-duration:1s;"></i> ` + skins[i] + `
+                </div>
+                `;
+            }
+
+            skinHtml += `</div>`
+            
+            $('#settings_container').html(skinHtml);
+
             // Uptime section
             $('#uptime_info').text(data.uptime_info);
 
@@ -726,6 +788,7 @@ function collapseSectionsExceptCpu() {
     $('#network').click();
     $('#storage').click();
     $('#run').click();
+    $('#settings').click();
     $('#power').click();
     $('#logout').click();
 }
@@ -750,27 +813,6 @@ function start() {
 function stop() {
     clearInterval(loop);
     console.log("stopped setInterval");
-}
-
-function loadCSS(skin) {
-
-    var oldlink = $('#css');
-    console.log(oldlink);
-
-    var newlink = document.createElement("link");
-    newlink.setAttribute("rel", "stylesheet");
-    newlink.setAttribute("type", "text/css");
-    newlink.setAttribute("href", "/monitor/web/css/" + skin + ".css");
-
-    oldlink.replaceWith(newlink);
-}
-
-// setCookie("css", "rpi", 30);
-function loadCssFromCookie() {
-    css = getCookie("css");
-    if (css) {
-        loadCSS(css);
-    }
 }
 
 window.onscroll = function() { sticyHeader() };
