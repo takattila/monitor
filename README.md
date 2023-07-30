@@ -372,9 +372,6 @@ on_start:                                            # These settings can be app
     level: debug                                     #   - From debug to none levels, the detail of the logging can be set.
     color: on                                        #   - Colorizing the log output.
 on_runtime:                                          # - These settings can be applied during the service running.
-  theme:                                             #   - Themes configuration.
-    skin: suse                                       #     - Color scheme
-    logo: rpi                                        #     - Image
   allowed_ip: 0.0.0.0                                #   - We can set the IP, from where the service can be reached.
                                                      #     - 0.0.0.0 -> means: any IP will be accepted.
                                                      #     - 10.1.1.34,10.3.4.5 -> means: multiple IP can be accepted.
@@ -400,14 +397,9 @@ You can **switch between light and dark modes** by clicking the `header` or the 
 
 # Skin support
 
-Both the `skin` and the `logo` of the web service can be modified in the [configs/web.yaml](configs/web.yaml).
+Both the `skin` and the `logo` of the web service can be modified in the web interface, under the `Settings` section.
 
-```yaml
-on_runtime:
-  theme:
-    skin: suse
-    logo: rpi
-```
+![Monitor Service](assets/settings.png)
 
 ## Available skins
 
@@ -429,21 +421,21 @@ on_runtime:
 
 ## Available logos
 
-- arch
-- centos
-- debian
-- fedora
-- tux
-- manjaro
-- mint
-- opi
-- pop
-- redhat
-- rpi
-- suse
-- ubuntu
-- vanilla
-- zorin
+- [arch](web/img/arch.png)
+- [centos](web/img/centos.png)
+- [debian](web/img/debian.png)
+- [fedora](web/img/fedora.png)
+- [tux](web/img/tux.png)
+- [manjaro](web/img/manjaro.png)
+- [mint](web/img/mint.png)
+- [opi](web/img/opi.png)
+- [pop](web/img/pop.png)
+- [redhat](web/img/redhat.png)
+- [rpi](web/img/rpi.png)
+- [suse](web/img/suse.png)
+- [ubuntu](web/img/ubuntu.png)
+- [vanilla](web/img/vanilla.png)
+- [zorin](web/img/zorin.png)
 
 ## Skins & logos location
 
