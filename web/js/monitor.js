@@ -269,26 +269,6 @@ function loadLogoFromCookie() {
     }
 }
 
-function getLogos() {
-    var promise = $.ajax({
-        type: "GET",
-        async: false,
-        url: ROUTE_API.replace("{statistics}", "logos")
-    });
-
-    var logos
-
-    promise.done(function(response) {
-        var data = $.parseJSON(response);
-
-        if (data.logos) {
-            logos = data.logos
-        }
-    });
-
-    return logos
-}
-
 function loadCSS(skin) {
     var oldlink = $('#css');
     var newlink = document.createElement("link");
@@ -311,26 +291,6 @@ function loadCssFromCookie() {
     } else {
         loadCSS("rpi");
     }
-}
-
-function getSkins() {
-    var promise = $.ajax({
-        type: "GET",
-        async: false,
-        url: ROUTE_API.replace("{statistics}", "skins")
-    });
-
-    var skins
-
-    promise.done(function(response) {
-        var data = $.parseJSON(response);
-
-        if (data.skins) {
-            skins = data.skins
-        }
-    });
-
-    return skins
 }
 
 function monitor() {
@@ -689,7 +649,7 @@ function monitor() {
 
             // Settings section
             var skinHtml = '<div class="w3-row-padding w3-margin-bottom"><h3>Set skin</h3>';
-            var skins = getSkins();
+            var skins = data.skins;
 
             for (let i = 0; i < skins.length; i++) {
                 skinHtml += `
@@ -704,7 +664,7 @@ function monitor() {
             $('#settings_container').html(skinHtml);
 
             var logoHtml = '<div class="w3-row-padding w3-margin-bottom"><h3>Set logo</h3>';
-            var logos = getLogos();
+            var logos = data.logos;
 
             for (let i = 0; i < logos.length; i++) {
                 logoHtml += `

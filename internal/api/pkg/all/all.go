@@ -5,12 +5,14 @@ import (
 
 	"github.com/sagernet/sing-box/common/badjsonmerge"
 	"github.com/takattila/monitor/internal/api/pkg/cpu"
+	"github.com/takattila/monitor/internal/api/pkg/logos"
 	"github.com/takattila/monitor/internal/api/pkg/memory"
 	"github.com/takattila/monitor/internal/api/pkg/model"
 	"github.com/takattila/monitor/internal/api/pkg/network"
 	"github.com/takattila/monitor/internal/api/pkg/processes"
 	"github.com/takattila/monitor/internal/api/pkg/run"
 	"github.com/takattila/monitor/internal/api/pkg/services"
+	"github.com/takattila/monitor/internal/api/pkg/skins"
 	"github.com/takattila/monitor/internal/api/pkg/storage"
 	"github.com/takattila/monitor/internal/api/pkg/uptime"
 )
@@ -46,6 +48,8 @@ func GetRawJSONs() *AllJSONs {
 		json.RawMessage(services.GetJSON()),
 		json.RawMessage(network.GetJSON()),
 		json.RawMessage(run.GetJSON()),
+		json.RawMessage(logos.GetJSON()),
+		json.RawMessage(skins.GetJSON()),
 		json.RawMessage(uptime.GetJSON()),
 	}
 	return &AllJSONs{RawJSONs: RawJSONs}

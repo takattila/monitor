@@ -7,12 +7,14 @@ import (
 
 	"github.com/stretchr/testify/suite"
 	"github.com/takattila/monitor/internal/api/pkg/cpu"
+	"github.com/takattila/monitor/internal/api/pkg/logos"
 	"github.com/takattila/monitor/internal/api/pkg/memory"
 	"github.com/takattila/monitor/internal/api/pkg/model"
 	"github.com/takattila/monitor/internal/api/pkg/network"
 	"github.com/takattila/monitor/internal/api/pkg/processes"
 	"github.com/takattila/monitor/internal/api/pkg/run"
 	"github.com/takattila/monitor/internal/api/pkg/services"
+	"github.com/takattila/monitor/internal/api/pkg/skins"
 	"github.com/takattila/monitor/internal/api/pkg/storage"
 	"github.com/takattila/monitor/pkg/common"
 	"github.com/takattila/settings-manager"
@@ -32,7 +34,7 @@ func (a ApiAllSuite) TestGetJSON() {
 	s.Data.Set("NetworkTraffic", false)
 	s.Data.Set("Storage", false)
 
-	cpu.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, run.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s, s
+	cpu.Cfg, logos.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, run.Cfg, skins.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s, s, s, s
 
 	r := GetRawJSONs()
 	JSON := r.GetJSON()
@@ -42,12 +44,14 @@ func (a ApiAllSuite) TestGetJSON() {
 	a.Contains(JSON, "process_info")
 	a.Contains(JSON, "services_info")
 	a.Contains(JSON, "network_info")
+	a.Contains(JSON, "run_list")
+	a.Contains(JSON, "logos")
+	a.Contains(JSON, "skins")
 	a.Contains(JSON, "uptime_info")
 
 	d := make(map[string]interface{})
 	err := json.Unmarshal([]byte(JSON), &d)
 	a.Equal(err, nil)
-
 }
 
 func (a ApiAllSuite) TestGetJSONMergeJSONError() {
@@ -58,7 +62,7 @@ func (a ApiAllSuite) TestGetJSONMergeJSONError() {
 	s.Data.Set("NetworkTraffic", false)
 	s.Data.Set("Storage", false)
 
-	cpu.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, run.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s, s
+	cpu.Cfg, logos.Cfg, memory.Cfg, model.Cfg, network.Cfg, processes.Cfg, run.Cfg, skins.Cfg, services.Cfg, storage.Cfg = s, s, s, s, s, s, s, s, s, s
 
 	oldGetRawJSONs := GetRawJSONs
 	GetRawJSONs := func() *AllJSONs {
@@ -70,6 +74,9 @@ func (a ApiAllSuite) TestGetJSONMergeJSONError() {
 			json.RawMessage(processes.GetJSON()),
 			json.RawMessage(services.GetJSON()),
 			json.RawMessage(network.GetJSON()),
+			json.RawMessage(run.GetJSON()),
+			json.RawMessage(logos.GetJSON()),
+			json.RawMessage(skins.GetJSON()),
 		}
 		return &AllJSONs{RawJSONs: RawJSONs}
 	}
