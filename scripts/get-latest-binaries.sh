@@ -160,10 +160,11 @@ function installServices {
                 sudo chown ${USER}:${USER} ${cfgBackupPath}
                 sudo chown -R ${USER}:${USER} ${cfgBackupPath}
                 sudo cp -f ${monitorPath}/configs/*.yaml ${cfgBackupPath} >/dev/null 2>&1 || true
+                sudo cp -f ${monitorPath}/configs/*.db ${cfgBackupPath} >/dev/null 2>&1 || true
                 sudo rm -rf ${monitorPath} >/dev/null 2>&1 || true
-        else
+            else
                 echo -e "  - ${YELLOW}Backup skipped...${ENDCOLOR}"
-        fi
+            fi
     else
         echo -e "- ${YELLOW}[2./${totalSteps}.] ${GREEN}There is no existing configuration, backup skipped...${ENDCOLOR}"
     fi
@@ -171,6 +172,7 @@ function installServices {
     echo -e "- ${YELLOW}[3./${totalSteps}.] ${GREEN}Unzip monitor-v*.zip to ${basePath}...${ENDCOLOR}"
         sudo unzip -q -o monitor-v*.zip -d monitor
         sudo cp ${cfgBackupPath}/*.yaml ${monitorPath}/configs >/dev/null 2>&1 || true
+        sudo cp ${cfgBackupPath}/*.db ${monitorPath}/configs >/dev/null 2>&1 || true
         sudo rm -rf ${cfgBackupPath} >/dev/null 2>&1 || true
         sudo rm -f monitor-v*.zip 2>&1 || true
 
@@ -182,7 +184,12 @@ function installServices {
         cd "${monitorPath}"
 
     echo -e "- ${YELLOW}[6./${totalSteps}.] ${GREEN}Save your credentials${ENDCOLOR}"
-        sudo ./cmd/credentials
+        if [[ "$backupCfg" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+            echo -e "  - ${YELLOW}Using backup...${ENDCOLOR}"
+            sudo chown root:root ${monitorPath}/configs/*.db >/dev/null 2>&1 || true
+        else
+            sudo ./cmd/credentials
+        fi
 
     echo -e "- ${YELLOW}[7./${totalSteps}.] ${GREEN}Copy ${programDir}/tools/*.service to /etc/systemd/system...${ENDCOLOR}"
         sudo cp tools/*.service /etc/systemd/system
