@@ -102,7 +102,7 @@ function applySkin() {
 }
 
 function loader() {
-    $("body").hide(0).delay(0).fadeIn(500)
+    $("body").fadeIn(800)
 }
 
 $(document).ready(function() {

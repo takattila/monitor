@@ -14,6 +14,67 @@ body {
     -ms-overflow-style: none;
 }
 
+#vertical_progress_span {
+    top: 115px;
+}
+#vertical_progress_wrapper {
+    height: 200px;
+}
+#vertical_progress_mask {
+    height: 0px;
+}
+
+.process-padding-left {
+    padding-left: 13px;
+}
+
+.run-list-pre {
+    overflow-x: auto;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
+}
+
+.modal-open {
+    backdrop-filter: blur(5px);
+    z-index: 999999999999;
+    padding-top: 10px;
+}
+
+.modal-ninetynine {
+    width: 99% !important;
+    height: 99% !important;
+}
+
+.modal-header-font {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+}
+
+.modal-header-close {
+    font-size: 32px;
+}
+
+.modal-header-close-font {
+    font-size: 32px;
+}
+
+.modal-loader-duration {
+    animation-duration: 1s;
+}
+
+.modal-content-scroll {
+    display: none;
+    overflow-y: scroll;
+}
+
+.cursor-hand {
+    cursor: pointer;
+}
+
 .sticky {
     position: fixed;
     top: 0;
@@ -44,8 +105,8 @@ body {
 .circle-progress-circle {
     font-size: 180px;
     stroke-width: 40px;
-    stroke: #00add8;
-    fill: #00add8;
+    stroke: #0072a7;
+    fill: #0072a7;
 }
 
 .circle-progress-text {
@@ -152,15 +213,15 @@ body {
 }
 
 .scroll-hidden {
-    overflow: hidden
+    overflow: hidden !important;
 }
 
 .v-scroll-hidden {
-    overflow-y: hidden
+    overflow-y: hidden !important;
 }
 
 .h-scroll-hidden {
-    overflow-x: hidden
+    overflow-x: hidden !important;
 }
 
 a {
@@ -193,7 +254,7 @@ footer:hover {
 .w3-green,
 .w3-hover-green:hover {
     color: #fff !important;
-    background-color: #00add8 !important;
+    background-color: #0072a7 !important;
 }
 
 .login-padding {
@@ -209,7 +270,7 @@ footer:hover {
 }
 
 .red:hover {
-    color: #00add8 !important;
+    color: #0072a7 !important;
 }
 
 .w3-red,
@@ -233,19 +294,19 @@ footer:hover {
 .w3-green,
 .w3-hover-green:hover {
     color: #fff !important;
-    background-color: #00add8 !important;
+    background-color: #0072a7 !important;
 }
 
 .w3-green,
 .w3-hover-green:hover {
     color: #fff !important;
-    background-color: #00add8 !important;
+    background-color: #0072a7 !important;
 }
 
 .w3-green,
 .w3-hover-green:hover {
     color: #fff !important;
-    background-color: #00add8 !important;
+    background-color: #0072a7 !important;
 }
 
 .w3-light-green,
@@ -268,12 +329,12 @@ footer:hover {
 .color-dark-blue,
 .color-hover-dark-blue:hover {
     color: #fff !important;
-    background-color: #00add8 !important;
+    background-color: #0072a7 !important;
 }
 
 .button-blue {
     color: #fff !important;
-    background-color: #00add8 !important;
+    background-color: #0072a7 !important;
 }
 
 .w3-giant {
@@ -288,7 +349,7 @@ footer:hover {
 .w3-dark-red,
 .w3-hover-dark-red:hover {
     color: #fff !important;
-    background-color: #00add888 !important;
+    background-color: #0072a788 !important;
 }
 
 .w3-text-red,
@@ -298,17 +359,17 @@ footer:hover {
 
 .w3-text-green,
 .w3-hover-text-green:hover {
-    color: #00add8 !important;
+    color: #0072a7 !important;
 }
 
 .w3-text-green,
 .w3-hover-text-green:hover {
-    color: #00add8 !important;
+    color: #0072a7 !important;
 }
 
 .w3-text-dark-red,
 .w3-hover-text-dark-red:hover {
-    color: #00add888 !important;
+    color: #0072a788 !important;
 }
 
 .w3-text-light-green,
@@ -329,12 +390,12 @@ footer:hover {
 
 .color-text-light-blue,
 .color-hover-text-light-blue:hover {
-    color: #00add8 !important;
+    color: #0072a7 !important;
 }
 
 .color-text-dark-blue,
 .color-hover-text-dark-blue:hover {
-    color: #00add8 !important;
+    color: #0072a7 !important;
 }
 
 .w3-dark {
@@ -412,7 +473,7 @@ footer:hover {
     width: 100%;
     margin-top: -18px;
     margin-bottom: 16px;
-    background-color: #00add8;
+    background-color: #0072a7;
     border-radius: 14px 14px 14px 14px;
     -webkit-border-radius: 14px 14px 14px 14px;
     -moz-border-radius: 14px 14px 14px 14px;

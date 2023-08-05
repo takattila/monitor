@@ -14,6 +14,67 @@ body {
     -ms-overflow-style: none;
 }
 
+#vertical_progress_span {
+    top: 115px;
+}
+#vertical_progress_wrapper {
+    height: 200px;
+}
+#vertical_progress_mask {
+    height: 0px;
+}
+
+.process-padding-left {
+    padding-left: 13px;
+}
+
+.run-list-pre {
+    overflow-x: auto;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
+}
+
+.modal-open {
+    backdrop-filter: blur(5px);
+    z-index: 999999999999;
+    padding-top: 10px;
+}
+
+.modal-ninetynine {
+    width: 99% !important;
+    height: 99% !important;
+}
+
+.modal-header-font {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+}
+
+.modal-header-close {
+    font-size: 32px;
+}
+
+.modal-header-close-font {
+    font-size: 32px;
+}
+
+.modal-loader-duration {
+    animation-duration: 1s;
+}
+
+.modal-content-scroll {
+    display: none;
+    overflow-y: scroll;
+}
+
+.cursor-hand {
+    cursor: pointer;
+}
+
 .sticky {
     position: fixed;
     top: 0;
@@ -140,15 +201,15 @@ body {
 }
 
 .scroll-hidden {
-    overflow: hidden
+    overflow: hidden !important;
 }
 
 .v-scroll-hidden {
-    overflow-y: hidden
+    overflow-y: hidden !important;
 }
 
 .h-scroll-hidden {
-    overflow-x: hidden
+    overflow-x: hidden !important;
 }
 
 a {
@@ -209,7 +270,7 @@ footer:hover {
 .w3-orange,
 .w3-hover-orange:hover {
     color: #000 !important;
-    background-color: #ff1000 !important;
+    background-color: #df9d99 !important;
 }
 
 .w3-yellow,

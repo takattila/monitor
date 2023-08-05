@@ -490,7 +490,7 @@ function monitor() {
                     processHtml += `
                     <tr>
                         <td>
-                            <h4 class="w3-light-gray round-left" style="padding-left: 13px;">` + id + `. </h4>
+                            <h4 class="w3-light-gray round-left process-padding-left">` + id + `. </h4>
                             <b>PID</b>: <br>
                             <b>USER</b>: <br>
                             <b>MEM</b>: <br>
@@ -510,7 +510,7 @@ function monitor() {
                 }
             }
 
-            var processTable = `<table class="w3-table" id="processTable" style="cursor:pointer">` + processHtml + `</table>`
+            var processTable = `<table class="w3-table cursor-hand" id="processTable">` + processHtml + `</table>`
             $('#process_container').html(processTable + '<p></p>');
 
             // Network Traffic section
@@ -609,7 +609,7 @@ function monitor() {
                     runHtml += id;
                     runHtml += `</h3>`;
 
-                    runHtml += `<pre class="w3-medium w3-card w3-panel w3-padding-16" style="overflow-x: auto; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">`;
+                    runHtml += `<pre class="w3-medium w3-card w3-panel w3-padding-16 run-list-pre" >`;
                     runHtml += obj.trim()
                     runHtml += `</pre>`;
 
@@ -619,19 +619,19 @@ function monitor() {
                     runHtml += `<br><br>`;
 
                     runModal += `
-                    <div id="modal_` + id + `" class="w3-modal" style="backdrop-filter:blur(5px); z-index:999999999999; padding-top:10px;">
-                        <div id="modal_box_` + id + `" class="w3-modal-content w3-animate-top w3-white w3-card" style="width:99%; height:98%;">
+                    <div id="modal_` + id + `" class="w3-modal modal-open scroll-hidden">
+                        <div id="modal_box_` + id + `" class="w3-modal-content w3-animate-top w3-white w3-card modal-ninetynine">
                             <header class="w3-container w3-red"> 
-                                <span onclick="modalClose('` + id + `')" class="w3-button w3-display-topright" style="font-size:32px;">&times;</span>
-                                <h2 id="modal_header_` + id + `" data-click-state="1" style="white-space: nowrap; overflow: hidden; text-overflow: clip;">Running: "` + id + `"</h2>
+                                <span onclick="modalClose('` + id + `')" class="w3-button w3-display-topright modal-header-close-font">&times;</span>
+                                <h2 id="modal_header_` + id + `" data-click-state="1" class="modal-header-font">Running: "` + id + `"</h2>
                             </header>
                             <div class="w3-container w3-margin-bottom">
 
                                 <div id="modal_loader_` + id + `" class="w3-display-middle w3-medium">
-                                    <i class="fa fa-spinner w3-spin" style="animation-duration:1s;"></i> Loading data...
+                                    <i class="fa fa-spinner w3-spin" class="modal-loader-duration"></i> Loading data...
                                 </div>
                                 
-                                <div id="modal_content_` + id + `" class="w3-medium custom-scrollbar" style="display: none; overflow-y: scroll;"">
+                                <div id="modal_content_` + id + `" class="w3-medium custom-scrollbar modal-content-scroll">
                                     <pre id="modal_data_` + id + `" class="w3-medium w3-panel w3-padding-16" ondblclick="copyContent('` + id + `')">
                                         -= CONTENT =-
                                     </pre>
@@ -653,8 +653,8 @@ function monitor() {
 
             for (let i = 0; i < skins.length; i++) {
                 skinHtml += `
-                <div class="w3-half w3-card w3-padding w3-margin-top" style="cursor: pointer;" onclick="setCssToCookies('` + skins[i] + `');">
-                    <i class="fa fa-angle-right" style="animation-duration:1s;"></i> ` + skins[i] + `
+                <div class="w3-half w3-card w3-padding w3-margin-top cursor-hand" onclick="setCssToCookies('` + skins[i] + `');">
+                    <i class="fa fa-angle-right"></i> ` + skins[i] + `
                 </div>
                 `;
             }
@@ -668,8 +668,8 @@ function monitor() {
 
             for (let i = 0; i < logos.length; i++) {
                 logoHtml += `
-                <div class="w3-half w3-card w3-padding w3-margin-top" style="cursor: pointer;" onclick="setLogoToCookies('` + logos[i] + `');">
-                    <i class="fa fa-angle-right" style="animation-duration:1s;"></i> ` + logos[i] + `
+                <div class="w3-half w3-card w3-padding w3-margin-top cursor-hand" onclick="setLogoToCookies('` + logos[i] + `');">
+                    <i class="fa fa-angle-right"></i> ` + logos[i] + `
                 </div>
                 `;
             }
@@ -828,7 +828,7 @@ function sticyHeader() {
 }
 
 function loader() {
-    $("body").hide(0).delay(0).fadeIn(500)
+    $("body").fadeIn(800);
 }
 
 function start() {
