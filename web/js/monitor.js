@@ -293,6 +293,34 @@ function loadCssFromCookie() {
     }
 }
 
+function toggleRun(id) {
+    var container = "#" + id + "_container";
+    var run = id + "_run"
+    var toggle = getCookie(run);
+
+    if (toggle == "1") {
+        $(container).hide(0);
+        setCookie(run, "0", 0.0003472222);
+    } else {
+        $(container).show(0);
+        setCookie(run, "1", 0.0003472222);
+    }
+
+
+    if ($(this).attr('data-click-state') == 1) {
+        $(this).attr('data-click-state', 0);
+        $(container).hide(200);
+        section = $(this).text().replace(/\s+/g, '').trim();
+        toggleStatus(section, false);
+    } else {
+        $(this).attr('data-click-state', 1);
+        $(container).show(200);
+        monitor();
+        section = $(this).text().replace(/\s+/g, '').trim();
+        toggleStatus(section, true);
+    }
+}
+
 function monitor() {
     var cpuUsage = new CircleProgress('#percent_cpu_usage_circle', {
         max: 100,
@@ -602,21 +630,27 @@ function monitor() {
             for (var id in runList) {
                 if (runList.hasOwnProperty(id)) {
                     var obj = runList[id];
+                    var toggle = getCookie(id + '_run');
+                    var style = ""
 
-                    runHtml += `<p>`;
+                    if (toggle != "1") {
+                        style = `style="display: none"`;
+                    }
 
-                    runHtml += `<h3>`;
-                    runHtml += id;
+                    runHtml += `<h3 id="` + id + `" onclick="toggleRun('` + id + `')" class="cursor-hand">`;
+                    runHtml += `<i class="fa fa-terminal fa-fw w3-margin-right"></i>` + id;
                     runHtml += `</h3>`;
+
+                    runHtml += `<div id="` + id + `_container" ` + style + `>`;
 
                     runHtml += `<pre class="w3-medium w3-card w3-panel w3-padding-16 run-list-pre" >`;
                     runHtml += obj.trim()
                     runHtml += `</pre>`;
 
-                    runHtml += `</p>`;
-
                     runHtml +=`<button onclick="confirmModalOpen('` + id + `');" class="service-button w3-button w3-red round-left">run</button>`;
                     runHtml += `<br><br>`;
+
+                    runHtml += `</div>`;
 
                     runModal += `
                     <div id="modal_` + id + `" class="w3-modal modal-open scroll-hidden">
