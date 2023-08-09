@@ -305,20 +305,6 @@ function toggleRun(id) {
         $(container).show(0);
         setCookie(run, "1", 0.0003472222);
     }
-
-
-    if ($(this).attr('data-click-state') == 1) {
-        $(this).attr('data-click-state', 0);
-        $(container).hide(200);
-        section = $(this).text().replace(/\s+/g, '').trim();
-        toggleStatus(section, false);
-    } else {
-        $(this).attr('data-click-state', 1);
-        $(container).show(200);
-        monitor();
-        section = $(this).text().replace(/\s+/g, '').trim();
-        toggleStatus(section, true);
-    }
 }
 
 function monitor() {
