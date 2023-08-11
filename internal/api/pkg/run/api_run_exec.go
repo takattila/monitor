@@ -69,7 +69,7 @@ func Run(name, command string) (err error) {
 		defer func() {
 			_, _ = writer.WriteString("~x~o(f)o~x~")
 			writer.Flush()
-			_ = os.Rename(stdout, finish)
+			// _ = os.Rename(stdout, finish)
 		}()
 
 		err = cmdStart(cmd)

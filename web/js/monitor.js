@@ -6,7 +6,7 @@
 // - let ROUTE_API = "{{.RouteApi}}";
 // - let INTERVAL_SECONDS = "{{.QuerySeconds}}";
 
-var loop;
+var loop = null;
 var stdoutLoop;
 var header = document.getElementById("model_name");
 var sticky = header.offsetTop;
@@ -35,7 +35,11 @@ function getCookie(cname) {
     return "";
 }
 
-function systemctl(action, service) {
+function systemctl(params) {
+    var args = params.split(",");
+    var action = args[0];
+    var service = args[1];
+
     var params = {
         type: "POST",
         url: ROUTE_SYSTEMCTL.replace("{action}", action).replace("{service}", service),
@@ -50,7 +54,12 @@ function systemctl(action, service) {
     return $.ajax(params).responseText;
 }
 
+function logout() {
+    window.location.replace(ROUTE_LOGOUT);
+}
+
 function power(action) {
+    logout();
     var params = {
         type: "POST",
         url: ROUTE_POWER.replace("{action}", action),
@@ -70,10 +79,6 @@ function toggleStatus(section, status) {
     return $.ajax(params).responseText;
 }
 
-function logout() {
-    window.location.replace(ROUTE_LOGOUT);
-}
-
 function logoutIfSessionEnded() {
     if (!getCookie("session")) {
         logout();
@@ -81,16 +86,119 @@ function logoutIfSessionEnded() {
 }
 
 function confirmSystemCtlAction(action, service) {
-    if (confirm('Are you sure you want to [ ' + action + ' ] the "' + service + '" service?')) {
-        systemctl(action, service);
-    }
+    dialog({
+        id: "confirm", 
+        title: "Confirm", 
+        content: 'Are you sure you want to [&nbsp;' + action + '&nbsp;] the "' + service + '" service?', 
+        cancelBtnText: "NO", 
+        okFunc: systemctl, 
+        okFuncParam: [action, service], 
+        okBtnText: "YES"
+    });
 }
 
 function confirmPowerAction(action) {
-    if (confirm('Are you sure you want to [ ' + action + ' ] the computer?')) {
-        logout();
-        power(action);
+    dialog({
+        id: "confirm", 
+        title: "Confirm", 
+        content: 'Are you sure you want to [&nbsp;' + action + '&nbsp;] the computer?', 
+        cancelBtnText: "NO", 
+        okFunc: power, 
+        okFuncParam: action, 
+        okBtnText: "YES"
+    });
+}
+
+function dialog({
+        id, 
+        title, 
+        content, 
+        cancelFunc, 
+        cancelFuncParam, 
+        cancelBtnText, 
+        okFunc, 
+        okFuncParam, 
+        okBtnText
+    } = {}) {
+
+    var infoModal = `
+    <div id="dialog_` + id + `" class="w3-modal modal-open scroll-hidden">
+        <div id="dialog_box_` + id + `" class="w3-modal-content w3-animate-left w3-white w3-card dialog-open">
+            <header class="w3-container w3-red"> 
+                <span onclick="dialogCancel({closeId: '` + id + `'})" class="w3-button w3-display-topright modal-header-close-font">&times;</span>
+                <h2 id="dialog_header_` + id + `" data-click-state="1" class="modal-header-font">` + title + `</h2>
+            </header>
+            <div class="w3-container w3-margin-bottom w3-center w3-margin-left">
+
+                <div id="dialog_loader_` + id + `" class="w3-display-middle w3-medium">
+                    <i class="fa fa-spinner w3-spin" class="modal-loader-duration"></i> Loading data...
+                </div>
+                
+                <div id="dialog_content_` + id + `" class="w3-medium custom-scrollbar modal-content-scroll">
+                <p>`;
+
+    infoModal += content.trim();
+
+    infoModal += `
+                </p>
+                <p>
+                  <table class="w3-table">
+                    <tr>`;
+
+    if (okFunc) {
+        infoModal += `<td class="service-td"><button type="button" onclick="dialogOk({functionToExecute: ` + okFunc.name + `, funcParam: '` + okFuncParam + `', closeId: '` + id + `'})" class="service-button w3-button w3-green">` + okBtnText + `</button></td>`;
     }
+
+    if (cancelFunc) {
+        infoModal += `<td class="service-td"><button type="button" onclick="dialogCancel({functionToExecute: ` + cancelFunc.name + `, funcParam: '` + cancelFuncParam + `', closeId: '` + id + `'})" class="service-button w3-button w3-red">` + cancelBtnText + `</button></td>`;
+    } else {
+        infoModal += `<td class="service-td"><button type="button" onclick="dialogCancel({closeId: '` + id + `'})" class="service-button w3-button w3-red">` + cancelBtnText + `</button></td>`
+    }
+
+    infoModal += `
+                    </tr>
+                  </table>
+                </p>
+            </div>
+          </div>
+        </div>
+    </div>`;
+
+    $('#dialog_container').html(infoModal + '<p></p>');
+    
+    skin = getCookie("skin");
+    
+    if (skin == "light") {
+        $('#dialog_box_'+ id).addClass('w3-white').removeClass('w3-dark');
+    } else {
+        $('#dialog_box_'+ id).addClass('w3-dark').removeClass('w3-white');
+    }
+
+    $('#dialog_' + id).css('display', "block");
+
+    if ($('#dialog_header_' + id).attr('data-click-state') == 1) {
+        $('#dialog_' + id).css("z-index", "9999999");
+        $('#dialog_loader_' + id).css("display", "none");
+        $('#dialog_content_' + id).css("display", "block");
+        $('#dialog_content_' + id).css("max-height", ($(window).height() - 100) + "px");
+        $('#dialog_header_' + id).attr('data-click-state', 0);
+    } else {
+        $('#dialog_header_' + id).attr('data-click-state', 1);
+    }
+}
+
+function dialogOk({functionToExecute, funcParam, closeId} = {}) {
+    if (functionToExecute) {
+        functionToExecute(funcParam);
+    }
+    $('#dialog_' + closeId).remove();
+}
+
+function dialogCancel({functionToExecute, funcParam, closeId} = {}) {
+    if (functionToExecute) {
+        functionToExecute(funcParam);
+    }
+    $('#dialog_' + closeId).remove();
 }
 
 function copyTableRows() {
@@ -113,9 +221,12 @@ function copyTableRows() {
                     element.select();
 
                     document.execCommand("copy");
-                    // navigator.clipboard.writeText(element.value);
-					
-                    alert("Copied to clipboard:\n\n" + content);
+                    dialog({
+                        id: "info", 
+                        title: "Info", 
+                        content: "Content copied to the clipboard!", 
+                        cancelBtnText: "OK"
+                    });                
                     document.body.removeChild(element);
 				 };
             };
@@ -169,13 +280,15 @@ function stopLoopStdout() {
 }
 
 function confirmModalOpen(id) {
-    stop();
-
-    if (confirm('Are you sure you want to run the [ ' + id + ' ] command?')) {
-        modalOpen(id)
-    } else {
-        start();
-    }
+    dialog({
+        id: "confirm", 
+        title: "Confirm", 
+        content: 'Are you sure you want to run the [&nbsp;' + id + '&nbsp;] command?', 
+        cancelBtnText: "NO", 
+        okFunc: modalOpen, 
+        okFuncParam: id, 
+        okBtnText: "YES"
+    });
 }
 
 function modalOpen(id) {
@@ -224,7 +337,12 @@ function copyContent(id) {
     document.execCommand("copy");
     document.body.removeChild(aux);
 
-    alert("Copied to clipboard:\n\n" + $('#modal_content_' + id).text());
+    dialog({
+        id: "info", 
+        title: "Info", 
+        content: "Content copied to the clipboard!", 
+        cancelBtnText: "OK"
+    });
 }
 
 function modalClose(id) {
@@ -852,16 +970,19 @@ function loader() {
 }
 
 function start() {
-    monitor();
-    loop = setInterval(function() {
-        logoutIfSessionEnded();
+    if (!loop) {
         monitor();
-    }, INTERVAL_SECONDS * 1000);
-    console.log("started setInterval");
+        loop = setInterval(function() {
+            logoutIfSessionEnded();
+            monitor();
+        }, INTERVAL_SECONDS * 1000);
+        console.log("started setInterval");
+    }
 }
 
 function stop() {
     clearInterval(loop);
+    loop = null;
     console.log("stopped setInterval");
 }
 

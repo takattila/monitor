@@ -22,6 +22,7 @@
     <span id="model_name" data-click-state="0">Hardware model</span>
 
     <!-- Modal -->
+    <div id="dialog_container"></div>
     <div id="modal_container"></div>
 
     <!-- Page Container -->
@@ -32,7 +33,7 @@
 
             <!-- Left column -->
             <div id="cpu_section" class="w3-third">
-                
+
                 <!-- CPU Usage Circle Progress Bar -->
                 <div id="cpu_usage_container" class="w3-container w3-card w3-dark w3-margin-bottom">
                     <h2 id="cpu" class="w3-text-grey w3-padding-16" data-click-state="0">
@@ -180,7 +181,8 @@
 
     <!-- Footer -->
     <footer class="w3-container w3-red w3-center w3-margin-top" data-click-state="0">
-        <p><b>-= Uptime =-</b><br> <span id="uptime_info">0 years, 0 months, 0 week, 0 days, 0 hours, 0 minutes, 0 seconds</span></p>
+        <p><b>-= Uptime =-</b><br> <span id="uptime_info">0 years, 0 months, 0 week, 0 days, 0 hours, 0 minutes, 0
+                seconds</span></p>
     </footer>
     <script type="text/javascript">
         let ROUTE_SYSTEMCTL = "{{.RouteSystemCtl}}";

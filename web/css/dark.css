@@ -17,9 +17,11 @@ body {
 #vertical_progress_span {
     top: 115px;
 }
+
 #vertical_progress_wrapper {
     height: 200px;
 }
+
 #vertical_progress_mask {
     height: 0px;
 }
@@ -39,8 +41,12 @@ body {
 
 .modal-open {
     backdrop-filter: blur(5px);
-    z-index: 999999999999;
+    z-index: 999999;
     padding-top: 10px;
+}
+
+.dialog-open {
+    top: 30%;
 }
 
 .modal-ninetynine {
@@ -75,47 +81,56 @@ body {
     cursor: pointer;
 }
 
-.w3-red, .w3-hover-red:hover {
+.w3-red,
+.w3-hover-red:hover {
     color: #fff !important;
     background-color: #2e2e2e !important;
 }
 
-.w3-text-red, .w3-hover-text-red:hover {
+.w3-text-red,
+.w3-hover-text-red:hover {
     color: #fff !important;
     background-color: #474747 !important;
 }
 
-.w3-yellow, .w3-hover-yellow:hover {
+.w3-yellow,
+.w3-hover-yellow:hover {
     color: #fff !important;
     background-color: #727272 !important;
 }
 
-.w3-orange, .w3-hover-orange:hover {
+.w3-orange,
+.w3-hover-orange:hover {
     color: #fff !important;
     background-color: #4e4e4e !important;
 }
 
-.w3-blue, .w3-hover-blue:hover {
+.w3-blue,
+.w3-hover-blue:hover {
     color: #fff !important;
     background-color: #797979 !important;
 }
 
-.color-text-light-blue, .color-hover-text-light-blue:hover {
+.color-text-light-blue,
+.color-hover-text-light-blue:hover {
     color: #797979 !important;
 }
 
-.w3-green, .w3-hover-green:hover {
+.w3-green,
+.w3-hover-green:hover {
     color: #fff !important;
     background-color: #797979 !important;
 }
 
-.w3-text-green, .w3-hover-text-green:hover {
+.w3-text-green,
+.w3-hover-text-green:hover {
     color: #fff !important;
     background-color: #797979 !important;
 }
 
-.w3-text-blue, .w3-hover-text-blue:hover {
-    color: #9e9e9e!important;
+.w3-text-blue,
+.w3-hover-text-blue:hover {
+    color: #9e9e9e !important;
 }
 
 .sticky {
@@ -137,7 +152,7 @@ body {
 }
 
 #page_container {
-    max-width:100%;
+    max-width: 100%;
 }
 
 .circle-progress-value {

@@ -17,9 +17,11 @@ body {
 #vertical_progress_span {
     top: 115px;
 }
+
 #vertical_progress_wrapper {
     height: 200px;
 }
+
 #vertical_progress_mask {
     height: 0px;
 }
@@ -39,8 +41,12 @@ body {
 
 .modal-open {
     backdrop-filter: blur(5px);
-    z-index: 999999999999;
+    z-index: 999999;
     padding-top: 10px;
+}
+
+.dialog-open {
+    top: 30%;
 }
 
 .modal-ninetynine {
@@ -94,7 +100,7 @@ body {
 }
 
 #page_container {
-    max-width:100%;
+    max-width: 100%;
 }
 
 .circle-progress-value {
