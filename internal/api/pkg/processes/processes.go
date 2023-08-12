@@ -67,18 +67,17 @@ func GetJSON() string {
 				}
 			}
 		}
-	} else {
-		jsonArray = append(jsonArray, `"1": {
-					"pid": "1",
-					"user": "root",
-					"mem": "0.0%",
-					"cpu": "0.0%",
-					"cmd": "/sbin/init"
-				}
-			`)
 	}
 
-	return `{ "process_info": {` + strings.Join(jsonArray, ",") + `}}`
+	var result string
+
+	if len(jsonArray) == 0 {
+		result = `{ "process_info": {}}`
+	} else {
+		result = `{ "process_info": {` + strings.Join(jsonArray, ",") + `}}`
+	}
+
+	return result
 }
 
 // getPid fetches PID from string.
