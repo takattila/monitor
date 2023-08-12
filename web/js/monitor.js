@@ -631,7 +631,7 @@ function monitor() {
 
                     processHtml += `
                     <tr>
-                        <td id="` + obj.pid + `_kill" onclick="killProcess('` + obj.pid + `', '` + obj.cmd + `')">
+                        <td id="` + obj.pid + `_kill" onclick="killProcess('` + obj.pid + `', '` + obj.cmd.replaceAll("'","") + `')">
                             <h4 class="w3-light-gray round-left process-padding-left w3-red">&times;</h4>
                             <b>PID:</b> <br>
                             <b class="w3-text-red">USER:</b> <br>
