@@ -211,15 +211,11 @@ function dialogCancel({functionToExecute, funcParam, closeId} = {}) {
     $('#dialog_' + closeId).remove();
 }
 
-function truncateText(text) {
-    return text.substring(0, 50) + "...";
-  }
-
 function killProcess(pid, cmd) {
     dialog({
         id: "confirm",
         title: "Confirm",
-        content: 'Are you sure you want to kill the process?<br><br><b class="w3-red">PID:</b> [&nbsp;' + pid + '&nbsp;]<br><b class="w3-red">Command:</b> ' + truncateText(cmd),
+        content: 'Are you sure you want to kill the process?<br><br><b class="w3-red">PID:</b> [&nbsp;' + pid + '&nbsp;]<br><b class="w3-red">Command:</b> ' + cmd.substring(0, 50) + "...",
         cancelBtnText: "NO",
         okFunc: kill,
         okFuncParam: pid,
