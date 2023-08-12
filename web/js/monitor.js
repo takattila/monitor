@@ -233,8 +233,8 @@ function copyProcessContent(id) {
     element.value = content;
     document.body.appendChild(element)
     element.select();
-
     document.execCommand("copy");
+
     dialog({
         id: "info",
         title: "Info",
