@@ -12,6 +12,7 @@ on_start:
     api: /monitor/api/{statistics}
     systemctl: /monitor/systemctl/{action}/{service}
     power: /monitor/power/{action}
+    kill: /monitor/kill/{pid}
     toggle: /monitor/toggle/{section}/{status}
     web: /monitor/web
     run: /monitor/run/{action}/{name}

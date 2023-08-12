@@ -65,6 +65,7 @@ func (h *Handler) Internal(w http.ResponseWriter, r *http.Request) {
 			Version         string
 			RouteSystemCtl  string
 			RoutePower      string
+			RouteKill       string
 			RouteToggle     string
 			RouteLogout     string
 			RouteApi        string
@@ -76,6 +77,7 @@ func (h *Handler) Internal(w http.ResponseWriter, r *http.Request) {
 			Version:         fmt.Sprint(t.Year()) + fmt.Sprint(int(t.Month())) + fmt.Sprint(t.YearDay()) + fmt.Sprint(t.Minute()) + fmt.Sprint(t.Second()) + fmt.Sprint(t.Nanosecond()),
 			RouteSystemCtl:  config.GetString(h.Cfg, "on_start.routes.systemctl"),
 			RoutePower:      config.GetString(h.Cfg, "on_start.routes.power"),
+			RouteKill:       config.GetString(h.Cfg, "on_start.routes.kill"),
 			RouteToggle:     config.GetString(h.Cfg, "on_start.routes.toggle"),
 			RouteLogout:     config.GetString(h.Cfg, "on_start.routes.logout"),
 			RouteApi:        config.GetString(h.Cfg, "on_start.routes.api"),
@@ -160,6 +162,23 @@ func (h *Handler) Power(w http.ResponseWriter, r *http.Request) {
 		h.L.Warning("action:", action)
 		cmd := config.GetStringSlice(h.Cfg, "on_runtime.commands.init")
 		cmd = common.ReplaceStringInSlice(cmd, "{number}", initNumber)
+		fmt.Fprintf(w, "%s", common.Cli(cmd))
+	}
+}
+
+// Kill stops a specific process based on its PID.
+func (h *Handler) Kill(w http.ResponseWriter, r *http.Request) {
+	userName := getUsername(r)
+	h.L.Debug("userName:", userName)
+	if userName == "" {
+		http.Redirect(w, r, h.LoginRoute, 302)
+		return
+	}
+
+	if IPisAllowed(r.RemoteAddr, config.GetString(h.Cfg, "on_runtime.allowed_ip"), h) {
+		pid := chi.URLParam(r, "pid")
+		h.L.Warning("pid:", pid)
+		cmd := []string{"bash", "-c", fmt.Sprintf("kill %s", pid)}
 		fmt.Fprintf(w, "%s", common.Cli(cmd))
 	}
 }

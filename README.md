@@ -32,6 +32,7 @@ The web interface is responsive, it has `desktop` and `mobile` modes.
 - `restart` or `shutdown` the device
 - `start`/`stop`/`restart` or `enable`/`disable` services
 - `run` `programs`, `scripts` or `commands` defined in: `configs/api.linux|raspbian.yaml`
+- `kill` specific processes
 
 **Parts:**
 
@@ -362,6 +363,7 @@ on_start:                                            # These settings can be app
     api: /monitor/api/{statistics}                   #   - Route to the api page. (Login required)
     systemctl: /monitor/systemctl/{action}/{service} #   - Route to the systemctl page. (Login required)
     power: /monitor/power/{action}                   #   - Route to the power page. (Login required)
+    kill: /monitor/kill/{pid}                        #   - Route to the kill page. (Login required)
     toggle: /monitor/toggle/{section}/{status}       #   - Route to the toggle page. (Login required)
     web: /monitor/web                                #   - The files: html, js, css can be served under this route.
     run: /monitor/run/{action}/{name}                #   - Route to the run commands page. (Login required)

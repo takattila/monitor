@@ -58,6 +58,7 @@ func main() {
 	router.Get(config.GetString(s, "on_start.routes.toggle"), h.Toggle)
 	router.Post(config.GetString(s, "on_start.routes.systemctl"), h.SystemCtl)
 	router.Post(config.GetString(s, "on_start.routes.power"), h.Power)
+	router.Post(config.GetString(s, "on_start.routes.kill"), h.Kill)
 	router.Get(config.GetString(s, "on_start.routes.run"), h.Run)
 
 	s := servers.Server{

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"strings"
 	"testing"
 	"time"
@@ -192,6 +193,50 @@ func (a WebHandlersSuite) TestPowerOk() {
 func (a WebHandlersSuite) TestPowerNotAuthenticated() {
 	powerURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), "/monitor/power/reboot")
 	resp, err := req("POST", powerURL, nil)
+	a.Equal(nil, err)
+	a.Equal(200, resp.StatusCode)
+}
+
+func (a WebHandlersSuite) TestKillOk() {
+	user := "username"
+	pass := "password"
+
+	authdb := newTestAuthDB(a.T(), user, pass)
+	defer func() { _ = os.Remove(authdb) }()
+
+	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
+
+	go startWebServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	form := url.Values{}
+	form.Add("uname", user)
+	form.Add("psw", pass)
+
+	loginURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), config.GetString(s, "on_start.routes.index"))
+	resp, err := req("POST", loginURL, strings.NewReader(form.Encode()))
+	a.Equal(nil, err)
+	a.Equal(200, resp.StatusCode)
+
+	// Running process in the background, and later will be killed by its PID.
+	cmd := exec.Command("bash", "-c", "ping -c 50 localhost")
+	go func() {
+		err = cmd.Start()
+		a.Equal(nil, err)
+	}()
+
+	time.Sleep(100 * time.Millisecond)
+
+	killURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), fmt.Sprintf("/monitor/kill/%d", cmd.Process.Pid))
+	resp, err = req("POST", killURL, strings.NewReader(form.Encode()))
+	a.Equal(nil, err)
+	a.Equal(200, resp.StatusCode)
+}
+
+func (a WebHandlersSuite) TestKillNotAuthenticated() {
+	killURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), "/monitor/kill/999999999999")
+	resp, err := req("POST", killURL, nil)
 	a.Equal(nil, err)
 	a.Equal(200, resp.StatusCode)
 }
@@ -446,6 +491,7 @@ func startWebServer(t *testing.T) {
 	r.Get(config.GetString(s, "on_start.routes.toggle"), h.Toggle)
 	r.Post(config.GetString(s, "on_start.routes.systemctl"), h.SystemCtl)
 	r.Post(config.GetString(s, "on_start.routes.power"), h.Power)
+	r.Post(config.GetString(s, "on_start.routes.kill"), h.Kill)
 	r.Get(config.GetString(s, "on_start.routes.run"), h.Run)
 
 	s := servers.Server{

@@ -69,6 +69,16 @@ function power(action) {
     return $.ajax(params).responseText;
 }
 
+function kill(pid) {
+    var params = {
+        type: "POST",
+        url: ROUTE_KILL.replace("{pid}", pid),
+        async: true
+    };
+
+    return $.ajax(params).responseText;
+}
+
 function toggleStatus(section, status) {
     var params = {
         type: "GET",
@@ -89,7 +99,7 @@ function confirmSystemCtlAction(action, service) {
     dialog({
         id: "confirm", 
         title: "Confirm", 
-        content: 'Are you sure you want to [&nbsp;' + action + '&nbsp;] the "' + service + '" service?', 
+        content: 'Are you sure you want to <b class="w3-red">[&nbsp;' + action + '&nbsp;]</b> the "' + service + '" service?', 
         cancelBtnText: "NO", 
         okFunc: systemctl, 
         okFuncParam: [action, service], 
@@ -101,7 +111,7 @@ function confirmPowerAction(action) {
     dialog({
         id: "confirm", 
         title: "Confirm", 
-        content: 'Are you sure you want to [&nbsp;' + action + '&nbsp;] the computer?', 
+        content: 'Are you sure you want to <b class="w3-red">[&nbsp;' + action + '&nbsp;]</b> the computer?', 
         cancelBtnText: "NO", 
         okFunc: power, 
         okFuncParam: action, 
@@ -201,38 +211,38 @@ function dialogCancel({functionToExecute, funcParam, closeId} = {}) {
     $('#dialog_' + closeId).remove();
 }
 
-function copyTableRows() {
-    var table = document.getElementById("processTable");
-    var rows = table.getElementsByTagName("tr");
-    for (i = 0; i < rows.length; i++) {
-        var currentRow = table.rows[i];
-        var createClickHandler = 
-            function(row) {
-                return function() { 
-					var cell = row.getElementsByTagName("td")[1];
-					var content = cell.innerHTML;
-					content = content.replaceAll("&nbsp;", "");
-					content = content.replaceAll(/<\/?[^>]+(>|$)/gi, "");
-					content = content.replace(/\s+/g, ' ').trim();
+function killProcess(pid, cmd) {
+    dialog({
+        id: "confirm",
+        title: "Confirm",
+        content: 'Are you sure you want to kill the process?<br><br><b class="w3-red">PID:</b> [&nbsp;' + pid + '&nbsp;]<br><b class="w3-red">Command:</b> ' + cmd,
+        cancelBtnText: "NO",
+        okFunc: kill,
+        okFuncParam: pid,
+        okBtnText: "YES"
+    });
+}
 
-                    const element = document.createElement("textarea");
-                    element.value = content;
-                    document.body.appendChild(element)
-                    element.select();
+function copyProcessContent(id) {
+    content = $('#' + id).text();
+    content = content.replaceAll("&nbsp;", "");
+    content = content.replaceAll(/<\/?[^>]+(>|$)/gi, "");
+    content = content.replace(/\s+/g, ' ').trim();
 
-                    document.execCommand("copy");
-                    dialog({
-                        id: "info", 
-                        title: "Info", 
-                        content: "Content copied to the clipboard!", 
-                        cancelBtnText: "OK"
-                    });                
-                    document.body.removeChild(element);
-				 };
-            };
+    const element = document.createElement("textarea");
+    element.value = content;
+    document.body.appendChild(element)
+    element.select();
 
-        currentRow.onclick = createClickHandler(currentRow);
-    }
+    document.execCommand("copy");
+    dialog({
+        id: "info",
+        title: "Info",
+        content: "Content copied to the clipboard!",
+        cancelBtnText: "OK"
+    });
+
+    document.body.removeChild(element);
 }
 
 function tail(id) {
@@ -283,7 +293,7 @@ function confirmModalOpen(id) {
     dialog({
         id: "confirm", 
         title: "Confirm", 
-        content: 'Are you sure you want to run the [&nbsp;' + id + '&nbsp;] command?', 
+        content: 'Are you sure you want to run the <span class="w3-red">[&nbsp;' + id + '&nbsp;]</span> command?', 
         cancelBtnText: "NO", 
         okFunc: modalOpen, 
         okFuncParam: id, 
@@ -621,20 +631,20 @@ function monitor() {
 
                     processHtml += `
                     <tr>
-                        <td>
-                            <h4 class="w3-light-gray round-left process-padding-left">` + id + `. </h4>
-                            <b>PID</b>: <br>
-                            <b>USER</b>: <br>
-                            <b>MEM</b>: <br>
-                            <b>CPU</b>: <br>
-                            <b>CMD</b>:
+                        <td id="` + obj.pid + `_kill" onclick="killProcess('` + obj.pid + `', '` + obj.cmd + `')">
+                            <h4 class="w3-light-gray round-left process-padding-left w3-red">&times;</h4>
+                            <b>PID:</b> <br>
+                            <b class="w3-text-red">USER:</b> <br>
+                            <b>MEM:</b> <br>
+                            <b class="w3-text-red">CPU:</b> <br>
+                            <b>CMD:</b>
                         </td>
-                        <td class="word-wrap">
-                            <h4 class="w3-light-gray round-right">&nbsp;</h4>
+                        <td id="` + obj.pid + `_content" class="word-wrap" onclick="copyProcessContent('` + obj.pid + `_content')">
+                            <h4 class="w3-light-gray round-right w3-green">&nbsp;` + id + `.</h4>
                             ` + obj.pid + ` <br>
-                            ` + obj.user + ` <br>
-                            ` + obj.mem + `% <br>
-                            ` + obj.cpu + `% <br>
+                            <span class="w3-text-red">` + obj.user + ` </span><br>
+                            ` + obj.mem + `% </span><br>
+                            <span class="w3-text-red">` + obj.cpu + `% </span><br>
                             ` + obj.cmd + `
                         </td>
                     </tr>
@@ -819,8 +829,6 @@ function monitor() {
 
             // Uptime section
             $('#uptime_info').text(data.uptime_info);
-
-            window.onload = copyTableRows();
         }
     });
 }
