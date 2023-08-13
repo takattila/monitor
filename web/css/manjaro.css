@@ -105,14 +105,14 @@ body {
 
 .circle-progress-value {
     stroke-width: 50px;
-    stroke: #20ecc4;
+    stroke: #fcbd89;
 }
 
 .circle-progress-circle {
     font-size: 180px;
     stroke-width: 40px;
-    stroke: #16a085;
-    fill: #16a085;
+    stroke: #ee7d22;
+    fill: #ee7d22;
 }
 
 .circle-progress-text {
