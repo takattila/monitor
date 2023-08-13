@@ -844,7 +844,9 @@ function toggleSection() {
             toggleStatus(section, false);
         } else {
             $(this).attr('data-click-state', 1);
-            $(container).show(200);
+            $('#' + id + '_loader').css("margin-top", "-32px").show(200, function() {
+                $(container).fadeIn(500);
+            }).fadeOut(600);
             monitor();
             section = $(this).text().replace(/\s+/g, '').trim();
             toggleStatus(section, true);

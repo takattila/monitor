@@ -39,6 +39,11 @@
                     <h2 id="cpu" class="w3-text-grey w3-padding-16" data-click-state="0">
                         <i class="fa fa-braille fa-fw w3-margin-right w3-xxlarge w3-text-red"></i> CPU
                     </h2>
+                    <div id="cpu_loader" class="w3-small" style="display: none;">
+                        <p>
+                            <i class="fa fa-spinner w3-spin" class="modal-loader-duration"></i> Loading data...
+                        </p>
+                    </div>
                     <div id="cpu_usage_wrapper">
                         <div class="circle-progress w3-center" id="percent_cpu_usage_circle"> </div>
                     </div>
@@ -79,6 +84,11 @@
                     <h2 id="memory" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fa fa-memory fa-fw w3-margin-right w3-xxlarge"></i> Memory
                     </h2>
+                    <div id="memory_loader" class="w3-small" style="display: none;">
+                        <p>
+                            <i class="fa fa-spinner w3-spin" class="modal-loader-duration"></i> Loading data...
+                        </p>
+                    </div>
                     <div class="w3-container" id="memory_container"> </div>
                 </div>
 
@@ -93,14 +103,24 @@
                     <h2 id="services" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fa fa-tasks fa-fw w3-margin-right w3-xxlarge"></i> Services
                     </h2>
+                    <div id="services_loader" class="w3-small" style="display: none;">
+                        <p>
+                            <i class="fa fa-spinner w3-spin" class="modal-loader-duration"></i> Loading data...
+                        </p>
+                    </div>
                     <div class="w3-container" id="services_container"> </div>
                 </div>
 
-                <!-- Process Container -->
+                <!-- Top Processes Container -->
                 <div class="w3-container w3-card w3-dark w3-margin-bottom">
                     <h2 id="process" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fab fa-think-peaks fa-fw w3-margin-right w3-xxlarge"></i> Top Processes
                     </h2>
+                    <div id="process_loader" class="w3-small" style="display: none;">
+                        <p>
+                            <i class="fa fa-spinner w3-spin" class="modal-loader-duration"></i> Loading data...
+                        </p>
+                    </div>
                     <div class="w3-container" id="process_container"> </div>
                 </div>
 
@@ -109,6 +129,11 @@
                     <h2 id="network" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fa fa-network-wired fa-fw w3-margin-right w3-xxlarge"></i> Network Traffic
                     </h2>
+                    <div id="network_loader" class="w3-small" style="display: none;">
+                        <p>
+                            <i class="fa fa-spinner w3-spin" class="modal-loader-duration"></i> Loading data...
+                        </p>
+                    </div>
                     <div id="network_container"> </div>
                 </div>
 
@@ -117,6 +142,11 @@
                     <h2 id="storage" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fa fa-hdd fa-fw w3-margin-right w3-xxlarge"></i> Storage
                     </h2>
+                    <div id="storage_loader" class="w3-small" style="display: none;">
+                        <p>
+                            <i class="fa fa-spinner w3-spin" class="modal-loader-duration"></i> Loading data...
+                        </p>
+                    </div>
                     <div class="w3-container" id="storage_container"> </div>
                 </div>
 
@@ -125,6 +155,11 @@
                     <h2 id="run" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fa fa-terminal fa-fw w3-margin-right w3-xxlarge"></i> Run Commands
                     </h2>
+                    <div id="run_loader" class="w3-small" style="display: none;">
+                        <p>
+                            <i class="fa fa-spinner w3-spin" class="modal-loader-duration"></i> Loading data...
+                        </p>
+                    </div>
                     <div class="w3-container" id="run_container"> </div>
                 </div>
 
@@ -133,6 +168,11 @@
                     <h2 id="settings" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fa fa-wrench fa-fw w3-margin-right w3-xxlarge"></i> Settings
                     </h2>
+                    <div id="settings_loader" class="w3-small" style="display: none;">
+                        <p>
+                            <i class="fa fa-spinner w3-spin" class="modal-loader-duration"></i> Loading data...
+                        </p>
+                    </div>
                     <div class="w3-container" id="settings_container"> </div>
                 </div>
 
@@ -141,6 +181,11 @@
                     <h2 id="power" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fas fa-power-off fa-fw w3-margin-right w3-xxlarge"></i> Power
                     </h2>
+                    <div id="power_loader" class="w3-small" style="display: none;">
+                        <p>
+                            <i class="fa fa-spinner w3-spin" class="modal-loader-duration"></i> Loading data...
+                        </p>
+                    </div>
                     <div class="w3-container" id="power_container">
                         <p>
                         <table class="w3-table">
@@ -162,6 +207,11 @@
                     <h2 id="logout" class="w3-text-grey w3-padding-16" data-click-state="1">
                         <i class="fas fa-sign-out-alt fa-fw w3-margin-right w3-xxlarge"></i> Logout
                     </h2>
+                    <div id="logout_loader" class="w3-small" style="display: none;">
+                        <p>
+                            <i class="fa fa-spinner w3-spin" class="modal-loader-duration"></i> Loading data...
+                        </p>
+                    </div>
                     <div class="w3-container" id="logout_container">
                         <p>
                             <button type="submit" onclick="logout();"
