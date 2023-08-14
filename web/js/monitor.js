@@ -839,13 +839,13 @@ function toggleSection() {
         var container = "#" + id + "_container";
         if ($(this).attr('data-click-state') == 1) {
             $(this).attr('data-click-state', 0);
-            $(container).hide(200);
+            $(container).fadeOut(500);
             section = $(this).text().replace(/\s+/g, '').trim();
             toggleStatus(section, false);
         } else {
             $(this).attr('data-click-state', 1);
             $('#' + id + '_loader').css("margin-top", "-32px").fadeIn(200, function() {
-                $(container).fadeIn(500);
+                $(container).fadeIn(1000);
             }).fadeOut(600);
             monitor();
             section = $(this).text().replace(/\s+/g, '').trim();
@@ -861,14 +861,14 @@ function toggleSectionCpu() {
         }
         if ($('#cpu').attr('data-click-state') == 1) {
             $('#cpu').attr('data-click-state', 1);
-            $('#cpu_usage_wrapper').hide(200);
-            $('#cpu_load_container').hide(200);
-            $('#vertical_progress_container').hide(100);
+            $('#cpu_usage_wrapper').fadeOut(500);
+            $('#cpu_load_container').fadeOut(500);
+            $('#vertical_progress_container').fadeOut(500);
         } else {
             $('#cpu').attr('data-click-state', 0);
-            $('#cpu_usage_wrapper').show(200);
-            $('#cpu_load_container').show(200);
-            $('#vertical_progress_container').show(200);
+            $('#cpu_usage_wrapper').fadeIn(500);
+            $('#cpu_load_container').fadeIn(500);
+            $('#vertical_progress_container').fadeIn(500);
         }
     });
 }
@@ -895,16 +895,16 @@ function toggleSectionMemory() {
 
             if (!memoryVisible && cpuVisible) {
                 $('#cpu').attr('data-click-state', 1);
-                $('#cpu_usage_wrapper').hide(200);
-                $('#cpu_load_container').hide(200);
-                $('#vertical_progress_container').hide(100);
+                $('#cpu_usage_wrapper').fadeOut(500);
+                $('#cpu_load_container').fadeOut(500);
+                $('#vertical_progress_container').fadeOut(500);
             }
 
             if (memoryVisible && !cpuVisible) {
                 $('#cpu').attr('data-click-state', 0);
-                $('#cpu_usage_wrapper').show(200);
-                $('#cpu_load_container').show(200);
-                $('#vertical_progress_container').show(200);
+                $('#cpu_usage_wrapper').fadeIn(500);
+                $('#cpu_load_container').fadeIn(500);
+                $('#vertical_progress_container').fadeIn(500);
             }
         }
     });
