@@ -979,6 +979,44 @@ function loader() {
     $("body").fadeIn(800);
 }
 
+function enkerKeyPressed() {
+    $(document).on('keydown', function(event) {
+        if (event.key == "Enter") {
+            $("#dialog_container").find('button').each(function(index, item) {
+                var dialog = $('#dialog_container').text().trim();
+                if (dialog) {
+                    var closeId = $('#dialog_container :first-child').attr('id');
+                    $('#' + closeId).remove();
+                }
+                var text = $(item).text();
+                if (text == "YES") {
+                    var func = $(item).attr("onclick");
+                    eval(func);
+                }
+            });
+        }
+    });
+}
+
+function escKeyPressed() {
+    $(document).on('keydown', function(event) {
+        if (event.key == "Escape") {
+            var dialog = $('#dialog_container').text().trim();
+            if (dialog) {
+                var closeId = $('#dialog_container :first-child').attr('id');
+                $('#' + closeId).remove();
+            }
+
+            $('#modal_container').children('.w3-modal').each(function (index, item) {
+                var closeId = $(item).attr("id"); display = $('#' + closeId).css("display");
+                if (display == "block") {
+                    modalClose(closeId);
+                }
+            });
+        }
+    });
+}
+
 function start() {
     if (!loop) {
         monitor();
@@ -1010,4 +1048,6 @@ $(document).ready(function() {
     toggleSectionMemory();
     toggleThemeOnHeaderOrFooterClick();
     collapseSectionsExceptCpu();
+    enkerKeyPressed();
+    escKeyPressed();
 });
