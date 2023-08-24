@@ -69,7 +69,7 @@ func Run(name, command string) (err error) {
 		defer func() {
 			_, _ = writer.WriteString("~x~o(f)o~x~")
 			writer.Flush()
-			// _ = os.Rename(stdout, finish)
+			_ = os.Rename(stdout, finish)
 		}()
 
 		err = cmdStart(cmd)
@@ -85,21 +85,25 @@ func Run(name, command string) (err error) {
 
 	// stdout exists and finish NOT exists
 	if common.FileExists(stdout) && !common.FileExists(finish) {
+		L.Warning("stdout exists and finish NOT exists -> [ execute ] function NOT called")
 		return fmt.Errorf("the command: '%s' is running  already", command)
 	}
 	// stdout exists and finish exists
 	if common.FileExists(stdout) && common.FileExists(finish) {
+		L.Warning("stdout exists and finish exists -> [ execute ] function is called")
 		_ = os.Remove(stdout)
 		_ = os.Remove(finish)
 		err = execute(stdout, finish, command)
 	}
 	// stdout NOT exists and finish exists
 	if !common.FileExists(stdout) && common.FileExists(finish) {
+		L.Warning("stdout NOT exists and finish exists -> [ execute ] function is called")
 		_ = os.Remove(finish)
 		err = execute(stdout, finish, command)
 	}
 	// stdout NOT exists and finish NOT exists
 	if !common.FileExists(finish) && !common.FileExists(stdout) {
+		L.Warning("stdout NOT exists and finish NOT exists -> [ execute ] function is called")
 		err = execute(stdout, finish, command)
 	}
 
