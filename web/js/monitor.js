@@ -131,6 +131,8 @@ function dialog({
         okBtnText
     } = {}) {
 
+    stop();
+
     var infoModal = `
     <div id="dialog_` + id + `" class="w3-modal modal-open scroll-hidden">
         <div id="dialog_box_` + id + `" class="w3-modal-content w3-animate-left w3-white w3-card dialog-open">
@@ -197,11 +199,30 @@ function dialog({
     }
 }
 
+function isAnyModalOpen() {
+    var modalIsOpen = false
+    var dialog = $('#dialog_container').text().trim();
+    if (dialog) {
+        modalIsOpen = true;
+    }
+    $('#modal_container').children('.w3-modal').each(function (index, item) {
+        var closeId = $(item).attr("id");
+        var display = $('#' + closeId).css("display");
+        if (display == "block") {
+            modalIsOpen = true;
+        }
+    });
+    return modalIsOpen;
+}
+
 function dialogOk({functionToExecute, funcParam, closeId} = {}) {
     if (functionToExecute) {
         functionToExecute(funcParam);
     }
     $('#dialog_' + closeId).remove();
+    if (isAnyModalOpen() == false) {
+        start();
+    }
 }
 
 function dialogCancel({functionToExecute, funcParam, closeId} = {}) {
@@ -209,6 +230,9 @@ function dialogCancel({functionToExecute, funcParam, closeId} = {}) {
         functionToExecute(funcParam);
     }
     $('#dialog_' + closeId).remove();
+    if (isAnyModalOpen() == false) {
+        start();
+    }
 }
 
 function killProcess(pid, cmd) {
@@ -994,6 +1018,10 @@ function enkerKeyPressed() {
                     eval(func);
                 }
             });
+
+            if (isAnyModalOpen() == false) {
+                start();
+            }
         }
     });
 }
@@ -1013,6 +1041,10 @@ function escKeyPressed() {
                     modalClose(closeId);
                 }
             });
+
+            if (isAnyModalOpen() == false) {
+                start();
+            }
         }
     });
 }
