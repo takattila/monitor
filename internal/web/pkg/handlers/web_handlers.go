@@ -117,6 +117,10 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// =====================================================================================================================================
+//                                                   [ SHOULD BE MOVED INTO API ]
+// =====================================================================================================================================
+
 // SystemCtl queries or sends control commands to the systemd manager.
 func (h *Handler) SystemCtl(w http.ResponseWriter, r *http.Request) {
 	userName := getUsername(r)
@@ -182,6 +186,10 @@ func (h *Handler) Kill(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "%s", common.Cli(cmd))
 	}
 }
+
+// =====================================================================================================================================
+//                                                   [ SHOULD BE MOVED INTO API ]
+// =====================================================================================================================================
 
 // Api handler sends requests to the MONITOR-API service.
 // Basicaly it is a proxy.

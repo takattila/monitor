@@ -445,17 +445,17 @@ function loadCssFromCookie() {
     }
 }
 
-function toggleRun(id) {
+function toggleSubSection(id) {
     var container = "#" + id + "_container";
-    var run = id + "_run"
-    var toggle = getCookie(run);
+    var sub = id + "_sub"
+    var toggle = getCookie(sub);
 
     if (toggle == "1") {
         $(container).hide(0);
-        setCookie(run, "0", 0.0003472222);
+        setCookie(sub, "0", 0.0003472222);
     } else {
         $(container).show(0);
-        setCookie(run, "1", 0.0003472222);
+        setCookie(sub, "1", 0.0003472222);
     }
 }
 
@@ -768,14 +768,14 @@ function monitor() {
             for (var id in runList) {
                 if (runList.hasOwnProperty(id)) {
                     var obj = runList[id];
-                    var toggle = getCookie(id + '_run');
+                    var toggle = getCookie(id + '_sub');
                     var style = ""
 
                     if (toggle != "1") {
                         style = `style="display: none"`;
                     }
 
-                    runHtml += `<h3 id="` + id + `" onclick="toggleRun('` + id + `')" class="cursor-hand">`;
+                    runHtml += `<h3 id="` + id + `" onclick="toggleSubSection('` + id + `')" class="cursor-hand">`;
                     runHtml += `<i class="fa fa-terminal fa-fw w3-margin-right"></i>` + id;
                     runHtml += `</h3>`;
 
@@ -820,35 +820,57 @@ function monitor() {
             $('#run_container').html(runHtml + '<p></p>');
 
             // Settings section
-            var skinHtml = '<div class="w3-row-padding w3-margin-bottom"><h3>Set skin</h3>';
+            var skinHtml = '';
             var skins = data.skins;
+            var toggleSkin = getCookie('set_skin_sub');
+            var styleSkin = `style="display: block"`;
+
+            if (toggleSkin != "1") {
+                styleSkin = `style="display: none"`;
+            }
+
+            skinHtml += `<div id="set_skin" onclick="toggleSubSection('set_skin')" class="w3-card w3-padding cursor-hand w3-margin-bottom">`;
+            skinHtml += '<h3>Set skin</h3>';
+
+            skinHtml += '<div id="set_skin_container" class="w3-row-padding" ' + styleSkin + '>';
 
             for (let i = 0; i < skins.length; i++) {
                 skinHtml += `
-                <div class="w3-half w3-card w3-padding w3-margin-top cursor-hand" onclick="setCssToCookies('` + skins[i] + `');">
-                    <i class="fa fa-angle-right"></i> ` + skins[i] + `
+                <div class="w3-half w3-card w3-padding w3-margin-bottom cursor-hand" onclick="setCssToCookies('` + skins[i] + `');">
+                <i class="fa fa-angle-right"></i> ` + skins[i] + `
                 </div>
                 `;
             }
 
-            skinHtml += `</div>`
-            
-            $('#settings_container').html(skinHtml);
+            skinHtml += '</div>';
+            skinHtml += '</div>';
 
-            var logoHtml = '<div class="w3-row-padding w3-margin-bottom"><h3>Set logo</h3>';
+            var logoHtml = '';
             var logos = data.logos;
+            var toggleLogo = getCookie('set_logo_sub');
+            var styleLogo = `style="display: block"`;
+
+            if (toggleLogo != "1") {
+                styleLogo = `style="display: none"`;
+            }
+
+            logoHtml += `<div id="set_logo" onclick="toggleSubSection('set_logo')" class="w3-card w3-padding cursor-hand w3-margin-bottom">`;
+            logoHtml += '<h3>Set logo</h3>';
+
+            logoHtml += '<div id="set_logo_container" class="w3-row-padding" ' + styleLogo + '>';
 
             for (let i = 0; i < logos.length; i++) {
                 logoHtml += `
-                <div class="w3-half w3-card w3-padding w3-margin-top cursor-hand" onclick="setLogoToCookies('` + logos[i] + `');">
-                    <i class="fa fa-angle-right"></i> ` + logos[i] + `
+                <div class="w3-half w3-card w3-padding w3-margin-bottom cursor-hand" onclick="setLogoToCookies('` + logos[i] + `');">
+                <i class="fa fa-angle-right"></i> ` + logos[i] + `
                 </div>
                 `;
             }
 
-            logoHtml += `</div>`
+            logoHtml += '</div>';
+            logoHtml += `</div>`;
 
-            var settingsHtml = skinHtml+logoHtml
+            var settingsHtml = skinHtml + logoHtml
             $('#settings_container').html(settingsHtml);
 
             // Uptime section
