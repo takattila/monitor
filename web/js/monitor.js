@@ -830,7 +830,7 @@ function monitor() {
             }
 
             skinHtml += `<div id="set_skin" onclick="toggleSubSection('set_skin')" class="w3-card w3-padding cursor-hand w3-margin-bottom">`;
-            skinHtml += '<h3>Set skin</h3>';
+            skinHtml += '<h3><i class="fa fa-wrench fa-fw w3-margin-right"></i> Skin</h3>';
 
             skinHtml += '<div id="set_skin_container" class="w3-row-padding" ' + styleSkin + '>';
 
@@ -855,7 +855,7 @@ function monitor() {
             }
 
             logoHtml += `<div id="set_logo" onclick="toggleSubSection('set_logo')" class="w3-card w3-padding cursor-hand w3-margin-bottom">`;
-            logoHtml += '<h3>Set logo</h3>';
+            logoHtml += '<h3><i class="fa fa-wrench fa-fw w3-margin-right"></i> Logo</h3>';
 
             logoHtml += '<div id="set_logo_container" class="w3-row-padding" ' + styleLogo + '>';
 
