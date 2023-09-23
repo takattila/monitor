@@ -47,7 +47,7 @@ You can choose to [download the pre-built binaries](https://github.com/takattila
 
 ### By downloading the latest release
 
-If you didn't install go, and you don't want to install it, you can download install the latest pre-built binaries with: `get-latest-binaries.sh`.
+If you didn't install go, and you don't want to install it, you can download the latest pre-built binaries with: `get-latest-binaries.sh`.
 
 1. Install the latest release for your architecture
 
