@@ -264,7 +264,7 @@ func (h *Handler) Index(response http.ResponseWriter, request *http.Request) {
 	h.L.Debug("Authenticate", authenticated)
 
 	if name != "" && pass != "" && authenticated {
-		path := config.GetString(h.Cfg, "on_start.routes.web")
+		path := filepath.Join(config.GetString(h.Cfg, "on_start.routes.index")) + "/"
 		auth.SetSession(path, name, response)
 		redirectTarget = h.InternalRoute
 	}
@@ -274,7 +274,7 @@ func (h *Handler) Index(response http.ResponseWriter, request *http.Request) {
 // Logout clears user session.
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	h.L.Info(getUsername(r))
-	path := config.GetString(h.Cfg, "on_start.routes.web")
+	path := filepath.Join(config.GetString(h.Cfg, "on_start.routes.index")) + "/"
 	auth.ClearSession(path, w)
 	http.Redirect(w, r, h.LoginRoute, 302)
 }

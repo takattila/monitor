@@ -22,7 +22,7 @@ type (
 
 func (s WebSessionSuite) TestSetSessionGetSession() {
 	recorder := httptest.NewRecorder()
-	SetSession("/monitor/web/", "username", recorder)
+	SetSession("/monitor/", "username", recorder)
 
 	request := &http.Request{Header: http.Header{"Cookie": recorder.HeaderMap["Set-Cookie"]}}
 	s.Equal("username", GetUserName(request))
@@ -30,7 +30,7 @@ func (s WebSessionSuite) TestSetSessionGetSession() {
 
 func (s WebSessionSuite) TestClearSession() {
 	recorder := httptest.NewRecorder()
-	ClearSession("/monitor/web/", recorder)
+	ClearSession("/monitor/", recorder)
 
 	request := &http.Request{Header: http.Header{"Cookie": recorder.HeaderMap["Set-Cookie"]}}
 	s.Equal("", GetUserName(request))
