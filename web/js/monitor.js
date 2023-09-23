@@ -1,10 +1,15 @@
 // Defined in: web/html/monitor.html
 // - let ROUTE_SYSTEMCTL = "{{.RouteSystemCtl}}";
 // - let ROUTE_POWER = "{{.RoutePower}}";
+// - let ROUTE_KILL = "{{.RouteKill}}";
 // - let ROUTE_TOGGLE = "{{.RouteToggle}}";
 // - let ROUTE_LOGOUT = "{{.RouteLogout}}";
 // - let ROUTE_API = "{{.RouteApi}}";
-// - let INTERVAL_SECONDS = "{{.QuerySeconds}}";
+// - let ROUTE_INDEX = "{{.RouteIndex}}";
+// - let ROUTE_WEB = "{{.RouteWebPath}}";
+// - let ROUTE_RUN = "{{.RouteRun}}";
+// - let INTERVAL_SECONDS = "{{.IntervalSeconds}}";
+// - let VERSION = "{{.Version}}";
 
 var loop = null;
 var stdoutLoop;
@@ -16,7 +21,7 @@ function setCookie(cname, cvalue, exdays) {
     const d = new Date();
     d.setTime(d.getTime() + (exdays*24*60*60*1000));
     let expires = "expires=" + d.toUTCString();
-    let path = "path=" + ROUTE_WEB;
+    let path = "path=" + ROUTE_INDEX + "/";
     let cookie = cname + "=" + cvalue + ";" + expires + ";" + path;
     document.cookie = cookie;
 }
