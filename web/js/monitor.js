@@ -426,7 +426,7 @@ function loadCSS(skin) {
     var newlink = document.createElement("link");
     newlink.setAttribute("rel", "stylesheet");
     newlink.setAttribute("type", "text/css");
-    newlink.setAttribute("href", "/monitor/web/css/" + skin + ".css?v=" + VERSION);
+    newlink.setAttribute("href", ROUTE_WEB + "/css/" + skin + ".css?v=" + VERSION);
 
     oldlink.replaceWith(newlink);
 }
