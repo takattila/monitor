@@ -25,7 +25,7 @@ var (
 )
 
 // SetSession creates session cookie.
-func SetSession(userName string, response http.ResponseWriter) {
+func SetSession(path, userName string, response http.ResponseWriter) {
 	value := map[string]string{
 		"name": userName,
 	}
@@ -33,7 +33,7 @@ func SetSession(userName string, response http.ResponseWriter) {
 		cookie := &http.Cookie{
 			Name:  "session",
 			Value: encoded,
-			Path:  "/",
+			Path:  path,
 		}
 
 		http.SetCookie(response, cookie)
@@ -41,11 +41,11 @@ func SetSession(userName string, response http.ResponseWriter) {
 }
 
 // ClearSession removes session cookie.
-func ClearSession(response http.ResponseWriter) {
+func ClearSession(path string, response http.ResponseWriter) {
 	cookie := &http.Cookie{
 		Name:   "session",
 		Value:  "",
-		Path:   "/",
+		Path:   path,
 		MaxAge: -1,
 	}
 	http.SetCookie(response, cookie)
