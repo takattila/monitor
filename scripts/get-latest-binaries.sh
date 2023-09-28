@@ -223,7 +223,7 @@ function setRootPassword {
 
 function clearScreen {
     echo -ne '\e]11;#000000\e\\' # set default foreground to black
-    echo -ne '\e]10;#ffffff\e\\' # set default background to #abcdef
+    echo -ne '\e]10;#ffffff\e\\' # set default background to white
   
     clear
 }
