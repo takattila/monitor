@@ -416,7 +416,7 @@ function loadLogoSvg(logo) {
 }
 
 function setLogoToCookies(logo) {
-    setCookie("logo", logo, 30);
+    setCookie("logo", logo, 99999);
     reload();
 }
 
@@ -439,7 +439,7 @@ function loadCSS(skin) {
 }
 
 function setCssToCookies(skin) {
-    setCookie("css", skin, 30);
+    setCookie("css", skin, 99999);
     reload();
 }
 
@@ -970,7 +970,7 @@ function setLightSkin() {
     $('.w3-dark').addClass('w3-white').removeClass('w3-dark');
     $('.w3-dark-grey').addClass('w3-light-grey').removeClass('w3-dark-grey');
     $('.w3-text-light-grey').addClass('w3-text-grey').removeClass('w3-text-light-grey');
-    setCookie("skin", "light", 30);
+    setCookie("skin", "light", 99999);
     skin = getCookie("skin");
 }
 
@@ -981,7 +981,7 @@ function setDarkSkin() {
     $('.w3-white').addClass('w3-dark').removeClass('w3-white');
     $('.w3-light-grey').addClass('w3-dark-grey').removeClass('w3-light-grey');
     $('.w3-text-grey').addClass('w3-text-light-grey').removeClass('w3-text-grey');
-    setCookie("skin", "dark", 30);
+    setCookie("skin", "dark", 99999);
     skin = getCookie("skin");
 }
 
