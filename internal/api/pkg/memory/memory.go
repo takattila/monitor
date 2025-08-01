@@ -69,26 +69,67 @@ type Mem struct {
 	} `json:"memory_info"`
 }
 
-// GetJSON provides a JSON object with all the memory information.
+// új függvény, ami megpróbálja a memóriainfót kinyerni a konfigurációból (JSON stringként)
+func getMemoryFromConfig() (*Mem, error) {
+	ret, err := Cfg.GetStringSlice("on_runtime.memory")
+	if err != nil {
+		return nil, err
+	}
+	out := common.Cli(ret)
+	L.Debug(out)
+
+	var m Mem
+	err = json.Unmarshal([]byte(out), &m)
+	if err != nil {
+		return nil, err
+	}
+
+	return &m, nil
+}
+
+// módosított GetJSON(), ami először megkísérli a konfigurációból kivenni az adatokat,
+// ha nincs, akkor a szokásos gopsutil-os megoldással épül fel a memória struct.
 func GetJSON() string {
 	m := Mem{}
-	if Cfg.Data.GetBool("Memory") {
-		vm, err := mem.VirtualMemory()
-		L.Error(err)
-		swp, err := mem.SwapMemory()
-		L.Error(err)
 
-		m.getTotal(vm)
-		m.getUsed(vm)
-		m.getFree(vm)
-		m.getCached(vm)
-		m.getAvailable(vm)
-		m.getSwap(swp)
-		m.getVideo(vm)
+	// Próbáljuk konfigurációból kivenni az egész memóriainformációt
+	memFromCfg, err := getMemoryFromConfig()
+	if err != nil {
+		L.Error(err)
+		// hiba esetén fallback a rendszerből
 	}
-	b, err := json.MarshalIndent(m, "", "  ")
-	L.Error(err)
 
+	if memFromCfg != nil {
+		m = *memFromCfg
+	} else {
+		// Ha nincs konfigurált memória, vagy hiba történt, akkor lekérjük a rendszerből
+		if Cfg.Data.GetBool("Memory") {
+			vm, err := mem.VirtualMemory()
+			if err != nil {
+				L.Error(err)
+				return "{}"
+			}
+			swp, err := mem.SwapMemory()
+			if err != nil {
+				L.Error(err)
+				return "{}"
+			}
+
+			m.getTotal(vm)
+			m.getUsed(vm)
+			m.getFree(vm)
+			m.getCached(vm)
+			m.getAvailable(vm)
+			m.getSwap(swp)
+			m.getVideo(vm)
+		}
+	}
+
+	b, err := json.MarshalIndent(m, "", "  ")
+	if err != nil {
+		L.Error(err)
+		return "{}"
+	}
 	return string(b)
 }
 
