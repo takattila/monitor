@@ -69,7 +69,11 @@ type Mem struct {
 	} `json:"memory_info"`
 }
 
-// új függvény, ami megpróbálja a memóriainfót kinyerni a konfigurációból (JSON stringként)
+// getMemoryFromConfig attempts to retrieve memory information from the configuration.
+// It reads a slice of strings from "on_runtime.memory", treats it as a command to execute,
+// runs the command via common.Cli, and expects the output to be a JSON string.
+// The JSON output is unmarshaled into a Mem struct and returned.
+// If any error occurs (fetching config, command execution, or JSON parsing), it returns the error.
 func getMemoryFromConfig() (*Mem, error) {
 	ret, err := Cfg.GetStringSlice("on_runtime.memory")
 	if err != nil {
@@ -87,22 +91,23 @@ func getMemoryFromConfig() (*Mem, error) {
 	return &m, nil
 }
 
-// módosított GetJSON(), ami először megkísérli a konfigurációból kivenni az adatokat,
-// ha nincs, akkor a szokásos gopsutil-os megoldással épül fel a memória struct.
+// GetJSON returns a JSON-formatted string containing memory information.
+// It first attempts to retrieve memory data from the configuration via getMemoryFromConfig().
+// If configuration data is available and valid, it uses that data.
+// Otherwise, if the "Memory" flag in configuration is enabled, it collects memory statistics
+// directly from the system using gopsutil's VirtualMemory and SwapMemory functions.
+// On errors during data retrieval or JSON marshaling, it logs the error and returns an empty JSON object "{}".
 func GetJSON() string {
 	m := Mem{}
 
-	// Próbáljuk konfigurációból kivenni az egész memóriainformációt
 	memFromCfg, err := getMemoryFromConfig()
 	if err != nil {
 		L.Error(err)
-		// hiba esetén fallback a rendszerből
 	}
 
 	if memFromCfg != nil {
 		m = *memFromCfg
 	} else {
-		// Ha nincs konfigurált memória, vagy hiba történt, akkor lekérjük a rendszerből
 		if Cfg.Data.GetBool("Memory") {
 			vm, err := mem.VirtualMemory()
 			if err != nil {
