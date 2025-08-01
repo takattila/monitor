@@ -69,26 +69,72 @@ type Mem struct {
 	} `json:"memory_info"`
 }
 
-// GetJSON provides a JSON object with all the memory information.
+// getMemoryFromConfig attempts to retrieve memory information from the configuration.
+// It reads a slice of strings from "on_runtime.memory", treats it as a command to execute,
+// runs the command via common.Cli, and expects the output to be a JSON string.
+// The JSON output is unmarshaled into a Mem struct and returned.
+// If any error occurs (fetching config, command execution, or JSON parsing), it returns the error.
+func getMemoryFromConfig() (*Mem, error) {
+	ret, err := Cfg.GetStringSlice("on_runtime.memory")
+	if err != nil {
+		return nil, err
+	}
+	out := common.Cli(ret)
+	L.Debug(out)
+
+	var m Mem
+	err = json.Unmarshal([]byte(out), &m)
+	if err != nil {
+		return nil, err
+	}
+
+	return &m, nil
+}
+
+// GetJSON returns a JSON-formatted string containing memory information.
+// It first attempts to retrieve memory data from the configuration via getMemoryFromConfig().
+// If configuration data is available and valid, it uses that data.
+// Otherwise, if the "Memory" flag in configuration is enabled, it collects memory statistics
+// directly from the system using gopsutil's VirtualMemory and SwapMemory functions.
+// On errors during data retrieval or JSON marshaling, it logs the error and returns an empty JSON object "{}".
 func GetJSON() string {
 	m := Mem{}
-	if Cfg.Data.GetBool("Memory") {
-		vm, err := mem.VirtualMemory()
-		L.Error(err)
-		swp, err := mem.SwapMemory()
-		L.Error(err)
 
-		m.getTotal(vm)
-		m.getUsed(vm)
-		m.getFree(vm)
-		m.getCached(vm)
-		m.getAvailable(vm)
-		m.getSwap(swp)
-		m.getVideo(vm)
+	memFromCfg, err := getMemoryFromConfig()
+	if err != nil {
+		L.Error(err)
 	}
-	b, err := json.MarshalIndent(m, "", "  ")
-	L.Error(err)
 
+	if memFromCfg != nil {
+		m = *memFromCfg
+	} else {
+		if Cfg.Data.GetBool("Memory") {
+			vm, err := mem.VirtualMemory()
+			if err != nil {
+				L.Error(err)
+				return "{}"
+			}
+			swp, err := mem.SwapMemory()
+			if err != nil {
+				L.Error(err)
+				return "{}"
+			}
+
+			m.getTotal(vm)
+			m.getUsed(vm)
+			m.getFree(vm)
+			m.getCached(vm)
+			m.getAvailable(vm)
+			m.getSwap(swp)
+			m.getVideo(vm)
+		}
+	}
+
+	b, err := json.MarshalIndent(m, "", "  ")
+	if err != nil {
+		L.Error(err)
+		return "{}"
+	}
 	return string(b)
 }
 
