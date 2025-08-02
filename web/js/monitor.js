@@ -998,12 +998,18 @@ function toggleThemeOnHeaderOrFooterClick() {
 function applySkin() {
     skin = getCookie("skin");
 
+    if (skin === "") {
+        skin = "dark";
+        setCookie("skin", "dark", 99999);
+    }
+
     if (skin == "dark") {
         setDarkSkin();
     } else {
         setLightSkin();
     }
 }
+
 
 function collapseSectionsExceptCpu() {
     toggleStatus("Memory", true);
