@@ -26,57 +26,60 @@ on_runtime:
   #     - bash
   #     - -c
   #     - |
-  #       FREE_OUTPUT=$(free -b); \
-  #       VMSTAT_OUTPUT=$(vmstat); \
-  #       \
-  #       function convert_bytes() { \
-  #           local bytes=$1; \
-  #           local units=("B" "KB" "MB" "GB" "TB"); \
-  #           local unit_index=0; \
-  #           local converted_value=$bytes; \
-  #       \
-  #           if (( bytes > 1024 )); then \
-  #               until (( converted_value < 1024 )) || (( unit_index >= ${#units[@]} )); do \
-  #                   converted_value=$(( converted_value / 1024 )); \
-  #                   (( unit_index++ )); \
-  #               done; \
-  #           fi; \
-  #       \
-  #           echo "$converted_value ${units[$unit_index]}"; \
-  #       }; \
-  #       \
-  #       read -r _ total_b used_b free_b shared_b buff_cache_b available_b <<< "$(echo "$FREE_OUTPUT" | grep 'Mem:')"; \
-  #       read -r _ swap_total_b swap_used_b _ <<< "$(echo "$FREE_OUTPUT" | grep 'Swap:')"; \
-  #       \
-  #       read -r _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ io_wait _ <<< "$(echo "$VMSTAT_OUTPUT" | tail -1)"; \
-  #       \
-  #       used_pct=$(( total_b > 0 ? 100 * used_b / total_b : 0 )); \
-  #       free_pct=$(( total_b > 0 ? 100 * free_b / total_b : 0 )); \
-  #       cached_pct=$(( total_b > 0 ? 100 * buff_cache_b / total_b : 0 )); \
-  #       avail_pct=$(( total_b > 0 ? 100 * available_b / total_b : 0 )); \
-  #       swap_pct=$(( swap_total_b > 0 ? 100 * swap_used_b / swap_total_b : 0 )); \
-  #       \
-  #       read -r total_val total_unit <<< "$(convert_bytes "$total_b")"; \
-  #       read -r used_val used_unit <<< "$(convert_bytes "$used_b")"; \
-  #       read -r free_val free_unit <<< "$(convert_bytes "$free_b")"; \
-  #       read -r cached_val cached_unit <<< "$(convert_bytes "$buff_cache_b")"; \
-  #       read -r available_val available_unit <<< "$(convert_bytes "$available_b")"; \
-  #       read -r swap_total_val swap_total_unit <<< "$(convert_bytes "$swap_total_b")"; \
-  #       read -r swap_used_val swap_used_unit <<< "$(convert_bytes "$swap_used_b")"; \
-  #       \
-  #       JSON_OUTPUT=$( \
-  #           printf '{"memory_info": {' \
-  #           printf '"total": {"total": %d, "total_unit": "%s", "actual": %d, "actual_unit": "%s", "percent": 100},' "$total_val" "$total_unit" "$total_val" "$total_unit"; \
-  #           printf '"used": {"total": %d, "total_unit": "%s", "actual": %d, "actual_unit": "%s", "percent": %d},' "$total_val" "$total_unit" "$used_val" "$used_unit" "$used_pct"; \
-  #           printf '"free": {"total": %d, "total_unit": "%s", "actual": %d, "actual_unit": "%s", "percent": %d},' "$total_val" "$total_unit" "$free_val" "$free_unit" "$free_pct"; \
-  #           printf '"cached": {"total": %d, "total_unit": "%s", "actual": %d, "actual_unit": "%s", "percent": %d},' "$total_val" "$total_unit" "$cached_val" "$cached_unit" "$cached_pct"; \
-  #           printf '"available": {"total": %d, "total_unit": "%s", "actual": %d, "actual_unit": "%s", "percent": %d},' "$total_val" "$total_unit" "$available_val" "$available_unit" "$avail_pct"; \
-  #           printf '"swap": {"total": %d, "total_unit": "%s", "actual": %d, "actual_unit": "%s", "percent": %d},' "$swap_total_val" "$swap_total_unit" "$swap_used_val" "$swap_used_unit" "$swap_pct"; \
-  #           printf '"io_wait": {"total": 100, "total_unit": "%%", "actual": %d, "actual_unit": "%%", "percent": %d}' "$io_wait" "$io_wait"; \
-  #           printf '}}'; \
-  #       ); \
-  #       \
-  #       echo "$JSON_OUTPUT";
+  #       FREE_OUTPUT=$(free -b)
+  #       VMSTAT_OUTPUT=$(vmstat)
+
+  #       function convert_bytes() {
+  #           local bytes=$1
+  #           local units=("B" "KB" "MB" "GB" "TB")
+  #           local unit_index=0
+  #           local converted_value=$bytes
+
+  #           if (( bytes > 1024 )); then
+  #               until (( converted_value < 1024 )) || (( unit_index >= ${#units[@]} )); do
+  #                   converted_value=$(( converted_value / 1024 ))
+  #                   (( unit_index++ ))
+  #               done
+  #           fi
+
+  #           echo "$converted_value ${units[$unit_index]}"
+  #       }
+
+  #       read -r _ total_b used_b free_b shared_b buff_cache_b available_b <<< "$(echo "$FREE_OUTPUT" | grep 'Mem:')"
+  #       read -r _ swap_total_b swap_used_b _ <<< "$(echo "$FREE_OUTPUT" | grep 'Swap:')"
+
+  #       read -r _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ io_wait _ <<< "$(echo "$VMSTAT_OUTPUT" | tail -1)"
+
+  #       used_pct=$(( total_b > 0 ? 100 * used_b / total_b : 0 ))
+  #       free_pct=$(( total_b > 0 ? 100 * free_b / total_b : 0 ))
+  #       cached_pct=$(( total_b > 0 ? 100 * buff_cache_b / total_b : 0 ))
+  #       avail_pct=$(( total_b > 0 ? 100 * available_b / total_b : 0 ))
+  #       swap_pct=$(( swap_total_b > 0 ? 100 * swap_used_b / swap_total_b : 0 ))
+
+  #       read -r total_val total_unit <<< "$(convert_bytes "$total_b")"
+  #       read -r used_val used_unit <<< "$(convert_bytes "$used_b")"
+  #       read -r free_val free_unit <<< "$(convert_bytes "$free_b")"
+  #       read -r cached_val cached_unit <<< "$(convert_bytes "$buff_cache_b")"
+  #       read -r available_val available_unit <<< "$(convert_bytes "$available_b")"
+  #       read -r swap_total_val swap_total_unit <<< "$(convert_bytes "$swap_total_b")"
+  #       read -r swap_used_val swap_used_unit <<< "$(convert_bytes "$swap_used_b")"
+
+  #       JSON_OUTPUT=$(cat <<EOF
+  #       {
+  #           "memory_info": {
+  #               "total": {"total": $total_val, "total_unit": "$total_unit", "actual": $total_val, "actual_unit": "$total_unit", "percent": 100},
+  #               "used": {"total": $total_val, "total_unit": "$total_unit", "actual": $used_val, "actual_unit": "$used_unit", "percent": $used_pct},
+  #               "free": {"total": $total_val, "total_unit": "$total_unit", "actual": $free_val, "actual_unit": "$free_unit", "percent": $free_pct},
+  #               "cached": {"total": $total_val, "total_unit": "$total_unit", "actual": $cached_val, "actual_unit": "$cached_unit", "percent": $cached_pct},
+  #               "available": {"total": $total_val, "total_unit": "$total_unit", "actual": $available_val, "actual_unit": "$available_unit", "percent": $avail_pct},
+  #               "swap": {"total": $swap_total_val, "total_unit": "$swap_total_unit", "actual": $swap_used_val, "actual_unit": "$swap_used_unit", "percent": $swap_pct},
+  #               "video": {"total": 100, "total_unit": "%%", "actual": $io_wait, "actual_unit": "%%", "percent": $io_wait}
+  #           }
+  #       }
+  #       EOF
+  #       )
+
+  #       echo "$JSON_OUTPUT"
   commands:
     # cpu_temp:
     #   - bash
