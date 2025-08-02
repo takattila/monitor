@@ -448,7 +448,7 @@ function loadCssFromCookie() {
     if (css) {
         loadCSS(css);
     } else {
-        loadCSS("rpi");
+        loadCSS("github_purple");
     }
 }
 

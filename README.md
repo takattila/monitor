@@ -13,7 +13,7 @@ Currently, it is tested on: Raspberry PI 3 Model B, but it can be used on other 
 The web interface is responsive, it has `desktop` and `mobile` modes.
 
 
-![Monitor Service](assets/banner.png)
+![Monitor Service](assets/desktop-github_purple-dark.png)
 
 **It monitors:**
 
