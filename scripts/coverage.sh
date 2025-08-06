@@ -1,24 +1,12 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -e
 
-# List all packages
-all_packages=$(go list ./...)
+# Csak nem-main csomagok listázása
+filtered_packages=$(go list -f '{{.Name}} {{.ImportPath}}' ./... | awk '$1 != "main" {print $2}')
 
-# Filter: only include packages that do NOT contain 'package main'
-filtered_packages=()
-for pkg in $all_packages; do
-  # Get the directory of the package
-  pkg_dir=$(go list -f '{{.Dir}}' "$pkg")
+# Tesztek futtatása párhuzamosan
+go test -coverprofile="coverage.out" -covermode=atomic -v -p 4 $filtered_packages
 
-  # If no 'package main' is found in the files, include the package
-  if ! grep -q '^package main' "$pkg_dir"/*.go 2>/dev/null; then
-    filtered_packages+=("$pkg")
-  fi
-done
-
-# Run tests on the filtered packages
-go test -coverprofile="coverage.out" -covermode=atomic -v "${filtered_packages[@]}"
-
-# Generate coverage report
+# Lefedettségi jelentés
 go tool cover -func=coverage.out
 
