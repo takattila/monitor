@@ -7,15 +7,20 @@ import (
 // MarshalFunc is a function prototype that can be overridden in tests.
 type MarshalFunc func(v interface{}) ([]byte, error)
 
+var (
+	jsonUnmarshal = json.Unmarshal
+	jsonMarshal   = json.Marshal
+)
+
 // MergeJSON merges two JSON objects (source into destination).
 // A variadic `marshalFunc` is accepted to allow for mocking in tests.
-func MergeJSON(source, destination json.RawMessage, marshalFunc ...MarshalFunc) (json.RawMessage, error) {
+func MergeJSON(source, destination json.RawMessage) (json.RawMessage, error) {
 	var srcMap, dstMap map[string]interface{}
 
-	if err := json.Unmarshal(destination, &dstMap); err != nil {
+	if err := jsonUnmarshal(destination, &dstMap); err != nil {
 		return nil, err
 	}
-	if err := json.Unmarshal(source, &srcMap); err != nil {
+	if err := jsonUnmarshal(source, &srcMap); err != nil {
 		return nil, err
 	}
 
@@ -23,13 +28,7 @@ func MergeJSON(source, destination json.RawMessage, marshalFunc ...MarshalFunc) 
 		dstMap[k] = v
 	}
 
-	// Use the provided `marshalFunc` if available, otherwise use the standard `json.Marshal`.
-	marshal := json.Marshal
-	if len(marshalFunc) > 0 {
-		marshal = marshalFunc[0]
-	}
-
-	merged, err := marshal(dstMap)
+	merged, err := jsonMarshal(dstMap)
 	if err != nil {
 		return nil, err
 	}
