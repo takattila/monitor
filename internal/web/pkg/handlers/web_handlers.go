@@ -340,7 +340,7 @@ func IPisAllowed(requestIP, allowedIP string, h *Handler) bool {
 		return ret
 	}
 	if allowedIP != requestIP {
-		h.L.Error(fmt.Errorf("IP not allowed: " + requestIP))
+		h.L.Error(fmt.Errorf("IP not allowed: %s", requestIP))
 		return false
 	}
 	return true
