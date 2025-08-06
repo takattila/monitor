@@ -3,8 +3,8 @@ package all
 import (
 	"encoding/json"
 
-	"github.com/sagernet/sing-box/common/badjsonmerge"
 	"github.com/takattila/monitor/internal/api/pkg/cpu"
+	"github.com/takattila/monitor/internal/api/pkg/jsonmerge"
 	"github.com/takattila/monitor/internal/api/pkg/logos"
 	"github.com/takattila/monitor/internal/api/pkg/memory"
 	"github.com/takattila/monitor/internal/api/pkg/model"
@@ -28,7 +28,7 @@ func (r *AllJSONs) GetJSON() string {
 	var err error
 
 	for _, rawSource := range r.RawJSONs {
-		rawDestination, err = badjsonmerge.MergeJSON(rawSource, rawDestination)
+		rawDestination, err = jsonmerge.MergeJSON(rawSource, rawDestination)
 		if err != nil {
 			rawDestination = []byte("{}")
 		}
