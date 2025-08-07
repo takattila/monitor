@@ -10,8 +10,12 @@ import (
 )
 
 var (
-	Cfg *settings.Settings
-	L   logger.Logger
+	Cfg               *settings.Settings
+	L                 logger.Logger
+	jsonUnmarshal     = json.Unmarshal
+	jsonMarshalIndent = json.MarshalIndent
+	memVirtualMemory  = mem.VirtualMemory
+	memSwapMemory     = mem.SwapMemory
 )
 
 // The Mem structure contains the necessary data about the memory.
@@ -83,7 +87,7 @@ func getMemoryFromConfig() (*Mem, error) {
 	L.Debug(out)
 
 	var m Mem
-	err = json.Unmarshal([]byte(out), &m)
+	err = jsonUnmarshal([]byte(out), &m)
 	if err != nil {
 		return nil, err
 	}
@@ -106,19 +110,22 @@ func GetJSON() string {
 	}
 
 	if memFromCfg != nil {
+		L.Debug("Using memory data from script")
 		m = *memFromCfg
 	} else {
 		if Cfg.Data.GetBool("Memory") {
-			vm, err := mem.VirtualMemory()
+			vm, err := memVirtualMemory()
 			if err != nil {
 				L.Error(err)
 				return "{}"
 			}
-			swp, err := mem.SwapMemory()
+			swp, err := memSwapMemory()
 			if err != nil {
 				L.Error(err)
 				return "{}"
 			}
+
+			L.Debug("Using memory data from system")
 
 			m.getTotal(vm)
 			m.getUsed(vm)
@@ -130,7 +137,7 @@ func GetJSON() string {
 		}
 	}
 
-	b, err := json.MarshalIndent(m, "", "  ")
+	b, err := jsonMarshalIndent(m, "", "  ")
 	if err != nil {
 		L.Error(err)
 		return "{}"
