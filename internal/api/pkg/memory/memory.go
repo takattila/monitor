@@ -110,6 +110,7 @@ func GetJSON() string {
 	}
 
 	if memFromCfg != nil {
+		L.Debug("Using memory data from script")
 		m = *memFromCfg
 	} else {
 		if Cfg.Data.GetBool("Memory") {
@@ -123,6 +124,8 @@ func GetJSON() string {
 				L.Error(err)
 				return "{}"
 			}
+
+			L.Debug("Using memory data from system")
 
 			m.getTotal(vm)
 			m.getUsed(vm)
