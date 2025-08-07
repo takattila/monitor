@@ -2,6 +2,7 @@ package memory
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 
@@ -40,6 +41,40 @@ func (a ApiMemorySuite) TestGetMemoryFromConfigSuccess() {
 	a.NotNil(result)
 	a.Equal(1.0, result.MemoryInfo.Total.Total)
 	a.Equal("GB", result.MemoryInfo.Total.TotalUnit)
+}
+
+func (a ApiMemorySuite) TestGetMemoryFromConfigJsonUnmarshalError() {
+	s := getConfig("api", "linux")
+
+	memStruct := Mem{}
+	memStruct.MemoryInfo.Total.Total = 1
+	memStruct.MemoryInfo.Total.TotalUnit = "GB"
+	memStruct.MemoryInfo.Total.Actual = 0.9
+	memStruct.MemoryInfo.Total.ActualUnit = "GB"
+	memStruct.MemoryInfo.Total.Percent = 90
+
+	jsonBytes, err := json.Marshal(memStruct)
+	a.Nil(err)
+
+	s.Data.Set("on_runtime.memory", []string{"echo", string(jsonBytes)})
+	Cfg = s
+	L = logger.New(logger.NoneLevel, logger.ColorOff)
+
+	// Set up the mock function *before* calling the function under test
+	oldJsonUnmarshal := jsonUnmarshal
+	jsonUnmarshal = func(data []byte, v any) error {
+		return errors.New("invalid character 'e' looking for beginning of value")
+	}
+	// Defer the restoration of the original function
+	defer func() { jsonUnmarshal = oldJsonUnmarshal }()
+
+	// Now, call the function under test
+	result, err := getMemoryFromConfig()
+
+	// Assert that an error was returned and the result is nil
+	a.Assertions.Nil(result)
+	a.Assertions.Error(err)
+	a.Contains(err.Error(), "invalid character")
 }
 
 func (a ApiMemorySuite) TestGetMemoryFromConfigInvalidJSON() {
@@ -186,6 +221,105 @@ func (a ApiMemorySuite) TestGetVideo() {
 	a.GreaterOrEqual(m.MemoryInfo.Video.Actual, float64(0))
 	a.NotEmpty(m.MemoryInfo.Video.ActualUnit)
 	a.GreaterOrEqual(m.MemoryInfo.Video.Percent, float64(0))
+}
+
+func (a *ApiMemorySuite) TestGetJSONFromConfig() {
+	s := getConfig("api", "linux")
+
+	memStruct := Mem{}
+	memStruct.MemoryInfo.Total.Total = 1.0
+	memStruct.MemoryInfo.Total.TotalUnit = "GB"
+	memStruct.MemoryInfo.Total.Actual = 0.9
+	memStruct.MemoryInfo.Total.ActualUnit = "GB"
+	memStruct.MemoryInfo.Total.Percent = 90.0
+
+	jsonBytes, err := json.Marshal(memStruct)
+	a.Nil(err)
+
+	s.Data.Set("on_runtime.memory", []string{"echo", string(jsonBytes)})
+	Cfg = s
+	L = logger.New(logger.NoneLevel, logger.ColorOff)
+
+	oldJsonUnmarshal := jsonUnmarshal
+	jsonUnmarshal = func(data []byte, v any) error {
+		return oldJsonUnmarshal(data, v)
+	}
+	defer func() { jsonUnmarshal = oldJsonUnmarshal }()
+
+	resultJSON := GetJSON()
+
+	a.NotEqual("{}", resultJSON)
+
+	expectedJSON, err := json.MarshalIndent(memStruct, "", "  ")
+	a.Nil(err)
+
+	a.Equal(string(expectedJSON), resultJSON)
+}
+
+func (a *ApiMemorySuite) TestGetJSONVirtualMemoryError() {
+	s := getConfig("api", "linux")
+	s.Data.Set("Memory", true)
+	Cfg = s
+	L = logger.New(logger.NoneLevel, logger.ColorOff)
+
+	oldVirtualMemory := memVirtualMemory
+	memVirtualMemory = func() (*mem.VirtualMemoryStat, error) {
+		return nil, errors.New("mocked VirtualMemory error")
+	}
+	defer func() { memVirtualMemory = oldVirtualMemory }()
+
+	oldSwapMemory := memSwapMemory
+	memSwapMemory = func() (*mem.SwapMemoryStat, error) {
+		return &mem.SwapMemoryStat{}, nil
+	}
+	defer func() { memSwapMemory = oldSwapMemory }()
+
+	result := GetJSON()
+
+	a.Equal("{}", result)
+}
+
+func (a *ApiMemorySuite) TestGetJSONSwapMemoryError() {
+	s := getConfig("api", "linux")
+	s.Data.Set("Memory", true)
+	Cfg = s
+	L = logger.New(logger.NoneLevel, logger.ColorOff)
+
+	oldMemVirtualMemory := memVirtualMemory
+	memVirtualMemory = func() (*mem.VirtualMemoryStat, error) {
+		return &mem.VirtualMemoryStat{}, nil
+	}
+	defer func() { memVirtualMemory = oldMemVirtualMemory }()
+
+	oldMemSwapMemory := memSwapMemory
+	memSwapMemory = func() (*mem.SwapMemoryStat, error) {
+		return nil, errors.New("mocked SwapMemory error")
+	}
+	defer func() { memSwapMemory = oldMemSwapMemory }()
+
+	result := GetJSON()
+
+	a.Equal("{}", result)
+}
+
+func (a *ApiMemorySuite) TestGetJSONMarshalError() {
+	s := getConfig("api", "linux")
+	memStruct := Mem{}
+	jsonBytes, err := json.Marshal(memStruct)
+	a.Nil(err)
+	s.Data.Set("on_runtime.memory", []string{"echo", string(jsonBytes)})
+	Cfg = s
+	L = logger.New(logger.NoneLevel, logger.ColorOff)
+
+	oldJsonMarshalIndent := jsonMarshalIndent
+	jsonMarshalIndent = func(v any, prefix, indent string) ([]byte, error) {
+		return nil, errors.New("mocked json.MarshalIndent error")
+	}
+	defer func() { jsonMarshalIndent = oldJsonMarshalIndent }()
+
+	result := GetJSON()
+
+	a.Equal("{}", result)
 }
 
 func getConfig(service, system string) *settings.Settings {
