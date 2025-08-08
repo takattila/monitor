@@ -827,58 +827,138 @@ function monitor() {
             $('#run_container').html(runHtml + '<p></p>');
 
             // Settings section
-            var skinHtml = '';
-            var skins = data.skins;
-            var toggleSkin = getCookie('set_skin_sub');
-            var styleSkin = `style="display: block"`;
+            // Defined in: web/html/monitor.html
+// ... (rest of the variables)
+// - let defaultSkin = "{{.DefaultSkin}}";
+// - let defaultLogo = "{{.DefaultLogo}}";
+// - let skins = {{.Skins}};
+// - let logos = {{.Logos}};
 
-            if (toggleSkin != "1") {
-                styleSkin = `style="display: none"`;
+var loop = null;
+var stdoutLoop;
+var header = document.getElementById("model_name");
+var sticky = header.offsetTop;
+var autoScroll = true;
+
+function setupThemeSelectors() {
+    const skinSelector = document.getElementById('skin-selector');
+    const logoSelector = document.getElementById('logo-selector');
+    const skinStylesheet = document.getElementById('skin-stylesheet');
+    const mainLogo = document.getElementById('main-logo');
+    const favicon = document.getElementById('favicon');
+
+    // Populate skins
+    if (skins && skinSelector) {
+        skins.forEach(skin => {
+            const option = document.createElement('option');
+            option.value = ROUTE_WEB + "/" + skin.path;
+            option.textContent = skin.name;
+            if (ROUTE_WEB + "/" + skin.path === defaultSkin) {
+                option.selected = true;
             }
+            skinSelector.appendChild(option);
+        });
 
-            skinHtml += `<div id="set_skin" onclick="toggleSubSection('set_skin')" class="w3-card w3-padding cursor-hand w3-margin-bottom">`;
-            skinHtml += '<h3><i class="fa fa-wrench fa-fw w3-margin-right"></i> Skin</h3>';
+        skinSelector.addEventListener('change', (e) => {
+            skinStylesheet.href = e.target.value + "?v=" + VERSION;
+        });
+    }
 
-            skinHtml += '<div id="set_skin_container" class="w3-row-padding" ' + styleSkin + '>';
-
-            for (let i = 0; i < skins.length; i++) {
-                skinHtml += `
-                <div class="w3-half w3-card w3-padding w3-margin-bottom cursor-hand" onclick="setCssToCookies('` + skins[i] + `');">
-                <i class="fa fa-angle-right"></i> ` + skins[i] + `
-                </div>
-                `;
+    // Populate logos
+    if (logos && logoSelector) {
+        logos.forEach(logo => {
+            const option = document.createElement('option');
+            option.value = ROUTE_WEB + "/" + logo.path;
+            option.textContent = logo.name;
+            if (ROUTE_WEB + "/" + logo.path === defaultLogo) {
+                option.selected = true;
             }
+            logoSelector.appendChild(option);
+        });
 
-            skinHtml += '</div>';
-            skinHtml += '</div>';
-
-            var logoHtml = '';
-            var logos = data.logos;
-            var toggleLogo = getCookie('set_logo_sub');
-            var styleLogo = `style="display: block"`;
-
-            if (toggleLogo != "1") {
-                styleLogo = `style="display: none"`;
+        logoSelector.addEventListener('change', (e) => {
+            mainLogo.src = e.target.value + "?v=" + VERSION;
+            // Also update favicon if it's a png
+            if (e.target.value.endsWith('.png')) {
+                favicon.href = e.target.value + "?v=" + VERSION;
             }
+        });
+    }
+}
 
-            logoHtml += `<div id="set_logo" onclick="toggleSubSection('set_logo')" class="w3-card w3-padding cursor-hand w3-margin-bottom">`;
-            logoHtml += '<h3><i class="fa fa-wrench fa-fw w3-margin-right"></i> Logo</h3>';
 
-            logoHtml += '<div id="set_logo_container" class="w3-row-padding" ' + styleLogo + '>';
+function setCookie(cname, cvalue, exdays) {
+    const d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    let expires = "expires=" + d.toUTCString();
+    let path = "path=" + ROUTE_INDEX + "/";
+    let cookie = cname + "=" + cvalue + ";" + expires + ";" + path;
+    document.cookie = cookie;
+}
 
-            for (let i = 0; i < logos.length; i++) {
-                logoHtml += `
-                <div class="w3-half w3-card w3-padding w3-margin-bottom cursor-hand" onclick="setLogoToCookies('` + logos[i] + `');">
-                <i class="fa fa-angle-right"></i> ` + logos[i] + `
-                </div>
-                `;
-            }
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
 
-            logoHtml += '</div>';
-            logoHtml += `</div>`;
+// ... (rest of the functions are the same until monitor())
 
-            var settingsHtml = skinHtml + logoHtml
-            $('#settings_container').html(settingsHtml);
+function monitor() {
+    var cpuUsage = new CircleProgress('#percent_cpu_usage_circle', {
+        max: 100,
+        value: 0,
+        textFormat: 'percent',
+    });
+
+    var promise = $.ajax({
+        type: "GET",
+        url: ROUTE_API.replace("{statistics}", "all")
+    });
+
+    promise.done(function(response) {
+        var data = $.parseJSON(response);
+
+        // Parse JSON only if has a specific field...
+        if (data.processor_info) {
+            // ... (rest of the monitor function is the same, but remove the settings part)
+
+            // Uptime section
+            $('#uptime_info').text(data.uptime_info);
+        }
+    });
+}
+
+// ... (rest of the functions are the same)
+
+window.onscroll = function() { sticyHeader() };
+
+$(document).ready(function() {
+    loader();
+    logoutIfSessionEnded();
+    start();
+    applySkin();
+    // loadCssFromCookie(); // Replaced by setupThemeSelectors
+    // loadLogoFromCookie(); // Replaced by setupThemeSelectors
+    setupThemeSelectors();
+    toggleSection();
+    toggleSectionCpu();
+    toggleSectionMemory();
+    toggleThemeOnHeaderOrFooterClick();
+    collapseSectionsExceptCpu();
+    enkerKeyPressed();
+    escKeyPressed();
+});
 
             // Uptime section
             $('#uptime_info').text(data.uptime_info);

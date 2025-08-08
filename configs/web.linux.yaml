@@ -22,6 +22,10 @@ on_start:
   logger:
     level: debug
     color: on
+  ui:
+    skin: "/css/dark.css"
+    logo: "/img/tux.svg"
+    favicon: "/img/tux.png"
 on_runtime:
   allowed_ip: 0.0.0.0
   interval_seconds: 1

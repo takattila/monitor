@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -40,7 +42,7 @@ type (
 )
 
 var (
-	gitRootPath = strings.ReplaceAll(common.Cli([]string{"bash", "-c", "git rev-parse --show-toplevel"}), "\n", "")
+	gitRootPath = getGitRootPath()
 	s           = getConfig("web", "linux")
 	h           = &Handler{
 		ProgramDir:    gitRootPath,
@@ -56,6 +58,53 @@ var (
 
 	r = chi.NewRouter()
 )
+
+func getGitRootPath() string {
+	gitRootPath := strings.ReplaceAll(common.Cli([]string{"bash", "-c", "git rev-parse --show-toplevel"}), "\n", "")
+	if runtime.GOOS == "windows" {
+		// On Windows, Git Bash returns a path like /c/Users/... which needs to be converted
+		// to a proper Windows path like C:\Users\...
+		if strings.HasPrefix(gitRootPath, "/") {
+			drive := string(gitRootPath[1])
+			gitRootPath = drive + ":" + gitRootPath[2:]
+		}
+		gitRootPath = filepath.FromSlash(gitRootPath)
+	}
+	return gitRootPath
+}
+
+func (a *WebHandlersSuite) TestDiscoverThemes() {
+	// Create a temporary directory for testing
+	tempDir, err := os.MkdirTemp("", "test-themes")
+	a.NoError(err)
+	defer os.RemoveAll(tempDir)
+
+	// Create some dummy files
+	_, err = os.Create(filepath.Join(tempDir, "style.css"))
+	a.NoError(err)
+	_, err = os.Create(filepath.Join(tempDir, "logo.svg"))
+	a.NoError(err)
+	_, err = os.Create(filepath.Join(tempDir, "logo.png"))
+	a.NoError(err)
+	_, err = os.Create(filepath.Join(tempDir, "other.txt"))
+	a.NoError(err)
+
+	// Test case 1: Discover CSS files
+	skins, err := DiscoverThemes(tempDir, ".css")
+	a.NoError(err)
+	a.Len(skins, 1)
+	a.Equal("Style", skins[0].Name)
+	a.Equal(filepath.ToSlash(filepath.Join(filepath.Base(tempDir), "style.css")), skins[0].Path)
+
+	// Test case 2: Discover SVG and PNG files
+	logos, err := DiscoverThemes(tempDir, ".svg", ".png")
+	a.NoError(err)
+	a.Len(logos, 2)
+
+	// Test case 3: Directory does not exist
+	_, err = DiscoverThemes("non-existent-dir", ".css")
+	a.Error(err)
+}
 
 func (a WebHandlersSuite) TestInternalNotAuthenticated() {
 	go startWebServer(a.T())

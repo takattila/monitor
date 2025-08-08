@@ -1,12 +1,13 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
 	"strings"
-	"text/template"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -36,6 +37,12 @@ type (
 		Url  string
 		Port int
 	}
+
+	// Theme represents a selectable skin or logo
+	Theme struct {
+		Name string `json:"name"`
+		Path string `json:"path"`
+	}
 )
 
 var getUsername = func(r *http.Request) string {
@@ -61,6 +68,20 @@ func (h *Handler) Internal(w http.ResponseWriter, r *http.Request) {
 					h.FilesDir,
 					h.InternalPage)))
 
+		// Discover skins and logos
+		skins, err := DiscoverThemes(filepath.Join(h.ProgramDir, h.FilesDir, "css"), ".css")
+		if err != nil {
+			h.L.Error(err)
+		}
+		logos, err := DiscoverThemes(filepath.Join(h.ProgramDir, h.FilesDir, "img"), ".svg", ".png")
+		if err != nil {
+			h.L.Error(err)
+		}
+
+		// Marshal UI data to JSON
+		skinsJSON, _ := json.Marshal(skins)
+		logosJSON, _ := json.Marshal(logos)
+
 		data := struct {
 			Version         string
 			RouteSystemCtl  string
@@ -73,6 +94,11 @@ func (h *Handler) Internal(w http.ResponseWriter, r *http.Request) {
 			RouteIndex      string
 			RouteWebPath    string
 			IntervalSeconds int
+			DefaultSkin     string
+			DefaultLogo     string
+			DefaultFavicon  string
+			Skins           template.JS
+			Logos           template.JS
 		}{
 			Version:         fmt.Sprint(t.Year()) + fmt.Sprint(int(t.Month())) + fmt.Sprint(t.YearDay()) + fmt.Sprint(t.Minute()) + fmt.Sprint(t.Second()) + fmt.Sprint(t.Nanosecond()),
 			RouteSystemCtl:  config.GetString(h.Cfg, "on_start.routes.systemctl"),
@@ -85,10 +111,43 @@ func (h *Handler) Internal(w http.ResponseWriter, r *http.Request) {
 			RouteIndex:      config.GetString(h.Cfg, "on_start.routes.index"),
 			RouteWebPath:    config.GetString(h.Cfg, "on_start.routes.web"),
 			IntervalSeconds: config.GetInt(h.Cfg, "on_runtime.interval_seconds"),
+			DefaultSkin:     config.GetString(h.Cfg, "on_start.ui.skin"),
+			DefaultLogo:     config.GetString(h.Cfg, "on_start.ui.logo"),
+			DefaultFavicon:  config.GetString(h.Cfg, "on_start.ui.favicon"),
+			Skins:           template.JS(skinsJSON),
+			Logos:           template.JS(logosJSON),
 		}
 
 		tmpl.Execute(w, data)
 	}
+}
+
+// DiscoverThemes scans a directory for files with given extensions and returns a list of Themes
+func DiscoverThemes(dirPath string, extensions ...string) ([]Theme, error) {
+	var themes []Theme
+	files, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		return nil, fmt.Errorf("could not read directory %s: %w", dirPath, err)
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		for _, ext := range extensions {
+			if filepath.Ext(file.Name()) == ext {
+				name := strings.TrimSuffix(file.Name(), ext)
+				// Capitalize first letter for better display
+				name = strings.ToUpper(string(name[0])) + name[1:]
+				themes = append(themes, Theme{
+					Name: name,
+					Path: filepath.ToSlash(filepath.Join(filepath.Base(dirPath), file.Name())),
+				})
+				break
+			}
+		}
+	}
+	return themes, nil
 }
 
 // Login serves a login page.
@@ -116,6 +175,8 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		tmpl.Execute(w, data)
 	}
 }
+
+// ... (rest of the file is the same)
 
 // =====================================================================================================================================
 //                                                   [ SHOULD BE MOVED INTO API ]
