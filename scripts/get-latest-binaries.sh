@@ -82,7 +82,7 @@ function getWebConfigType {
 }
 
 function getIP {
-    echo "$(hostname)"
+    echo "$(hostname -I | awk '{print $1}')"
 }
 
 function getPort {
