@@ -66,6 +66,24 @@ body::before {
     z-index: -1;
 }
 
+.animateleft-out {
+    position: relative;
+    animation: animateleft-out 0.3s ease;
+}
+@keyframes animateleft-out {
+    from { left: 0; opacity: 1 }
+    to { left: -300px; opacity: 0 }
+}
+
+.animatetop-out {
+    position: relative;
+    animation: animatetop-out 0.3s ease;
+}
+@keyframes animatetop-out {
+    from { top: 0; opacity: 1 }
+    to { top: -300px; opacity: 0 }
+}
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
     border-radius: 10px;
 }

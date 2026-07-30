@@ -215,20 +215,26 @@ function dialogOk({functionToExecute, funcParam, closeId} = {}) {
     if (functionToExecute) {
         functionToExecute(funcParam);
     }
-    $('#dialog_' + closeId).remove();
-    if (isAnyModalOpen() == false) {
-        start();
-    }
+    var $box = $('#dialog_box_' + closeId);
+    $box.addClass('animateleft-out').one('animationend', function() {
+        $('#dialog_' + closeId).remove();
+        if (isAnyModalOpen() == false) {
+            start();
+        }
+    });
 }
 
 function dialogCancel({functionToExecute, funcParam, closeId} = {}) {
     if (functionToExecute) {
         functionToExecute(funcParam);
     }
-    $('#dialog_' + closeId).remove();
-    if (isAnyModalOpen() == false) {
-        start();
-    }
+    var $box = $('#dialog_box_' + closeId);
+    $box.addClass('animateleft-out').one('animationend', function() {
+        $('#dialog_' + closeId).remove();
+        if (isAnyModalOpen() == false) {
+            start();
+        }
+    });
 }
 
 function killProcess(pid, cmd) {
@@ -376,13 +382,14 @@ function copyContent(id) {
 }
 
 function modalClose(id) {
-    start();
-
-    $('#modal_' + id).css('display', "none");
-    $('#modal_loader_' + id).css("display", "block");
-    $('#modal_content_' + id).css("display", "none");
-
-    stopLoopStdout();
+    var $box = $('#modal_box_' + id);
+    $box.addClass('animatetop-out').one('animationend', function() {
+        $('#modal_' + id).css('display', "none");
+        $('#modal_loader_' + id).css("display", "block");
+        $('#modal_content_' + id).css("display", "none");
+        stopLoopStdout();
+        start();
+    });
 }
 
 function setProgressPresetToCookies(preset) {
