@@ -33,6 +33,7 @@ function setLightSkin() {
     $('.w3-dark').addClass('w3-white').removeClass('w3-dark');
     $('.w3-dark-grey').addClass('w3-light-grey').removeClass('w3-dark-grey');
     $('.w3-text-light-grey').addClass('w3-text-grey').removeClass('w3-text-light-grey');
+    $('body').addClass('light-mode');
     setCookie("skin", "light", Infinity);
 }
 
@@ -42,6 +43,7 @@ function setDarkSkin() {
     $('.w3-white').addClass('w3-dark').removeClass('w3-white');
     $('.w3-light-grey').addClass('w3-dark-grey').removeClass('w3-light-grey');
     $('.w3-text-grey').addClass('w3-text-light-grey').removeClass('w3-text-grey');
+    $('body').removeClass('light-mode');
     setCookie("skin", "dark", Infinity);
 }
 
@@ -113,7 +115,7 @@ function applySkin() {
 }
 
 function loader() {
-    $("body").fadeIn(800)
+    $("body").animate({opacity: 1}, 800);
 }
 
 $(document).ready(function() {

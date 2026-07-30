@@ -1,26 +1,11 @@
-// Defined in: web/html/monitor.html
-// - let ROUTE_SYSTEMCTL = "{{.RouteSystemCtl}}";
-// - let ROUTE_POWER = "{{.RoutePower}}";
-// - let ROUTE_KILL = "{{.RouteKill}}";
-// - let ROUTE_TOGGLE = "{{.RouteToggle}}";
-// - let ROUTE_LOGOUT = "{{.RouteLogout}}";
-// - let ROUTE_API = "{{.RouteApi}}";
-// - let ROUTE_INDEX = "{{.RouteIndex}}";
-// - let ROUTE_WEB = "{{.RouteWebPath}}";
-// - let ROUTE_RUN = "{{.RouteRun}}";
-// - let INTERVAL_SECONDS = "{{.IntervalSeconds}}";
-// - let VERSION = "{{.Version}}";
-
-var loop = null;
-var stdoutLoop;
-var header = document.getElementById("model_name");
-var sticky = header.offsetTop;
-var autoScroll = true;
+let loop = null;
+let stdoutLoop;
+let autoScroll = true;
 
 function setCookie(cname, cvalue, exdays) {
     const d = new Date();
     if (exdays === Infinity) {
-        d.setFullYear(9999, 11, 31);
+        d.setFullYear(9999, 12, 31);
     } else {
         d.setTime(d.getTime() + (exdays*24*60*60*1000));
     }
@@ -1026,6 +1011,7 @@ function setLightSkin() {
     $('.w3-dark').addClass('w3-white').removeClass('w3-dark');
     $('.w3-dark-grey').addClass('w3-light-grey').removeClass('w3-dark-grey');
     $('.w3-text-light-grey').addClass('w3-text-grey').removeClass('w3-text-light-grey');
+    $('body').addClass('light-mode');
     setCookie("skin", "light", Infinity);
     skin = getCookie("skin");
 }
@@ -1037,6 +1023,7 @@ function setDarkSkin() {
     $('.w3-white').addClass('w3-dark').removeClass('w3-white');
     $('.w3-light-grey').addClass('w3-dark-grey').removeClass('w3-light-grey');
     $('.w3-text-grey').addClass('w3-text-light-grey').removeClass('w3-text-grey');
+    $('body').removeClass('light-mode');
     setCookie("skin", "dark", Infinity);
     skin = getCookie("skin");
 }
@@ -1082,16 +1069,8 @@ function collapseSectionsExceptCpu() {
     $('#logout').click();
 }
 
-function sticyHeader() {
-    if (window.pageYOffset > sticky) {
-        header.classList.add("sticky");
-    } else {
-        header.classList.remove("sticky");
-    }
-}
-
 function loader() {
-    $("body").fadeIn(800);
+    $("body").animate({opacity: 1}, 800);
 }
 
 function enkerKeyPressed() {
@@ -1156,8 +1135,6 @@ function stop() {
     loop = null;
     console.log("stopped setInterval");
 }
-
-window.onscroll = function() { sticyHeader() };
 
 $(document).ready(function() {
     loader();

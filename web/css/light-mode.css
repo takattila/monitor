@@ -1,0 +1,39 @@
+.light-mode #model_name {
+    background: linear-gradient(135deg, #e0e0e0 0%, #c0c0c0 100%) !important;
+    color: #111 !important;
+}
+
+.light-mode .circle-progress-text {
+    fill: #111 !important;
+    stroke: none !important;
+}
+
+.light-mode #vertical_progress_span {
+    color: #fff !important;
+}
+
+.light-mode h2 {
+    color: #111 !important;
+}
+
+.light-mode {
+    color: #111 !important;
+}
+
+.light-mode [class*="w3-text"] {
+    background-color: transparent !important;
+    color: #111 !important;
+}
+
+.light-mode a {
+    color: #111 !important;
+}
+
+.light-mode a:hover {
+    color: #333 !important;
+}
+
+.light-mode .color-text-light-blue,
+.light-mode .color-text-dark-blue {
+    color: #111 !important;
+}
