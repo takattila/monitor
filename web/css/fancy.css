@@ -1,11 +1,7 @@
 /* === FANCY ENHANCEMENTS === */
 
 #model_name {
-    position: sticky;
-    top: 0;
-    z-index: 999;
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    overflow: hidden;
 }
 #model_name::after {
     content: '';
