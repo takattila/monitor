@@ -72,6 +72,14 @@ body::before {
     z-index: -1;
 }
 
+.modal-header-close-font {
+    right: 16px !important;
+}
+
+.modal-header-font {
+    padding-right: 60px;
+}
+
 .animateleft-out {
     position: relative;
     animation: animateleft-out 0.3s ease;
