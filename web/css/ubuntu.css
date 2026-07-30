@@ -522,3 +522,138 @@ footer:hover {
     -webkit-border-radius: 0 14px 14px 0;
     -moz-border-radius: 0 14px 14px 0;
 }
+/* === FANCY ENHANCEMENTS === */
+body {
+    background: linear-gradient(180deg, #772953 0%, rgba(119,41,83,0.95) 100%) fixed;
+}
+
+#model_name {
+    box-shadow: 0 4px 25px rgba(255,156,94,0.3);
+    position: relative;
+    overflow: hidden;
+}
+#model_name::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.w3-card, .w3-card-2 {
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(255,156,94,0.15), 0 1px 3px rgba(0,0,0,0.1);
+    transition: all .3s cubic-bezier(.4,0,.2,1);
+    overflow: hidden;
+}
+.w3-card:hover, .w3-card-2:hover {
+    box-shadow: 0 8px 35px rgba(255,156,94,0.3);
+    transform: translateY(-2px);
+}
+
+.circle-progress-value {
+    filter: drop-shadow(0 0 8px rgba(255,156,94,0.5));
+    transition: stroke .5s ease;
+}
+
+.circle-progress-circle {
+    filter: drop-shadow(0 0 4px rgba(119,41,83,0.3));
+}
+
+.cpu-load {
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: all .3s ease;
+}
+.cpu-load::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+#vertical_progress_wrapper {
+    box-shadow: 0 2px 15px rgba(255,156,94,0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+#vertical_progress_mask {
+    position: relative;
+}
+#vertical_progress_mask::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+}
+
+#vertical_progress_span {
+    text-shadow: 0 0 10px rgba(255,156,94,0.5);
+}
+
+a {
+    transition: color .3s ease, text-shadow .3s ease;
+}
+a:hover {
+    text-shadow: 0 0 8px rgba(255,156,94,0.4);
+}
+
+input[type=text]:focus, input[type=password]:focus {
+    box-shadow: 0 0 0 3px rgba(255,156,94,0.25);
+    border-color: #ff9c5e !important;
+    transition: box-shadow .3s ease, border-color .3s ease;
+}
+
+.w3-red, .w3-blue, .w3-green, .w3-orange, .w3-yellow,
+.w3-dark-red, .w3-light-green {
+    transition: filter .3s ease, box-shadow .3s ease;
+}
+.w3-red:hover, .w3-blue:hover, .w3-green:hover, .w3-orange:hover, .w3-yellow:hover,
+.w3-dark-red:hover, .w3-light-green:hover {
+    filter: brightness(1.1);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255,156,94,0.3) !important;
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,156,94,0.5) !important;
+}
+.custom-scrollbar {
+    scrollbar-color: rgba(255,156,94,0.3) transparent !important;
+}
+.custom-scrollbar.scroll-auto-hide:hover {
+    scrollbar-color: rgba(255,156,94,0.3) transparent !important;
+}
+
+.modal-open {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.w3-dark, .w3-dark-grey {
+    position: relative;
+}
+.w3-dark::before, .w3-dark-grey::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,156,94,0.08) 0%, transparent 50%);
+    pointer-events: none;
+}
