@@ -1,0 +1,73 @@
+/* === FANCY ENHANCEMENTS === */
+
+#model_name {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+}
+#model_name::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.w3-card, .w3-card-2 {
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    transition: box-shadow .2s ease, transform .2s ease;
+}
+.w3-card:hover, .w3-card-2:hover {
+    box-shadow: 0 6px 28px rgba(0,0,0,0.25);
+    transform: translateY(-1px);
+}
+
+.circle-progress-value {
+    filter: drop-shadow(0 0 6px rgba(0,0,0,0.3));
+}
+
+.w3-modal {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.w3-modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.cpu-load {
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+.cpu-load::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at top, rgba(255,255,255,0.03) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+}
