@@ -1073,6 +1073,24 @@ function loader() {
     $("body").animate({opacity: 1}, 800);
 }
 
+var stickyOffset = null;
+
+function sticyHeader() {
+    var mn = document.getElementById('model_name');
+    if (mn) {
+        if (stickyOffset === null) {
+            stickyOffset = mn.offsetTop;
+        }
+        if (window.pageYOffset > stickyOffset) {
+            mn.classList.add("sticky");
+        } else {
+            mn.classList.remove("sticky");
+        }
+    }
+}
+
+window.addEventListener('scroll', sticyHeader);
+
 function enkerKeyPressed() {
     $(document).on('keydown', function(event) {
         if (event.key == "Enter") {
