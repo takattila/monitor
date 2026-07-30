@@ -1138,6 +1138,7 @@ function stop() {
 
 $(document).ready(function() {
     loader();
+    var mn = document.getElementById('model_name'); if (mn) { mn.style.position = 'sticky'; mn.style.top = '0'; mn.style.zIndex = '999'; }
     logoutIfSessionEnded();
     start();
     applySkin();
