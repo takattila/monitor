@@ -1,0 +1,188 @@
+/* Progress Visual Presets */
+/* Each preset uses var() to adapt to the current skin's colors */
+/* When no preset class is present, the skin's base filled style is used */
+
+/* ── Preset 1: Default Ring ───────────────────────────────────────── */
+body.preset-thin .circle-progress-value {
+    stroke-width: 6px;
+    stroke: var(--cp-accent);
+}
+body.preset-thin .circle-progress-circle {
+    stroke-width: 6px;
+    stroke: var(--cp-bg);
+    fill: none;
+}
+body.preset-thin .circle-progress-text {
+    fill: var(--cp-text);
+}
+
+/* ── Preset 2: Dashed Ring ────────────────────────────────────────── */
+body.preset-dashed .circle-progress-value {
+    stroke-width: 6px;
+    stroke: var(--cp-accent);
+    stroke-dasharray: 4 1;
+}
+body.preset-dashed .circle-progress-circle {
+    stroke-width: 6px;
+    stroke: var(--cp-bg);
+    fill: none;
+}
+body.preset-dashed .circle-progress-text {
+    font-weight: bold;
+    fill: var(--cp-text);
+}
+
+/* ── Preset 3: Rounded Cap ────────────────────────────────────────── */
+body.preset-rounded .circle-progress-value {
+    stroke-width: 6px;
+    stroke: var(--cp-accent);
+    stroke-linecap: round;
+}
+body.preset-rounded .circle-progress-circle {
+    stroke-width: 2px;
+    stroke: var(--cp-bg);
+    fill: none;
+}
+
+/* ── Preset 4: Thick Fill ─────────────────────────────────────────── */
+body.preset-jumbo .circle-progress-value {
+    stroke-width: 50px;
+    stroke: var(--cp-accent);
+}
+body.preset-jumbo .circle-progress-circle {
+    stroke-width: 50px;
+    stroke: var(--cp-bg);
+    fill: none;
+}
+body.preset-jumbo .circle-progress-text {
+    fill: var(--cp-text);
+}
+
+/* ── Preset 5: White Ring ─────────────────────────────────────────── */
+body.preset-elegant .circle-progress-value {
+    stroke-width: 6px;
+    stroke: var(--cp-accent);
+    stroke-linecap: round;
+}
+body.preset-elegant .circle-progress-circle {
+    stroke-width: 8px;
+    stroke: var(--cp-bg);
+    fill: none;
+}
+body.preset-elegant .circle-progress-text {
+    fill: var(--cp-text);
+}
+
+/* ── Preset 6: Thick Green ────────────────────────────────────────── */
+body.preset-block .circle-progress-value {
+    stroke-width: 50px;
+    stroke: var(--cp-accent);
+}
+body.preset-block .circle-progress-circle {
+    stroke-width: 40px;
+    stroke: var(--cp-bg);
+    fill: var(--cp-bg);
+}
+body.preset-block .circle-progress-text {
+    fill: var(--cp-text);
+    font-weight: bold;
+}
+
+/* ── Preset 7: Dotted Aqua ────────────────────────────────────────── */
+body.preset-dotted .circle-progress-value {
+    stroke-width: 11px;
+    stroke: var(--cp-accent);
+    stroke-dasharray: 0 23.3;
+    stroke-linecap: round;
+}
+body.preset-dotted .circle-progress-circle {
+    stroke: transparent;
+    fill: none;
+}
+body.preset-dotted .circle-progress-text {
+    font-family: "Varela Round", "Gotham rounded", sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    fill: var(--cp-text);
+}
+
+/* ── Preset 8: Value Circle ───────────────────────────────────────── */
+body.preset-classic .circle-progress-value {
+    stroke-width: 6px;
+    stroke: var(--cp-accent);
+}
+body.preset-classic .circle-progress-circle {
+    stroke-width: 6px;
+    stroke: var(--cp-bg);
+    fill: none;
+}
+body.preset-classic .circle-progress-text {
+    font-weight: bold;
+    fill: var(--cp-text);
+}
+
+/* ── Preset 9: Blue White ─────────────────────────────────────────── */
+body.preset-pill .circle-progress-value {
+    stroke-width: 12px;
+    stroke: var(--cp-accent);
+}
+body.preset-pill .circle-progress-circle {
+    stroke-width: 22px;
+    stroke: var(--cp-bg);
+    fill: var(--cp-bg);
+}
+body.preset-pill .circle-progress-text {
+    font-family: "Georgia", serif;
+    font-size: 13px;
+    fill: var(--cp-text);
+}
+
+/* ── Preset 10: Thin Ring ─────────────────────────────────────────── */
+body.preset-hairline .circle-progress-value {
+    stroke-width: 2px;
+    stroke: var(--cp-accent);
+}
+body.preset-hairline .circle-progress-circle {
+    stroke-width: 2px;
+    stroke: var(--cp-bg);
+    fill: none;
+}
+body.preset-hairline .circle-progress-text {
+    font-family: "Georgia", serif;
+    font-size: 13px;
+}
+
+/* ── Preset 11: Dashed Both ───────────────────────────────────────── */
+body.preset-mesh .circle-progress-value {
+    stroke-width: 6px;
+    stroke: var(--cp-accent);
+    stroke-dasharray: 0.6 3;
+}
+body.preset-mesh .circle-progress-circle {
+    stroke-width: 6px;
+    stroke: var(--cp-accent);
+    stroke-dasharray: 0.6 3;
+    stroke-dashoffset: 1.6;
+    fill: none;
+}
+body.preset-mesh .circle-progress-text {
+    font-family: "Dosis", "Varela Round", "Gotham Rounded Light", sans-serif;
+    fill: var(--cp-text);
+    font-size: 26px;
+}
+
+/* ── Preset 12: Dark Filled ───────────────────────────────────────── */
+body.preset-bold .circle-progress-value {
+    stroke-width: 12px;
+    stroke: var(--cp-accent);
+}
+body.preset-bold .circle-progress-circle {
+    stroke-width: 11px;
+    stroke: var(--cp-bg);
+    fill: var(--cp-bg);
+}
+body.preset-bold .circle-progress-text {
+    font-family: "Georgia", serif;
+    font-size: 13px;
+    fill: var(--cp-text);
+}

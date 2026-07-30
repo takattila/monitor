@@ -1,17 +1,10 @@
 :root {
-    --cp-accent: #c17cff;
-    --cp-bg: #563d7c;
-    --cp-text: white;
+    --cp-accent: #e2b714;
+    --cp-bg: #1a1a2e;
+    --cp-text: #e2b714;
 }
 
-html,
-body,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+html, body, h1, h2, h3, h4, h5, h6 {
     font-family: "Roboto", sans-serif
 }
 
@@ -94,15 +87,16 @@ body {
 }
 
 #model_name {
-    background-color: #704fa2 !important;
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460) !important;
     display: block !important;
     width: 100% !important;
     padding-bottom: 5px;
     padding-top: 5px;
     text-align: center;
     cursor: pointer;
-    color: #FFF;
+    color: #e0e0ff;
     z-index: 99999;
+    letter-spacing: 2px;
 }
 
 #page_container {
@@ -111,18 +105,18 @@ body {
 
 .circle-progress-value {
     stroke-width: 40px;
-    stroke: #c17cff;
+    stroke: #e2b714;
 }
 
 .circle-progress-circle {
     font-size: 180px;
     stroke-width: 40px;
-    stroke: #563d7c;
-    fill: #563d7c;
+    stroke: #1a1a2e;
+    fill: #1a1a2e;
 }
 
 .circle-progress-text {
-    fill: white;
+    fill: #e2b714;
     font-weight: bold;
 }
 
@@ -148,20 +142,22 @@ body {
 }
 
 .cpu-load.w3-yellow {
-    background-color: #c17cff !important;
+    background: linear-gradient(180deg, #e2b714, #c8a40e) !important;
+    color: #1a1a2e !important;
 }
 
 .cpu-load.w3-orange {
-    background-color: #563d7c !important;
+    background: linear-gradient(180deg, #0f3460, #16213e) !important;
+    color: #e2b714 !important;
 }
 
 .cpu-load.w3-red {
-    background-color: #322349 !important;
+    background: linear-gradient(180deg, #533483, #3b1f5e) !important;
+    color: #e0e0ff !important;
 }
 
 .custom-scrollbar {
-    scrollbar-color: rgba(0, 0, 0, .2) transparent;
-    scrollbar-color: var(--palette-black-alpha-20, rgba(0, 0, 0, .2)) transparent;
+    scrollbar-color: rgba(226, 183, 20, .3) transparent;
     scrollbar-width: thin;
 }
 
@@ -170,8 +166,7 @@ body {
 }
 
 .custom-scrollbar.scroll-auto-hide:hover {
-    scrollbar-color: rgba(0, 0, 0, .2) transparent;
-    scrollbar-color: var(--palette-black-alpha-20, rgba(0, 0, 0, .2)) transparent
+    scrollbar-color: rgba(226, 183, 20, .3) transparent
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -181,8 +176,7 @@ body {
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
     border: 6px solid transparent;
-    background: rgba(0, 0, 0, .2);
-    background: var(--palette-black-alpha-20, rgba(0, 0, 0, .2));
+    background: rgba(226, 183, 20, .3);
     border-radius: 10px;
     background-clip: padding-box
 }
@@ -205,14 +199,12 @@ body {
 }
 
 .custom-scrollbar.scroll-auto-hide:hover::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, .2);
-    background: var(--palette-black-alpha-20, rgba(0, 0, 0, .2));
+    background: rgba(226, 183, 20, .3);
     background-clip: padding-box
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, .3);
-    background: var(--palette-black-alpha-30, rgba(0, 0, 0, .3));
+    background: rgba(226, 183, 20, .5);
     background-clip: padding-box;
     border: 4px solid transparent
 }
@@ -239,11 +231,11 @@ body {
 }
 
 a {
-    color: #0b5894 !important;
+    color: #533483 !important;
 }
 
 a:hover {
-    color: #0091ff !important;
+    color: #e2b714 !important;
 }
 
 form {
@@ -255,8 +247,10 @@ input[type=password] {
     width: 100%;
     margin: 8px 0;
     display: inline-block;
-    border: 1px solid #ccc;
+    border: 1px solid #533483;
     box-sizing: border-box;
+    background-color: #0f3460;
+    color: #e0e0ff;
 }
 
 h2:hover,
@@ -268,7 +262,7 @@ footer:hover {
 .w3-green,
 .w3-hover-green:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #533483 !important;
 }
 
 .login-padding {
@@ -276,79 +270,73 @@ footer:hover {
 }
 
 .white {
-    color: #fff !important;
+    color: #e0e0ff !important;
 }
 
 .red {
-    color: #fcee29 !important;
+    color: #e2b714 !important;
 }
 
 .red:hover {
-    color: #563d7c !important;
+    color: #533483 !important;
 }
 
 .w3-red,
 .w3-hover-red:hover {
     color: #fff !important;
-    background-color: #704fa2 !important;
+    background-color: #e2b714 !important;
 }
 
 .w3-orange,
 .w3-hover-orange:hover {
-    color: #000 !important;
-    background-color: #D362BA !important;
+    color: #fff !important;
+    background-color: #0f3460 !important;
 }
 
 .w3-yellow,
 .w3-hover-yellow:hover {
-    color: #000 !important;
-    background-color: #8b62c8 !important;
+    color: #1a1a2e !important;
+    background-color: #e2b714 !important;
 }
 
 .w3-green,
 .w3-hover-green:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #533483 !important;
 }
 
-.w3-green,
-.w3-hover-green:hover {
-    color: #fff !important;
-    background-color: #563d7c !important;
-}
-
-.w3-green,
-.w3-hover-green:hover {
-    color: #fff !important;
-    background-color: #563d7c !important;
+.w3-light-red,
+.w3-hover-light-red:hover {
+    color: #e0e0ff !important;
+    background-color: #2a2a4e !important;
 }
 
 .w3-light-green,
 .w3-hover-light-red:hover {
-    color: #fff !important;
-    background-color: #9c9bb6 !important;
+    color: #e0e0ff !important;
+    background-color: #1a1a2e !important;
 }
 
 .w3-text-green,
 .w3-hover-text-green:hover {
-    color: #fc5329 !important;
+    color: #e2b714 !important;
 }
 
 .w3-blue,
 .w3-hover-blue:hover {
     color: #fff !important;
-    background-color: #322349 !important;
+    background-color: #3b1f5e !important;
 }
 
 .color-dark-blue,
 .color-hover-dark-blue:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #0f3460 !important;
 }
 
 .button-blue {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #533483 !important;
 }
 
 .w3-giant {
@@ -357,74 +345,70 @@ footer:hover {
 
 .w3-text-light-red,
 .w3-hover-text-light-red:hover {
-    color: #e6cfcc !important;
+    color: #9b72cf !important;
 }
 
 .w3-dark-red,
 .w3-hover-dark-red:hover {
     color: #fff !important;
-    background-color: #563d7c88 !important;
+    background-color: #16213e88 !important;
 }
 
 .w3-text-red,
 .w3-hover-text-red:hover {
-    color: #8b62c8 !important;
+    color: #0f3460 !important;
 }
 
 .w3-text-green,
 .w3-hover-text-green:hover {
-    color: #563d7c !important;
-}
-
-.w3-text-green,
-.w3-hover-text-green:hover {
-    color: #563d7c !important;
+    color: #533483 !important;
 }
 
 .w3-text-dark-red,
 .w3-hover-text-dark-red:hover {
-    color: #563d7c88 !important;
+    color: #16213e88 !important;
 }
 
 .w3-text-light-green,
 .w3-hover-text-light-green:hover {
-    color: #cae0cb !important;
+    color: #9b72cf !important;
 }
 
 .color-light-blue,
 .color-hover-light-blue:hover {
-    color: #fff !important;
-    background-color: #9c9bb6 !important;
+    color: #e0e0ff !important;
+    background-color: #16213e !important;
 }
 
 .w3-text-blue,
 .w3-hover-text-blue:hover {
-    color: #c17cff !important;
+    color: #0f3460 !important;
 }
 
 .color-text-light-blue,
 .color-hover-text-light-blue:hover {
-    color: #563d7c !important;
+    color: #e2b714 !important;
 }
 
 .color-text-dark-blue,
 .color-hover-text-dark-blue:hover {
-    color: #563d7c !important;
+    color: #e2b714 !important;
 }
 
 .w3-dark {
-    background-color: #0d1117 !important;
+    background: linear-gradient(135deg, #1a1a2e, #16213e) !important;
 }
 
 .w3-dark-grey {
-    background-color: #0d1117 !important;
+    background: linear-gradient(180deg, #0a0a1a, #0f0f2a) !important;
 }
 
 .w3-card,
 .w3-card-2 {
-    border-color: #29303b;
-    border-style: ridge;
+    border-color: #533483;
+    border-style: solid;
     border-width: 1px;
+    box-shadow: 0 4px 20px rgba(83, 52, 131, 0.15);
 }
 
 .word-wrap {
@@ -480,22 +464,24 @@ footer:hover {
 #vertical_progress_span {
     z-index: 100;
     position: relative;
-    color: white;
+    color: #FFFFFF;
     font-weight: bold;
+    font-size: 24px;
+    text-shadow: 0 0 12px rgba(226, 183, 20, 0.8), 0 0 24px rgba(226, 183, 20, 0.5);
 }
 
 #vertical_progress_wrapper {
     width: 100%;
     margin-top: -18px;
     margin-bottom: 16px;
-    background-color: #563d7c;
+    background: linear-gradient(180deg, #e2b714, #c8a40e) !important;
     border-radius: 14px 14px 14px 14px;
     -webkit-border-radius: 14px 14px 14px 14px;
     -moz-border-radius: 14px 14px 14px 14px;
 }
 
 #vertical_progress_mask {
-    background-color: #8b62c8;
+    background: linear-gradient(180deg, #16213e, #1a1a2e);
     border-radius: 14px 14px 0px 0px;
     -webkit-border-radius: 14px 14px 0px 0px;
     -moz-border-radius: 14px 14px 0px 0px;

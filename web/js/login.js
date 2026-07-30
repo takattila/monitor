@@ -1,6 +1,10 @@
 function setCookie(cname, cvalue, exdays) {
     const d = new Date();
-    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    if (exdays === Infinity) {
+        d.setFullYear(9999, 11, 31);
+    } else {
+        d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    }
     let expires = "expires=" + d.toUTCString();
     let path = "path=" + ROUTE_INDEX + "/";
     let cookie = cname + "=" + cvalue + ";" + expires + ";" + path;
@@ -29,7 +33,7 @@ function setLightSkin() {
     $('.w3-dark').addClass('w3-white').removeClass('w3-dark');
     $('.w3-dark-grey').addClass('w3-light-grey').removeClass('w3-dark-grey');
     $('.w3-text-light-grey').addClass('w3-text-grey').removeClass('w3-text-light-grey');
-    setCookie("skin", "light", 99999);
+    setCookie("skin", "light", Infinity);
 }
 
 function setDarkSkin() {
@@ -38,7 +42,7 @@ function setDarkSkin() {
     $('.w3-white').addClass('w3-dark').removeClass('w3-white');
     $('.w3-light-grey').addClass('w3-dark-grey').removeClass('w3-light-grey');
     $('.w3-text-grey').addClass('w3-text-light-grey').removeClass('w3-text-grey');
-    setCookie("skin", "dark", 99999);
+    setCookie("skin", "dark", Infinity);
 }
 
 function toggleThemeOnHeaderOrFooterClick() {
@@ -98,7 +102,7 @@ function applySkin() {
 
     if (skin === "") {
         skin = "dark"; 
-        setCookie("skin", "dark", 99999);
+        setCookie("skin", "dark", Infinity);
     }
 
     if (skin == "dark") {

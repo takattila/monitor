@@ -19,7 +19,11 @@ var autoScroll = true;
 
 function setCookie(cname, cvalue, exdays) {
     const d = new Date();
-    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    if (exdays === Infinity) {
+        d.setFullYear(9999, 11, 31);
+    } else {
+        d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    }
     let expires = "expires=" + d.toUTCString();
     let path = "path=" + ROUTE_INDEX + "/";
     let cookie = cname + "=" + cvalue + ";" + expires + ";" + path;
@@ -396,6 +400,20 @@ function modalClose(id) {
     stopLoopStdout();
 }
 
+function setProgressPresetToCookies(preset) {
+    setCookie("preset", preset, Infinity);
+    reload();
+}
+
+function loadProgressPresetFromCookie() {
+    var preset = getCookie("preset");
+    if (!preset) {
+        preset = "block";
+        setCookie("preset", "block", Infinity);
+    }
+    document.body.classList.add('preset-' + preset);
+}
+
 function reload() {
     window.location.reload();
 }
@@ -416,7 +434,7 @@ function loadLogoSvg(logo) {
 }
 
 function setLogoToCookies(logo) {
-    setCookie("logo", logo, 99999);
+    setCookie("logo", logo, Infinity);
     reload();
 }
 
@@ -439,7 +457,7 @@ function loadCSS(skin) {
 }
 
 function setCssToCookies(skin) {
-    setCookie("css", skin, 99999);
+    setCookie("css", skin, Infinity);
     reload();
 }
 
@@ -458,10 +476,10 @@ function toggleSubSection(id) {
     var toggle = getCookie(sub);
 
     if (toggle == "1") {
-        $(container).hide(0);
+        $(container).slideUp(200);
         setCookie(sub, "0", 0.0003472222);
     } else {
-        $(container).show(0);
+        $(container).slideDown(200);
         setCookie(sub, "1", 0.0003472222);
     }
 }
@@ -877,7 +895,45 @@ function monitor() {
             logoHtml += '</div>';
             logoHtml += `</div>`;
 
-            var settingsHtml = skinHtml + logoHtml
+            var progressHtml = '';
+            var presets = [
+                ['thin', 'Thin'],
+                ['dashed', 'Dashed'],
+                ['rounded', 'Rounded'],
+                ['jumbo', 'Jumbo'],
+                ['elegant', 'Elegant'],
+                ['block', 'Block'],
+                ['dotted', 'Dotted'],
+                ['classic', 'Classic'],
+                ['pill', 'Pill'],
+                ['hairline', 'Hairline'],
+                ['mesh', 'Mesh'],
+                ['bold', 'Bold']
+            ];
+            var toggleProgress = getCookie('set_progress_sub');
+            var styleProgress = `style="display: block"`;
+
+            if (toggleProgress != "1") {
+                styleProgress = `style="display: none"`;
+            }
+
+            progressHtml += `<div id="set_progress" onclick="toggleSubSection('set_progress')" class="w3-card w3-padding cursor-hand w3-margin-bottom">`;
+            progressHtml += '<h3><i class="fa fa-wrench fa-fw w3-margin-right"></i> Progress</h3>';
+
+            progressHtml += '<div id="set_progress_container" class="w3-row-padding" ' + styleProgress + '>';
+
+            for (let i = 0; i < presets.length; i++) {
+                progressHtml += `
+                <div class="w3-half w3-card w3-padding w3-margin-bottom cursor-hand" onclick="setProgressPresetToCookies('` + presets[i][0] + `');">
+                <i class="fa fa-angle-right"></i> ` + presets[i][1] + `
+                </div>
+                `;
+            }
+
+            progressHtml += '</div>';
+            progressHtml += '</div>';
+
+            var settingsHtml = skinHtml + logoHtml + progressHtml;
             $('#settings_container').html(settingsHtml);
 
             // Uptime section
@@ -970,7 +1026,7 @@ function setLightSkin() {
     $('.w3-dark').addClass('w3-white').removeClass('w3-dark');
     $('.w3-dark-grey').addClass('w3-light-grey').removeClass('w3-dark-grey');
     $('.w3-text-light-grey').addClass('w3-text-grey').removeClass('w3-text-light-grey');
-    setCookie("skin", "light", 99999);
+    setCookie("skin", "light", Infinity);
     skin = getCookie("skin");
 }
 
@@ -981,7 +1037,7 @@ function setDarkSkin() {
     $('.w3-white').addClass('w3-dark').removeClass('w3-white');
     $('.w3-light-grey').addClass('w3-dark-grey').removeClass('w3-light-grey');
     $('.w3-text-grey').addClass('w3-text-light-grey').removeClass('w3-text-grey');
-    setCookie("skin", "dark", 99999);
+    setCookie("skin", "dark", Infinity);
     skin = getCookie("skin");
 }
 
@@ -1000,7 +1056,7 @@ function applySkin() {
 
     if (skin === "") {
         skin = "dark";
-        setCookie("skin", "dark", 99999);
+        setCookie("skin", "dark", Infinity);
     }
 
     if (skin == "dark") {
@@ -1110,6 +1166,7 @@ $(document).ready(function() {
     applySkin();
     loadCssFromCookie();
     loadLogoFromCookie();
+    loadProgressPresetFromCookie();
     toggleSection();
     toggleSectionCpu();
     toggleSectionMemory();

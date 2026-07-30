@@ -1,3 +1,9 @@
+:root {
+    --cp-accent: #ff8d8d;
+    --cp-bg: #f44336;
+    --cp-text: white;
+}
+
 html,
 body,
 h1,
@@ -104,7 +110,7 @@ body {
 }
 
 .circle-progress-value {
-    stroke-width: 50px;
+    stroke-width: 40px;
     stroke: #ff8d8d;
 }
 
@@ -121,6 +127,8 @@ body {
 }
 
 .circle-progress {
+    padding: 10px;
+    box-sizing: border-box;
     width: 100%;
     height: 100%;
 }
