@@ -1,5 +1,7 @@
 /* === FANCY ENHANCEMENTS === */
 
+html { overflow-x: clip !important; }
+
 #model_name {
     position: sticky;
     top: 0;
