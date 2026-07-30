@@ -35,7 +35,13 @@
 
 .w3-modal-content {
     border-radius: 12px;
-    overflow: hidden;
+}
+
+@media (max-width: 600px) {
+    .w3-modal-content {
+        margin: 10px !important;
+        width: calc(100% - 20px) !important;
+    }
 }
 
 .cpu-load {
