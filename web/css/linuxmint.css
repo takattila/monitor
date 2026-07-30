@@ -1,6 +1,6 @@
 :root {
-    --cp-accent: #c17cff;
-    --cp-bg: #563d7c;
+    --cp-accent: #b0d97f;
+    --cp-bg: #7fb440;
     --cp-text: white;
 }
 
@@ -94,7 +94,7 @@ body {
 }
 
 #model_name {
-    background-color: #704fa2 !important;
+    background: linear-gradient(135deg, #7fb440 0%, #5b812d 100%) !important;
     display: block !important;
     width: 100% !important;
     padding-bottom: 5px;
@@ -111,14 +111,14 @@ body {
 
 .circle-progress-value {
     stroke-width: 40px;
-    stroke: #c17cff;
+    stroke: #b0d97f;
 }
 
 .circle-progress-circle {
     font-size: 180px;
     stroke-width: 40px;
-    stroke: #563d7c;
-    fill: #563d7c;
+    stroke: #7fb440;
+    fill: #7fb440;
 }
 
 .circle-progress-text {
@@ -148,15 +148,15 @@ body {
 }
 
 .cpu-load.w3-yellow {
-    background-color: #c17cff !important;
+    background-color: #b0d97f !important;
 }
 
 .cpu-load.w3-orange {
-    background-color: #563d7c !important;
+    background-color: #7fb440 !important;
 }
 
 .cpu-load.w3-red {
-    background-color: #322349 !important;
+    background-color: #5b812d !important;
 }
 
 .custom-scrollbar {
@@ -268,7 +268,7 @@ footer:hover {
 .w3-green,
 .w3-hover-green:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #5b812d !important;
 }
 
 .login-padding {
@@ -280,75 +280,75 @@ footer:hover {
 }
 
 .red {
-    color: #fcee29 !important;
+    color: #7a1009 !important;
 }
 
 .red:hover {
-    color: #563d7c !important;
+    color: #7fb440 !important;
 }
 
 .w3-red,
 .w3-hover-red:hover {
     color: #fff !important;
-    background-color: #704fa2 !important;
+    background-color: #7fb440 !important;
 }
 
 .w3-orange,
 .w3-hover-orange:hover {
     color: #000 !important;
-    background-color: #D362BA !important;
+    background-color: #cbeda2 !important;
 }
 
 .w3-yellow,
 .w3-hover-yellow:hover {
     color: #000 !important;
-    background-color: #8b62c8 !important;
+    background-color: #b0d97f !important;
 }
 
 .w3-green,
 .w3-hover-green:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #5b812d !important;
 }
 
 .w3-green,
 .w3-hover-green:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #5b812d !important;
 }
 
 .w3-green,
 .w3-hover-green:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #5b812d !important;
 }
 
 .w3-light-green,
 .w3-hover-light-red:hover {
     color: #fff !important;
-    background-color: #9c9bb6 !important;
+    background-color: #a2a89b !important;
 }
 
 .w3-text-green,
 .w3-hover-text-green:hover {
-    color: #fc5329 !important;
+    color: #8125b2 !important;
 }
 
 .w3-blue,
 .w3-hover-blue:hover {
     color: #fff !important;
-    background-color: #322349 !important;
+    background-color: #44883c !important;
 }
 
 .color-dark-blue,
 .color-hover-dark-blue:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #7fb440 !important;
 }
 
 .button-blue {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #7fb440 !important;
 }
 
 .w3-giant {
@@ -363,27 +363,27 @@ footer:hover {
 .w3-dark-red,
 .w3-hover-dark-red:hover {
     color: #fff !important;
-    background-color: #563d7c88 !important;
+    background-color: #7fb44088 !important;
 }
 
 .w3-text-red,
 .w3-hover-text-red:hover {
-    color: #8b62c8 !important;
+    color: #b0d97f !important;
 }
 
 .w3-text-green,
 .w3-hover-text-green:hover {
-    color: #563d7c !important;
+    color: #79a543 !important;
 }
 
 .w3-text-green,
 .w3-hover-text-green:hover {
-    color: #563d7c !important;
+    color: #79a543 !important;
 }
 
 .w3-text-dark-red,
 .w3-hover-text-dark-red:hover {
-    color: #563d7c88 !important;
+    color: #7fb44088 !important;
 }
 
 .w3-text-light-green,
@@ -394,35 +394,35 @@ footer:hover {
 .color-light-blue,
 .color-hover-light-blue:hover {
     color: #fff !important;
-    background-color: #9c9bb6 !important;
+    background-color: #a2a89b !important;
 }
 
 .w3-text-blue,
 .w3-hover-text-blue:hover {
-    color: #c17cff !important;
+    color: #44883c !important;
 }
 
 .color-text-light-blue,
 .color-hover-text-light-blue:hover {
-    color: #563d7c !important;
+    color: #8fc153 !important;
 }
 
 .color-text-dark-blue,
 .color-hover-text-dark-blue:hover {
-    color: #563d7c !important;
+    color: #7fb440 !important;
 }
 
 .w3-dark {
-    background-color: #0d1117 !important;
+    background-color: #1a1a1a !important;
 }
 
 .w3-dark-grey {
-    background-color: #0d1117 !important;
+    background-color: #1a1a1a !important;
 }
 
 .w3-card,
 .w3-card-2 {
-    border-color: #29303b;
+    border-color: #2d4a13;
     border-style: ridge;
     border-width: 1px;
 }
@@ -488,14 +488,14 @@ footer:hover {
     width: 100%;
     margin-top: -18px;
     margin-bottom: 16px;
-    background-color: #563d7c;
+    background-color: #7fb440;
     border-radius: 14px 14px 14px 14px;
     -webkit-border-radius: 14px 14px 14px 14px;
     -moz-border-radius: 14px 14px 14px 14px;
 }
 
 #vertical_progress_mask {
-    background-color: #8b62c8;
+    background-color: #b0d97f;
     border-radius: 14px 14px 0px 0px;
     -webkit-border-radius: 14px 14px 0px 0px;
     -moz-border-radius: 14px 14px 0px 0px;

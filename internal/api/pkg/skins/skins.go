@@ -21,13 +21,17 @@ func GetJSON() string {
 	files, err := ioutil.ReadDir(SkinsPath)
 	L.Error(err)
 
+	excluded := []string{"progress-presets"}
+
 	var skins []string
 
 	for _, file := range files {
 		ext := filepath.Ext(file.Name())
 		if ext == ".css" {
 			skin := strings.ReplaceAll(file.Name(), ext, "")
-			skins = append(skins, `"`+skin+`"`)
+			if !contains(excluded, skin) {
+				skins = append(skins, `"`+skin+`"`)
+			}
 		}
 	}
 
@@ -39,4 +43,13 @@ func GetJSON() string {
 	L.Error(err)
 
 	return obj
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
 }

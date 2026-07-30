@@ -1,25 +1,14 @@
-// Defined in: web/html/monitor.html
-// - let ROUTE_SYSTEMCTL = "{{.RouteSystemCtl}}";
-// - let ROUTE_POWER = "{{.RoutePower}}";
-// - let ROUTE_KILL = "{{.RouteKill}}";
-// - let ROUTE_TOGGLE = "{{.RouteToggle}}";
-// - let ROUTE_LOGOUT = "{{.RouteLogout}}";
-// - let ROUTE_API = "{{.RouteApi}}";
-// - let ROUTE_INDEX = "{{.RouteIndex}}";
-// - let ROUTE_WEB = "{{.RouteWebPath}}";
-// - let ROUTE_RUN = "{{.RouteRun}}";
-// - let INTERVAL_SECONDS = "{{.IntervalSeconds}}";
-// - let VERSION = "{{.Version}}";
-
-var loop = null;
-var stdoutLoop;
-var header = document.getElementById("model_name");
-var sticky = header.offsetTop;
-var autoScroll = true;
+let loop = null;
+let stdoutLoop;
+let autoScroll = true;
 
 function setCookie(cname, cvalue, exdays) {
     const d = new Date();
-    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    if (exdays === Infinity) {
+        d.setFullYear(9999, 12, 31);
+    } else {
+        d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    }
     let expires = "expires=" + d.toUTCString();
     let path = "path=" + ROUTE_INDEX + "/";
     let cookie = cname + "=" + cvalue + ";" + expires + ";" + path;
@@ -226,20 +215,26 @@ function dialogOk({functionToExecute, funcParam, closeId} = {}) {
     if (functionToExecute) {
         functionToExecute(funcParam);
     }
-    $('#dialog_' + closeId).remove();
-    if (isAnyModalOpen() == false) {
-        start();
-    }
+    var $box = $('#dialog_box_' + closeId);
+    $box.addClass('animateleft-out').one('animationend', function() {
+        $('#dialog_' + closeId).remove();
+        if (isAnyModalOpen() == false) {
+            start();
+        }
+    });
 }
 
 function dialogCancel({functionToExecute, funcParam, closeId} = {}) {
     if (functionToExecute) {
         functionToExecute(funcParam);
     }
-    $('#dialog_' + closeId).remove();
-    if (isAnyModalOpen() == false) {
-        start();
-    }
+    var $box = $('#dialog_box_' + closeId);
+    $box.addClass('animateleft-out').one('animationend', function() {
+        $('#dialog_' + closeId).remove();
+        if (isAnyModalOpen() == false) {
+            start();
+        }
+    });
 }
 
 function killProcess(pid, cmd) {
@@ -387,13 +382,28 @@ function copyContent(id) {
 }
 
 function modalClose(id) {
-    start();
+    var $box = $('#modal_box_' + id);
+    $box.addClass('animatetop-out').one('animationend', function() {
+        $('#modal_' + id).css('display', "none");
+        $('#modal_loader_' + id).css("display", "block");
+        $('#modal_content_' + id).css("display", "none");
+        stopLoopStdout();
+        start();
+    });
+}
 
-    $('#modal_' + id).css('display', "none");
-    $('#modal_loader_' + id).css("display", "block");
-    $('#modal_content_' + id).css("display", "none");
+function setProgressPresetToCookies(preset) {
+    setCookie("preset", preset, Infinity);
+    reload();
+}
 
-    stopLoopStdout();
+function loadProgressPresetFromCookie() {
+    var preset = getCookie("preset");
+    if (!preset) {
+        preset = "block";
+        setCookie("preset", "block", Infinity);
+    }
+    document.body.classList.add('preset-' + preset);
 }
 
 function reload() {
@@ -416,7 +426,7 @@ function loadLogoSvg(logo) {
 }
 
 function setLogoToCookies(logo) {
-    setCookie("logo", logo, 99999);
+    setCookie("logo", logo, Infinity);
     reload();
 }
 
@@ -439,7 +449,7 @@ function loadCSS(skin) {
 }
 
 function setCssToCookies(skin) {
-    setCookie("css", skin, 99999);
+    setCookie("css", skin, Infinity);
     reload();
 }
 
@@ -458,10 +468,10 @@ function toggleSubSection(id) {
     var toggle = getCookie(sub);
 
     if (toggle == "1") {
-        $(container).hide(0);
+        $(container).slideUp(200);
         setCookie(sub, "0", 0.0003472222);
     } else {
-        $(container).show(0);
+        $(container).slideDown(200);
         setCookie(sub, "1", 0.0003472222);
     }
 }
@@ -877,7 +887,45 @@ function monitor() {
             logoHtml += '</div>';
             logoHtml += `</div>`;
 
-            var settingsHtml = skinHtml + logoHtml
+            var progressHtml = '';
+            var presets = [
+                ['thin', 'Thin'],
+                ['dashed', 'Dashed'],
+                ['rounded', 'Rounded'],
+                ['jumbo', 'Jumbo'],
+                ['elegant', 'Elegant'],
+                ['block', 'Block'],
+                ['dotted', 'Dotted'],
+                ['classic', 'Classic'],
+                ['pill', 'Pill'],
+                ['hairline', 'Hairline'],
+                ['mesh', 'Mesh'],
+                ['bold', 'Bold']
+            ];
+            var toggleProgress = getCookie('set_progress_sub');
+            var styleProgress = `style="display: block"`;
+
+            if (toggleProgress != "1") {
+                styleProgress = `style="display: none"`;
+            }
+
+            progressHtml += `<div id="set_progress" onclick="toggleSubSection('set_progress')" class="w3-card w3-padding cursor-hand w3-margin-bottom">`;
+            progressHtml += '<h3><i class="fa fa-wrench fa-fw w3-margin-right"></i> Progress</h3>';
+
+            progressHtml += '<div id="set_progress_container" class="w3-row-padding" ' + styleProgress + '>';
+
+            for (let i = 0; i < presets.length; i++) {
+                progressHtml += `
+                <div class="w3-half w3-card w3-padding w3-margin-bottom cursor-hand" onclick="setProgressPresetToCookies('` + presets[i][0] + `');">
+                <i class="fa fa-angle-right"></i> ` + presets[i][1] + `
+                </div>
+                `;
+            }
+
+            progressHtml += '</div>';
+            progressHtml += '</div>';
+
+            var settingsHtml = skinHtml + logoHtml + progressHtml;
             $('#settings_container').html(settingsHtml);
 
             // Uptime section
@@ -970,7 +1018,8 @@ function setLightSkin() {
     $('.w3-dark').addClass('w3-white').removeClass('w3-dark');
     $('.w3-dark-grey').addClass('w3-light-grey').removeClass('w3-dark-grey');
     $('.w3-text-light-grey').addClass('w3-text-grey').removeClass('w3-text-light-grey');
-    setCookie("skin", "light", 99999);
+    $('body').addClass('light-mode');
+    setCookie("skin", "light", Infinity);
     skin = getCookie("skin");
 }
 
@@ -981,7 +1030,8 @@ function setDarkSkin() {
     $('.w3-white').addClass('w3-dark').removeClass('w3-white');
     $('.w3-light-grey').addClass('w3-dark-grey').removeClass('w3-light-grey');
     $('.w3-text-grey').addClass('w3-text-light-grey').removeClass('w3-text-grey');
-    setCookie("skin", "dark", 99999);
+    $('body').removeClass('light-mode');
+    setCookie("skin", "dark", Infinity);
     skin = getCookie("skin");
 }
 
@@ -1000,7 +1050,7 @@ function applySkin() {
 
     if (skin === "") {
         skin = "dark";
-        setCookie("skin", "dark", 99999);
+        setCookie("skin", "dark", Infinity);
     }
 
     if (skin == "dark") {
@@ -1026,17 +1076,27 @@ function collapseSectionsExceptCpu() {
     $('#logout').click();
 }
 
+function loader() {
+    $("body").animate({opacity: 1}, 800);
+}
+
+var stickyOffset = null;
+
 function sticyHeader() {
-    if (window.pageYOffset > sticky) {
-        header.classList.add("sticky");
-    } else {
-        header.classList.remove("sticky");
+    var mn = document.getElementById('model_name');
+    if (mn) {
+        if (stickyOffset === null) {
+            stickyOffset = mn.offsetTop;
+        }
+        if (window.pageYOffset > stickyOffset) {
+            mn.classList.add("sticky");
+        } else {
+            mn.classList.remove("sticky");
+        }
     }
 }
 
-function loader() {
-    $("body").fadeIn(800);
-}
+window.addEventListener('scroll', sticyHeader);
 
 function enkerKeyPressed() {
     $(document).on('keydown', function(event) {
@@ -1101,8 +1161,6 @@ function stop() {
     console.log("stopped setInterval");
 }
 
-window.onscroll = function() { sticyHeader() };
-
 $(document).ready(function() {
     loader();
     logoutIfSessionEnded();
@@ -1110,6 +1168,7 @@ $(document).ready(function() {
     applySkin();
     loadCssFromCookie();
     loadLogoFromCookie();
+    loadProgressPresetFromCookie();
     toggleSection();
     toggleSectionCpu();
     toggleSectionMemory();

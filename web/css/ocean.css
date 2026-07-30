@@ -1,17 +1,10 @@
 :root {
-    --cp-accent: #c17cff;
-    --cp-bg: #563d7c;
-    --cp-text: white;
+    --cp-accent: #00e5ff;
+    --cp-bg: #023047;
+    --cp-text: #00e5ff;
 }
 
-html,
-body,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+html, body, h1, h2, h3, h4, h5, h6 {
     font-family: "Roboto", sans-serif
 }
 
@@ -94,7 +87,7 @@ body {
 }
 
 #model_name {
-    background-color: #704fa2 !important;
+    background: linear-gradient(90deg, #006994, #00b4d8) !important;
     display: block !important;
     width: 100% !important;
     padding-bottom: 5px;
@@ -111,18 +104,18 @@ body {
 
 .circle-progress-value {
     stroke-width: 40px;
-    stroke: #c17cff;
+    stroke: #00e5ff;
 }
 
 .circle-progress-circle {
     font-size: 180px;
     stroke-width: 40px;
-    stroke: #563d7c;
-    fill: #563d7c;
+    stroke: #023047;
+    fill: #023047;
 }
 
 .circle-progress-text {
-    fill: white;
+    fill: #00e5ff;
     font-weight: bold;
 }
 
@@ -148,20 +141,22 @@ body {
 }
 
 .cpu-load.w3-yellow {
-    background-color: #c17cff !important;
+    background: linear-gradient(180deg, #00e5ff, #0099cc) !important;
+    color: #000 !important;
 }
 
 .cpu-load.w3-orange {
-    background-color: #563d7c !important;
+    background: linear-gradient(180deg, #0077b6, #005f8a) !important;
+    color: #fff !important;
 }
 
 .cpu-load.w3-red {
-    background-color: #322349 !important;
+    background: linear-gradient(180deg, #023047, #001a2e) !important;
+    color: #00e5ff !important;
 }
 
 .custom-scrollbar {
-    scrollbar-color: rgba(0, 0, 0, .2) transparent;
-    scrollbar-color: var(--palette-black-alpha-20, rgba(0, 0, 0, .2)) transparent;
+    scrollbar-color: rgba(0, 229, 255, .3) transparent;
     scrollbar-width: thin;
 }
 
@@ -170,8 +165,7 @@ body {
 }
 
 .custom-scrollbar.scroll-auto-hide:hover {
-    scrollbar-color: rgba(0, 0, 0, .2) transparent;
-    scrollbar-color: var(--palette-black-alpha-20, rgba(0, 0, 0, .2)) transparent
+    scrollbar-color: rgba(0, 229, 255, .3) transparent
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -181,8 +175,7 @@ body {
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
     border: 6px solid transparent;
-    background: rgba(0, 0, 0, .2);
-    background: var(--palette-black-alpha-20, rgba(0, 0, 0, .2));
+    background: rgba(0, 229, 255, .3);
     border-radius: 10px;
     background-clip: padding-box
 }
@@ -205,14 +198,12 @@ body {
 }
 
 .custom-scrollbar.scroll-auto-hide:hover::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, .2);
-    background: var(--palette-black-alpha-20, rgba(0, 0, 0, .2));
+    background: rgba(0, 229, 255, .3);
     background-clip: padding-box
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, .3);
-    background: var(--palette-black-alpha-30, rgba(0, 0, 0, .3));
+    background: rgba(0, 229, 255, .5);
     background-clip: padding-box;
     border: 4px solid transparent
 }
@@ -239,11 +230,11 @@ body {
 }
 
 a {
-    color: #0b5894 !important;
+    color: #00b4d8 !important;
 }
 
 a:hover {
-    color: #0091ff !important;
+    color: #00e5ff !important;
 }
 
 form {
@@ -255,8 +246,10 @@ input[type=password] {
     width: 100%;
     margin: 8px 0;
     display: inline-block;
-    border: 1px solid #ccc;
+    border: 1px solid #0077b6;
     box-sizing: border-box;
+    background-color: #023047;
+    color: #00e5ff;
 }
 
 h2:hover,
@@ -268,7 +261,7 @@ footer:hover {
 .w3-green,
 .w3-hover-green:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #0077b6 !important;
 }
 
 .login-padding {
@@ -280,75 +273,69 @@ footer:hover {
 }
 
 .red {
-    color: #fcee29 !important;
+    color: #00e5ff !important;
 }
 
 .red:hover {
-    color: #563d7c !important;
+    color: #0099cc !important;
 }
 
 .w3-red,
 .w3-hover-red:hover {
     color: #fff !important;
-    background-color: #704fa2 !important;
+    background-color: #006994 !important;
 }
 
 .w3-orange,
 .w3-hover-orange:hover {
-    color: #000 !important;
-    background-color: #D362BA !important;
+    color: #fff !important;
+    background-color: #005f8a !important;
 }
 
 .w3-yellow,
 .w3-hover-yellow:hover {
     color: #000 !important;
-    background-color: #8b62c8 !important;
+    background-color: #00e5ff !important;
 }
 
 .w3-green,
 .w3-hover-green:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #0077b6 !important;
 }
 
-.w3-green,
-.w3-hover-green:hover {
+.w3-light-red,
+.w3-hover-light-red:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
-}
-
-.w3-green,
-.w3-hover-green:hover {
-    color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #014f70 !important;
 }
 
 .w3-light-green,
 .w3-hover-light-red:hover {
     color: #fff !important;
-    background-color: #9c9bb6 !important;
+    background-color: #023047 !important;
 }
 
 .w3-text-green,
 .w3-hover-text-green:hover {
-    color: #fc5329 !important;
+    color: #00e5ff !important;
 }
 
 .w3-blue,
 .w3-hover-blue:hover {
     color: #fff !important;
-    background-color: #322349 !important;
+    background-color: #0099cc !important;
 }
 
 .color-dark-blue,
 .color-hover-dark-blue:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #0077b6 !important;
 }
 
 .button-blue {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #0077b6 !important;
 }
 
 .w3-giant {
@@ -357,74 +344,70 @@ footer:hover {
 
 .w3-text-light-red,
 .w3-hover-text-light-red:hover {
-    color: #e6cfcc !important;
+    color: #66d9ff !important;
 }
 
 .w3-dark-red,
 .w3-hover-dark-red:hover {
     color: #fff !important;
-    background-color: #563d7c88 !important;
+    background-color: #00699488 !important;
 }
 
 .w3-text-red,
 .w3-hover-text-red:hover {
-    color: #8b62c8 !important;
+    color: #0099cc !important;
 }
 
 .w3-text-green,
 .w3-hover-text-green:hover {
-    color: #563d7c !important;
-}
-
-.w3-text-green,
-.w3-hover-text-green:hover {
-    color: #563d7c !important;
+    color: #00b4d8 !important;
 }
 
 .w3-text-dark-red,
 .w3-hover-text-dark-red:hover {
-    color: #563d7c88 !important;
+    color: #00699488 !important;
 }
 
 .w3-text-light-green,
 .w3-hover-text-light-green:hover {
-    color: #cae0cb !important;
+    color: #66d9ff !important;
 }
 
 .color-light-blue,
 .color-hover-light-blue:hover {
     color: #fff !important;
-    background-color: #9c9bb6 !important;
+    background-color: #014f70 !important;
 }
 
 .w3-text-blue,
 .w3-hover-text-blue:hover {
-    color: #c17cff !important;
+    color: #0099cc !important;
 }
 
 .color-text-light-blue,
 .color-hover-text-light-blue:hover {
-    color: #563d7c !important;
+    color: #00e5ff !important;
 }
 
 .color-text-dark-blue,
 .color-hover-text-dark-blue:hover {
-    color: #563d7c !important;
+    color: #00e5ff !important;
 }
 
 .w3-dark {
-    background-color: #0d1117 !important;
+    background: linear-gradient(135deg, #001a2e, #023047) !important;
 }
 
 .w3-dark-grey {
-    background-color: #0d1117 !important;
+    background-color: #000d1a !important;
 }
 
 .w3-card,
 .w3-card-2 {
-    border-color: #29303b;
-    border-style: ridge;
+    border-color: #0077b6;
+    border-style: solid;
     border-width: 1px;
+    box-shadow: 0 0 15px rgba(0, 119, 182, 0.15);
 }
 
 .word-wrap {
@@ -480,22 +463,24 @@ footer:hover {
 #vertical_progress_span {
     z-index: 100;
     position: relative;
-    color: white;
+    color: #FFFFFF;
     font-weight: bold;
+    font-size: 24px;
+    text-shadow: 0 0 12px rgba(0, 229, 255, 0.8), 0 0 24px rgba(0, 229, 255, 0.5);
 }
 
 #vertical_progress_wrapper {
     width: 100%;
     margin-top: -18px;
     margin-bottom: 16px;
-    background-color: #563d7c;
+    background: linear-gradient(180deg, #00e5ff, #0099cc) !important;
     border-radius: 14px 14px 14px 14px;
     -webkit-border-radius: 14px 14px 14px 14px;
     -moz-border-radius: 14px 14px 14px 14px;
 }
 
 #vertical_progress_mask {
-    background-color: #8b62c8;
+    background: linear-gradient(180deg, #023047, #001a2e);
     border-radius: 14px 14px 0px 0px;
     -webkit-border-radius: 14px 14px 0px 0px;
     -moz-border-radius: 14px 14px 0px 0px;

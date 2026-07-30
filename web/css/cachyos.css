@@ -1,6 +1,6 @@
 :root {
-    --cp-accent: #c17cff;
-    --cp-bg: #563d7c;
+    --cp-accent: #a78bfa;
+    --cp-bg: #4c1d95;
     --cp-text: white;
 }
 
@@ -94,7 +94,7 @@ body {
 }
 
 #model_name {
-    background-color: #704fa2 !important;
+    background: linear-gradient(135deg, #7c3aed 0%, #2e1065 100%) !important;
     display: block !important;
     width: 100% !important;
     padding-bottom: 5px;
@@ -111,14 +111,14 @@ body {
 
 .circle-progress-value {
     stroke-width: 40px;
-    stroke: #c17cff;
+    stroke: #a78bfa;
 }
 
 .circle-progress-circle {
     font-size: 180px;
     stroke-width: 40px;
-    stroke: #563d7c;
-    fill: #563d7c;
+    stroke: #4c1d95;
+    fill: #4c1d95;
 }
 
 .circle-progress-text {
@@ -148,15 +148,15 @@ body {
 }
 
 .cpu-load.w3-yellow {
-    background-color: #c17cff !important;
+    background-color: #a78bfa !important;
 }
 
 .cpu-load.w3-orange {
-    background-color: #563d7c !important;
+    background-color: #4c1d95 !important;
 }
 
 .cpu-load.w3-red {
-    background-color: #322349 !important;
+    background-color: #2e1065 !important;
 }
 
 .custom-scrollbar {
@@ -239,11 +239,11 @@ body {
 }
 
 a {
-    color: #0b5894 !important;
+    color: #a78bfa !important;
 }
 
 a:hover {
-    color: #0091ff !important;
+    color: #c4b5fd !important;
 }
 
 form {
@@ -268,7 +268,7 @@ footer:hover {
 .w3-green,
 .w3-hover-green:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #2e1065 !important;
 }
 
 .login-padding {
@@ -284,71 +284,71 @@ footer:hover {
 }
 
 .red:hover {
-    color: #563d7c !important;
+    color: #a78bfa !important;
 }
 
 .w3-red,
 .w3-hover-red:hover {
     color: #fff !important;
-    background-color: #704fa2 !important;
+    background-color: #7c3aed !important;
 }
 
 .w3-orange,
 .w3-hover-orange:hover {
-    color: #000 !important;
-    background-color: #D362BA !important;
+    color: #fff !important;
+    background-color: #6d28d9 !important;
 }
 
 .w3-yellow,
 .w3-hover-yellow:hover {
     color: #000 !important;
-    background-color: #8b62c8 !important;
+    background-color: #a78bfa !important;
 }
 
 .w3-green,
 .w3-hover-green:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #2e1065 !important;
 }
 
 .w3-green,
 .w3-hover-green:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #2e1065 !important;
 }
 
 .w3-green,
 .w3-hover-green:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #2e1065 !important;
 }
 
 .w3-light-green,
 .w3-hover-light-red:hover {
     color: #fff !important;
-    background-color: #9c9bb6 !important;
+    background-color: #6b609e !important;
 }
 
 .w3-text-green,
 .w3-hover-text-green:hover {
-    color: #fc5329 !important;
+    color: #a78bfa !important;
 }
 
 .w3-blue,
 .w3-hover-blue:hover {
     color: #fff !important;
-    background-color: #322349 !important;
+    background-color: #2e1065 !important;
 }
 
 .color-dark-blue,
 .color-hover-dark-blue:hover {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #7c3aed !important;
 }
 
 .button-blue {
     color: #fff !important;
-    background-color: #563d7c !important;
+    background-color: #7c3aed !important;
 }
 
 .w3-giant {
@@ -363,27 +363,27 @@ footer:hover {
 .w3-dark-red,
 .w3-hover-dark-red:hover {
     color: #fff !important;
-    background-color: #563d7c88 !important;
+    background-color: #7c3aed88 !important;
 }
 
 .w3-text-red,
 .w3-hover-text-red:hover {
-    color: #8b62c8 !important;
+    color: #a78bfa !important;
 }
 
 .w3-text-green,
 .w3-hover-text-green:hover {
-    color: #563d7c !important;
+    color: #7c3aed !important;
 }
 
 .w3-text-green,
 .w3-hover-text-green:hover {
-    color: #563d7c !important;
+    color: #7c3aed !important;
 }
 
 .w3-text-dark-red,
 .w3-hover-text-dark-red:hover {
-    color: #563d7c88 !important;
+    color: #7c3aed88 !important;
 }
 
 .w3-text-light-green,
@@ -394,35 +394,35 @@ footer:hover {
 .color-light-blue,
 .color-hover-light-blue:hover {
     color: #fff !important;
-    background-color: #9c9bb6 !important;
+    background-color: #6b609e !important;
 }
 
 .w3-text-blue,
 .w3-hover-text-blue:hover {
-    color: #c17cff !important;
+    color: #a78bfa !important;
 }
 
 .color-text-light-blue,
 .color-hover-text-light-blue:hover {
-    color: #563d7c !important;
+    color: #7c3aed !important;
 }
 
 .color-text-dark-blue,
 .color-hover-text-dark-blue:hover {
-    color: #563d7c !important;
+    color: #7c3aed !important;
 }
 
 .w3-dark {
-    background-color: #0d1117 !important;
+    background-color: #0a0018 !important;
 }
 
 .w3-dark-grey {
-    background-color: #0d1117 !important;
+    background-color: #0a0018 !important;
 }
 
 .w3-card,
 .w3-card-2 {
-    border-color: #29303b;
+    border-color: #3b1f6e;
     border-style: ridge;
     border-width: 1px;
 }
@@ -488,14 +488,14 @@ footer:hover {
     width: 100%;
     margin-top: -18px;
     margin-bottom: 16px;
-    background-color: #563d7c;
+    background-color: #4c1d95;
     border-radius: 14px 14px 14px 14px;
     -webkit-border-radius: 14px 14px 14px 14px;
     -moz-border-radius: 14px 14px 14px 14px;
 }
 
 #vertical_progress_mask {
-    background-color: #8b62c8;
+    background-color: #7c3aed;
     border-radius: 14px 14px 0px 0px;
     -webkit-border-radius: 14px 14px 0px 0px;
     -moz-border-radius: 14px 14px 0px 0px;
