@@ -479,13 +479,35 @@ function toggleSubSection(id) {
 }
 
 function getNetworkColors() {
-    var style = getComputedStyle(document.body);
+    var inEl = document.querySelector('#network_container .net-arrow-in');
+    var outEl = document.querySelector('#network_container .net-arrow-out');
+    var cardEl = document.querySelector('#network_container');
+    var card = cardEl ? cardEl.parentElement : null;
+
+    var inColor = inEl ? getComputedStyle(inEl).color : '#00e5ff';
+    var outColor = outEl ? getComputedStyle(outEl).color : '#ff9800';
+
+    var light = false;
+    if (card) {
+        light = isLightColor(getComputedStyle(card).backgroundColor);
+    }
+
     return {
-        in: style.getPropertyValue('--net-in').trim() || '#00e5ff',
-        out: style.getPropertyValue('--net-out').trim() || '#ff9800',
-        grid: style.getPropertyValue('--net-grid').trim() || 'rgba(255,255,255,0.08)',
-        bg: style.getPropertyValue('--net-bg').trim() || 'rgba(255,255,255,0.02)'
+        in: inColor,
+        out: outColor,
+        grid: light ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.10)'
     };
+}
+
+function isLightColor(color) {
+    var m = color.match(/rgba?\((\d+)[,\s]+(\d+)[,\s]+(\d+)/);
+    if (!m) {
+        return false;
+    }
+    var r = Number(m[1]);
+    var g = Number(m[2]);
+    var b = Number(m[3]);
+    return (0.299 * r + 0.587 * g + 0.114 * b) > 128;
 }
 
 function drawNetworkChart(canvas, hist) {
@@ -511,9 +533,6 @@ function drawNetworkChart(canvas, hist) {
 
     ctx.clearRect(0, 0, width, height);
 
-    ctx.fillStyle = colors.bg;
-    ctx.fillRect(0, 0, width, height);
-
     ctx.strokeStyle = colors.grid;
     ctx.lineWidth = 1;
     for (var g = 1; g <= 3; g++) {
@@ -538,6 +557,22 @@ function drawNetworkChart(canvas, hist) {
     drawNetworkSeries(ctx, hist.out, colors.out, width, height, maxVal);
 }
 
+function traceSmoothPath(ctx, points) {
+    for (var i = 0; i < points.length - 1; i++) {
+        var p0 = points[i - 1] || points[i];
+        var p1 = points[i];
+        var p2 = points[i + 1];
+        var p3 = points[i + 2] || p2;
+
+        var cp1x = p1.x + (p2.x - p0.x) / 6;
+        var cp1y = p1.y + (p2.y - p0.y) / 6;
+        var cp2x = p2.x - (p3.x - p1.x) / 6;
+        var cp2y = p2.y - (p3.y - p1.y) / 6;
+
+        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+    }
+}
+
 function drawNetworkSeries(ctx, values, color, width, height, maxVal) {
     var n = values.length;
     if (n < 2) {
@@ -547,13 +582,19 @@ function drawNetworkSeries(ctx, values, color, width, height, maxVal) {
     var step = width / (NETWORK_HISTORY_POINTS - 1);
     var startX = width - (n - 1) * step;
 
-    ctx.beginPath();
-    ctx.moveTo(startX, height);
+    var points = [];
     for (var i = 0; i < n; i++) {
-        var y = height - (values[i] / maxVal) * (height - 4) - 2;
-        ctx.lineTo(startX + i * step, y);
+        points.push({
+            x: startX + i * step,
+            y: height - (values[i] / maxVal) * (height - 4) - 2
+        });
     }
-    ctx.lineTo(width, height);
+
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, height);
+    ctx.lineTo(points[0].x, points[0].y);
+    traceSmoothPath(ctx, points);
+    ctx.lineTo(points[n - 1].x, height);
     ctx.closePath();
     ctx.globalAlpha = 0.15;
     ctx.fillStyle = color;
@@ -561,15 +602,8 @@ function drawNetworkSeries(ctx, values, color, width, height, maxVal) {
     ctx.globalAlpha = 1;
 
     ctx.beginPath();
-    for (var i = 0; i < n; i++) {
-        var x = startX + i * step;
-        var y = height - (values[i] / maxVal) * (height - 4) - 2;
-        if (i === 0) {
-            ctx.moveTo(x, y);
-        } else {
-            ctx.lineTo(x, y);
-        }
-    }
+    ctx.moveTo(points[0].x, points[0].y);
+    traceSmoothPath(ctx, points);
     ctx.strokeStyle = color;
     ctx.lineWidth = 1.5;
     ctx.stroke();
@@ -821,11 +855,11 @@ function monitor() {
                     networkHtml += `
                     <p>
                         <b>[ ` + id + ` ]</b>
-                        <i class="fas fa-angle-double-left w3-text-blue"></i> <b>in</b>
-                        <span class="network-in-value">` + inVal.toFixed(2) + `&nbsp;KB/s</span>
+                        <i class="fas fa-angle-double-left w3-text-blue net-arrow-in"></i> <b>in</b>
+                        <span class="w3-text-blue">` + inVal.toFixed(2) + `&nbsp;KB/s</span>
                         &nbsp;&nbsp;
-                        <i class="fas fa-angle-double-right color-text-dark-blue"></i> <b>out</b>
-                        <span class="network-out-value">` + outVal.toFixed(2) + `&nbsp;KB/s</span>
+                        <i class="fas fa-angle-double-right color-text-dark-blue net-arrow-out"></i> <b>out</b>
+                        <span class="color-text-dark-blue">` + outVal.toFixed(2) + `&nbsp;KB/s</span>
                     </p>
                     <canvas class="network-chart"></canvas>
                     `;

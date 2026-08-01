@@ -104,37 +104,10 @@ body::before {
 
 /* === NETWORK TRAFFIC CHARTS === */
 
-:root {
-    --net-in: #00e5ff;
-    --net-out: #ff9800;
-    --net-grid: rgba(255, 255, 255, 0.08);
-    --net-bg: rgba(255, 255, 255, 0.02);
-}
-
-.light-mode {
-    --net-in: #0097a7;
-    --net-out: #e65100;
-    --net-grid: rgba(0, 0, 0, 0.08);
-    --net-bg: rgba(0, 0, 0, 0.03);
-}
-
 .network-chart {
     width: 100%;
     height: 110px;
     display: block;
     margin-bottom: 10px;
     border-radius: 8px;
-    background: rgba(0, 0, 0, 0.15);
-}
-
-.light-mode .network-chart {
-    background: rgba(0, 0, 0, 0.04);
-}
-
-.network-in-value {
-    color: var(--net-in);
-}
-
-.network-out-value {
-    color: var(--net-out);
 }
