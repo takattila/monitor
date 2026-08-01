@@ -8,7 +8,7 @@
 
 This project provides a powerful all-in-one monitoring and management service stack that can help you keep detailed realtime insights and remote control over your Raspberry PI or Linux machines via an intuitive web interface and API.
 
-Currently, it is tested on: Raspberry PI 3 Model B, but it can be used on other devices as well.
+The project has been tested on Linux systems, including the Raspberry Pi, but it can also run on other devices.
 
 The web interface is responsive, it has `desktop` and `mobile` modes.
 
@@ -21,7 +21,7 @@ The web interface is responsive, it has `desktop` and `mobile` modes.
 - `Memory`: total, used, free, cached, available, swap, video
 - `Services`: listed in: `configs/api.yaml` under: `on_runtime.services_list` section
 - `Top processes`
-- `Network traffic`
+- `Network traffic`: realtime per-interface throughput charts
 - `Storage`
 - `Uptime`
 
@@ -405,19 +405,37 @@ Both the `skin` and the `logo` of the web service can be modified in the web int
 
 ## Available skins
 
+- [cachyos](#cachyos)
+- [candy](#candy)
 - [centos](#centos)
+- [cyber](#cyber)
+- [debian](#debian)
 - [fedora](#fedora)
+- [forest](#forest)
 - [github_blue](#github_blue)
 - [github_green](#github_green)
 - [github_purple](#github_purple)
 - [github_red](#github_red)
 - [github_yellow](#github_yellow)
+- [ice](#ice)
+- [lava](#lava)
+- [linuxmint](#linuxmint)
 - [manjaro](#manjaro)
+- [matrix](#matrix)
+- [midnight](#midnight)
 - [mint](#mint)
+- [ocean](#ocean)
 - [opi](#opi)
+- [proxmox](#proxmox)
 - [redhat](#redhat)
+- [retro](#retro)
+- [royal](#royal)
 - [rpi](#rpi)
+- [steel](#steel)
+- [sunset](#sunset)
 - [suse](#suse)
+- [synthwave](#synthwave)
+- [tokyo](#tokyo)
 - [ubuntu](#ubuntu)
 - [vanilla](#vanilla)
 
@@ -503,17 +521,42 @@ The logos can be found under the [web/img](web/img) directory.
 
 ![Monitor Service](assets/desktop-full-light.png)
 
-## Additinal skins
+## Additional skins
+
+### Cachyos
+
+![Monitor Service](assets/desktop-cachyos-dark.png)
+![Monitor Service](assets/desktop-cachyos-light.png)
+
+### Candy
+
+![Monitor Service](assets/desktop-candy-dark.png)
+![Monitor Service](assets/desktop-candy-light.png)
 
 ### CentOS
 
 ![Monitor Service](assets/desktop-centos-dark.png)
 ![Monitor Service](assets/desktop-centos-light.png)
 
+### Cyber
+
+![Monitor Service](assets/desktop-cyber-dark.png)
+![Monitor Service](assets/desktop-cyber-light.png)
+
+### Debian
+
+![Monitor Service](assets/desktop-debian-dark.png)
+![Monitor Service](assets/desktop-debian-light.png)
+
 ### Fedora
 
 ![Monitor Service](assets/desktop-fedora-dark.png)
 ![Monitor Service](assets/desktop-fedora-light.png)
+
+### Forest
+
+![Monitor Service](assets/desktop-forest-dark.png)
+![Monitor Service](assets/desktop-forest-light.png)
 
 ### github_blue
 
@@ -540,35 +583,100 @@ The logos can be found under the [web/img](web/img) directory.
 ![Monitor Service](assets/desktop-github_yellow-dark.png)
 ![Monitor Service](assets/desktop-github_yellow-light.png)
 
+### Ice
+
+![Monitor Service](assets/desktop-ice-dark.png)
+![Monitor Service](assets/desktop-ice-light.png)
+
+### Lava
+
+![Monitor Service](assets/desktop-lava-dark.png)
+![Monitor Service](assets/desktop-lava-light.png)
+
+### Linuxmint
+
+![Monitor Service](assets/desktop-linuxmint-dark.png)
+![Monitor Service](assets/desktop-linuxmint-light.png)
+
 ### Manjaro
 
 ![Monitor Service](assets/desktop-manjaro-dark.png)
 ![Monitor Service](assets/desktop-manjaro-light.png)
+
+### Matrix
+
+![Monitor Service](assets/desktop-matrix-dark.png)
+![Monitor Service](assets/desktop-matrix-light.png)
+
+### Midnight
+
+![Monitor Service](assets/desktop-midnight-dark.png)
+![Monitor Service](assets/desktop-midnight-light.png)
 
 ### Mint
 
 ![Monitor Service](assets/desktop-mint-dark.png)
 ![Monitor Service](assets/desktop-mint-light.png)
 
+### Ocean
+
+![Monitor Service](assets/desktop-ocean-dark.png)
+![Monitor Service](assets/desktop-ocean-light.png)
+
 ### OPI
 
 ![Monitor Service](assets/desktop-opi-dark.png)
 ![Monitor Service](assets/desktop-opi-light.png)
+
+### Proxmox
+
+![Monitor Service](assets/desktop-proxmox-dark.png)
+![Monitor Service](assets/desktop-proxmox-light.png)
 
 ### Redhat
 
 ![Monitor Service](assets/desktop-redhat-dark.png)
 ![Monitor Service](assets/desktop-redhat-light.png)
 
+### Retro
+
+![Monitor Service](assets/desktop-retro-dark.png)
+![Monitor Service](assets/desktop-retro-light.png)
+
+### Royal
+
+![Monitor Service](assets/desktop-royal-dark.png)
+![Monitor Service](assets/desktop-royal-light.png)
+
 ### RPI
 
-![Monitor Service](assets/desktop-dark.png)
-![Monitor Service](assets/desktop-light.png)
+![Monitor Service](assets/desktop-rpi-dark.png)
+![Monitor Service](assets/desktop-rpi-light.png)
+
+### Steel
+
+![Monitor Service](assets/desktop-steel-dark.png)
+![Monitor Service](assets/desktop-steel-light.png)
+
+### Sunset
+
+![Monitor Service](assets/desktop-sunset-dark.png)
+![Monitor Service](assets/desktop-sunset-light.png)
 
 ### Suse
 
 ![Monitor Service](assets/desktop-suse-dark.png)
 ![Monitor Service](assets/desktop-suse-light.png)
+
+### Synthwave
+
+![Monitor Service](assets/desktop-synthwave-dark.png)
+![Monitor Service](assets/desktop-synthwave-light.png)
+
+### Tokyo
+
+![Monitor Service](assets/desktop-tokyo-dark.png)
+![Monitor Service](assets/desktop-tokyo-light.png)
 
 ### Ubuntu
 
