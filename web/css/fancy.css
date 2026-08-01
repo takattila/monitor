@@ -111,3 +111,29 @@ body::before {
     margin-bottom: 10px;
     border-radius: 8px;
 }
+
+/* === WEB TERMINAL === */
+
+#terminal_box {
+    width: 100%;
+    height: calc(100vh - 240px);
+    min-height: 220px;
+    padding: 8px;
+    border-radius: 8px;
+    background: #000;
+    box-sizing: border-box;
+}
+
+#terminal_box .terminal {
+    font-size: 14px;
+}
+
+body.light-mode #terminal_box {
+    border: 1px solid #e0e0e0;
+}
+
+@media (max-width: 600px) {
+    #terminal_box .terminal {
+        font-size: 12px;
+    }
+}

@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="{{.RouteWebPath}}/css/progress-presets.css?v={{.Version}}" id="presets">
 <link rel="stylesheet" href="{{.RouteWebPath}}/css/light-mode.css?v={{.Version}}">
 <link rel="stylesheet" href="{{.RouteWebPath}}/css/fancy.css?v={{.Version}}">
+<link rel="stylesheet" href="{{.RouteWebPath}}/css/xterm.css?v={{.Version}}">
 <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto'>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 <link rel="icon" href="{{.RouteWebPath}}/img/rpi.png?v={{.Version}}" type="image/png" id="logo_png">
@@ -163,6 +164,19 @@
                     <div class="w3-container" id="run_container"> </div>
                 </div>
 
+                <!-- Terminal Container -->
+                <div class="w3-container w3-card w3-dark w3-margin-bottom">
+                    <h2 id="terminal" class="w3-text-grey w3-padding-16" data-click-state="1">
+                        <i class="fa fa-laptop-code fa-fw w3-margin-right w3-xxlarge"></i> Terminal
+                    </h2>
+                    <div id="terminal_loader" class="w3-small w3-center" style="display: none;">
+                        <p>
+                            <i class="fa fa-spinner w3-spin" class="modal-loader-duration"></i> Loading data...
+                        </p>
+                    </div>
+                    <div class="w3-container" id="terminal_container"> </div>
+                </div>
+
                 <!-- Settings Container -->
                 <div class="w3-container w3-card w3-dark w3-margin-bottom">
                     <h2 id="settings" class="w3-text-grey w3-padding-16" data-click-state="1">
@@ -244,10 +258,13 @@
         let ROUTE_INDEX = "{{.RouteIndex}}";
         let ROUTE_WEB = "{{.RouteWebPath}}";
         let ROUTE_RUN = "{{.RouteRun}}";
+        let ROUTE_TERMINAL = "{{.RouteTerminal}}";
         let INTERVAL_SECONDS = "{{.IntervalSeconds}}";
         let VERSION = "{{.Version}}";
     </script>
     <script src="{{.RouteWebPath}}/js/circle-progress.js?v={{.Version}}"></script>
+    <script src="{{.RouteWebPath}}/js/xterm.min.js?v={{.Version}}"></script>
+    <script src="{{.RouteWebPath}}/js/xterm-addon-fit.min.js?v={{.Version}}"></script>
     <script src="{{.RouteWebPath}}/js/monitor.js?v={{.Version}}"></script>
 </body>
 

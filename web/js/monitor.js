@@ -1089,6 +1089,120 @@ function toggleSection() {
     });
 }
 
+let terminalSession = null;
+let terminalWS = null;
+let terminalResizeTimer = null;
+
+function openTerminal() {
+    var container = document.getElementById('terminal_container');
+    if (terminalSession) {
+        return;
+    }
+    if (typeof Terminal === "undefined") {
+        container.innerHTML = '<p class="w3-text-red">xterm.js is not loaded.</p>';
+        return;
+    }
+    var div = document.createElement('div');
+    div.id = 'terminal_box';
+    container.innerHTML = '';
+    container.appendChild(div);
+
+    terminalSession = new Terminal({
+        convertEol: true,
+        cursorBlink: true,
+        fontSize: 14,
+        fontFamily: '"Anonymice NF", "Anonymous Pro for Powerline", monospace',
+        theme: { background: '#000000' }
+    });
+    var fitAddon = new FitAddon.FitAddon();
+    terminalSession.loadAddon(fitAddon);
+    terminalSession.open(div);
+
+    var terminalOpened = false;
+
+    var openWebSocket = function() {
+        var protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
+        var url = protocol + location.host + ROUTE_TERMINAL + '?cols=' + terminalSession.cols + '&rows=' + terminalSession.rows;
+        terminalWS = new WebSocket(url);
+
+        terminalWS.onopen = function() {
+            fitAddon.fit();
+            terminalWS.send(JSON.stringify({type: "resize", cols: terminalSession.cols, rows: terminalSession.rows}));
+            terminalSession.focus();
+        };
+
+        terminalWS.onmessage = function(event) {
+            if (event.data instanceof Blob) {
+                event.data.arrayBuffer().then(function(buffer) {
+                    terminalSession.write(new Uint8Array(buffer));
+                });
+            } else {
+                terminalSession.write(event.data);
+            }
+        };
+
+        terminalWS.onclose = function() {
+            closeTerminal(true);
+        };
+    };
+
+    (function waitForVisible() {
+        if (terminalOpened || !terminalSession || !div.isConnected) {
+            return;
+        }
+        if (div.offsetWidth > 0 || div.offsetHeight > 0) {
+            terminalOpened = true;
+            fitAddon.fit();
+            openWebSocket();
+        } else {
+            setTimeout(waitForVisible, 50);
+        }
+    })();
+
+    terminalSession.onData(function(data) {
+        if (terminalWS && terminalWS.readyState === WebSocket.OPEN) {
+            terminalWS.send(JSON.stringify({type: "input", data: data}));
+        }
+    });
+
+    $(window).on('resize.terminal', function() {
+        if (terminalSession && terminalWS) {
+            clearTimeout(terminalResizeTimer);
+            terminalResizeTimer = setTimeout(function() {
+                fitAddon.fit();
+                if (terminalWS.readyState === WebSocket.OPEN) {
+                    terminalWS.send(JSON.stringify({type: "resize", cols: terminalSession.cols, rows: terminalSession.rows}));
+                }
+            }, 150);
+        }
+    });
+}
+
+function closeTerminal() {
+    clearTimeout(terminalResizeTimer);
+    if (terminalWS) {
+        terminalWS.onclose = null;
+        terminalWS.close();
+        terminalWS = null;
+    }
+    if (terminalSession) {
+        terminalSession.dispose();
+        terminalSession = null;
+    }
+    $('#terminal_box').remove();
+    $(window).off('resize.terminal');
+}
+
+function toggleTerminal() {
+    $('#terminal').on('click', function() {
+        if ($(this).attr('data-click-state') == 1) {
+            openTerminal();
+        } else {
+            closeTerminal();
+        }
+    });
+}
+
 function toggleSectionCpu() {
     $('#cpu').on('click', function() {
         if (window.innerWidth > 600) {
@@ -1205,6 +1319,7 @@ function collapseSectionsExceptCpu() {
     $('#network').click();
     $('#storage').click();
     $('#run').click();
+    $('#terminal').click();
     $('#settings').click();
     $('#power').click();
     $('#logout').click();
@@ -1304,6 +1419,7 @@ $(document).ready(function() {
     loadLogoFromCookie();
     loadProgressPresetFromCookie();
     toggleSection();
+    toggleTerminal();
     toggleSectionCpu();
     toggleSectionMemory();
     toggleThemeOnHeaderOrFooterClick();

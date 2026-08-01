@@ -5,13 +5,16 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
 
+	"github.com/coder/websocket"
 	"github.com/go-chi/chi"
 	"github.com/takattila/monitor/internal/common/pkg/config"
 	"github.com/takattila/monitor/internal/web/pkg/auth"
+	"github.com/takattila/monitor/internal/web/pkg/terminal"
 	"github.com/takattila/monitor/pkg/common"
 	"github.com/takattila/monitor/pkg/logger"
 	"github.com/takattila/settings-manager"
@@ -70,6 +73,7 @@ func (h *Handler) Internal(w http.ResponseWriter, r *http.Request) {
 			RouteLogout     string
 			RouteApi        string
 			RouteRun        string
+			RouteTerminal   string
 			RouteIndex      string
 			RouteWebPath    string
 			IntervalSeconds int
@@ -82,6 +86,7 @@ func (h *Handler) Internal(w http.ResponseWriter, r *http.Request) {
 			RouteLogout:     config.GetString(h.Cfg, "on_start.routes.logout"),
 			RouteApi:        config.GetString(h.Cfg, "on_start.routes.api"),
 			RouteRun:        config.GetString(h.Cfg, "on_start.routes.run"),
+			RouteTerminal:   config.GetString(h.Cfg, "on_start.routes.terminal"),
 			RouteIndex:      config.GetString(h.Cfg, "on_start.routes.index"),
 			RouteWebPath:    config.GetString(h.Cfg, "on_start.routes.web"),
 			IntervalSeconds: config.GetInt(h.Cfg, "on_runtime.interval_seconds"),
@@ -251,6 +256,44 @@ func (h *Handler) Run(w http.ResponseWriter, r *http.Request) {
 		h.L.Error(err)
 
 		fmt.Fprintf(w, "%s", resBody)
+	}
+}
+
+// Terminal upgrades the connection to a WebSocket and serves a shell session.
+func (h *Handler) Terminal(w http.ResponseWriter, r *http.Request) {
+	userName := getUsername(r)
+	h.L.Debug("userName:", userName)
+	if userName == "" {
+		http.Redirect(w, r, h.LoginRoute, 302)
+		return
+	}
+
+	if !IPisAllowed(r.RemoteAddr, config.GetString(h.Cfg, "on_runtime.allowed_ip"), h) {
+		return
+	}
+
+	cols := 80
+	rows := 24
+	if v := r.URL.Query().Get("cols"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			cols = n
+		}
+	}
+	if v := r.URL.Query().Get("rows"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			rows = n
+		}
+	}
+
+	conn, err := websocket.Accept(w, r, nil)
+	if err != nil {
+		h.L.Error(err)
+		return
+	}
+	defer conn.Close(websocket.StatusNormalClosure, "")
+
+	if err := terminal.Serve(conn, terminal.DetectShell(), terminal.HomeDir(), cols, rows, config.GetString(h.Cfg, "on_start.terminal_user")); err != nil {
+		h.L.Error(err)
 	}
 }
 

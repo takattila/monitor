@@ -140,7 +140,7 @@ function installServices {
     local programDir="monitor"
     local monitorPath="${basePath}${programDir}"
     local cfgBackupPath="${monitorPath}-cfg-backup"
-    local totalSteps="11"
+    local totalSteps="12"
     local backupCfg="n"
 
     echo -e "- ${YELLOW}[1./${totalSteps}.] ${GREEN}Downloading...${ENDCOLOR}"
@@ -183,7 +183,21 @@ function installServices {
     echo -e "- ${YELLOW}[5./${totalSteps}.] ${GREEN}Change directory to: ${monitorPath}${ENDCOLOR}"
         cd "${monitorPath}"
 
-    echo -e "- ${YELLOW}[6./${totalSteps}.] ${GREEN}Save your credentials${ENDCOLOR}"
+    echo -e "- ${YELLOW}[6./${totalSteps}.] ${GREEN}Set web terminal user...${ENDCOLOR}"
+        local webConfig="${monitorPath}/configs/web.$(getWebConfigType).yaml"
+        local currentTerminalUser
+        currentTerminalUser="$(grep '^  terminal_user:' "${webConfig}" | head -n1 | sed 's/^  terminal_user:[[:space:]]*//; s/"//g' | xargs)"
+        if [[ -n "${currentTerminalUser}" ]]; then
+            echo -e "  - ${YELLOW}Keeping terminal_user: ${currentTerminalUser}${ENDCOLOR}"
+        elif grep -q "^  terminal_user:" "${webConfig}"; then
+            sudo sed -i "s|^  terminal_user:.*|  terminal_user: ${USER}|" "${webConfig}"
+            echo -e "  - ${GREEN}terminal_user: ${USER}${ENDCOLOR}"
+        else
+            sudo sed -i "/^  save_credentials:/a\  terminal_user: ${USER}" "${webConfig}"
+            echo -e "  - ${GREEN}terminal_user: ${USER}${ENDCOLOR}"
+        fi
+
+    echo -e "- ${YELLOW}[7./${totalSteps}.] ${GREEN}Save your credentials${ENDCOLOR}"
         if [[ "$backupCfg" =~ ^([yY][eE][sS]|[yY])$ ]]; then
             echo -e "  - ${YELLOW}Using backup...${ENDCOLOR}"
             sudo chown root:root ${monitorPath}/configs/*.db >/dev/null 2>&1 || true
@@ -191,24 +205,24 @@ function installServices {
             sudo ./cmd/credentials
         fi
 
-    echo -e "- ${YELLOW}[7./${totalSteps}.] ${GREEN}Copy ${programDir}/tools/*.service to /etc/systemd/system...${ENDCOLOR}"
+    echo -e "- ${YELLOW}[8./${totalSteps}.] ${GREEN}Copy ${programDir}/tools/*.service to /etc/systemd/system...${ENDCOLOR}"
         sudo cp tools/*.service /etc/systemd/system
     
-    echo -e "- ${YELLOW}[8./${totalSteps}.] ${GREEN}Reload daemon...${ENDCOLOR}"
+    echo -e "- ${YELLOW}[9./${totalSteps}.] ${GREEN}Reload daemon...${ENDCOLOR}"
         sudo systemctl daemon-reload
 
-    echo -e "- ${YELLOW}[9./${totalSteps}.] ${GREEN}Enabling services...${ENDCOLOR}"
+    echo -e "- ${YELLOW}[10./${totalSteps}.] ${GREEN}Enabling services...${ENDCOLOR}"
         sudo systemctl enable monitor-api.service monitor-web.service
         echo "  - monitor-api: $(sudo systemctl is-enabled monitor-api.service)"
         echo "  - monitor-web: $(sudo systemctl is-enabled monitor-web.service)"
 
-    echo -e "- ${YELLOW}[10./${totalSteps}.] ${GREEN}Starting services...${ENDCOLOR}"
+    echo -e "- ${YELLOW}[11./${totalSteps}.] ${GREEN}Starting services...${ENDCOLOR}"
         sudo systemctl stop monitor-api.service monitor-web.service
         sudo systemctl start monitor-api.service monitor-web.service
         echo "  - monitor-api: $(sudo systemctl is-active monitor-api.service)"
         echo "  - monitor-web: $(sudo systemctl is-active monitor-web.service)"
 
-    echo -e "- ${YELLOW}[11./${totalSteps}.] ${GREEN}Finished!${ENDCOLOR}"
+    echo -e "- ${YELLOW}[12./${totalSteps}.] ${GREEN}Finished!${ENDCOLOR}"
         echo -e "  - $(cat /opt/monitor/VERSION.md | sed ':a;N;$!ba;s/\n/ /g')"
         echo -e "  - Web interface: ${YELLOW}http://$(getIP):$(getPort "${monitorPath}")$(getRoute "${monitorPath}")${ENDCOLOR}"
 }
