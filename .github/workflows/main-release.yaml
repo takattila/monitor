@@ -40,8 +40,10 @@ jobs:
       - name: Env
         id: vars
         run: |
-          echo "tag=${GITHUB_REF#refs/*/}"                                                                 >> $GITHUB_OUTPUT
-          echo "tag_msg=$(git cat-file -p "$(git describe --tags --abbrev=0)" | tail -n +6)"               >> $GITHUB_OUTPUT
+          echo "tag=${GITHUB_REF#refs/*/}" >> "$GITHUB_OUTPUT"
+          echo "tag_msg<<_PR_MSG_" >> "$GITHUB_OUTPUT"
+          git cat-file -p "$(git describe --tags --abbrev=0)" | tail -n +6 >> "$GITHUB_OUTPUT"
+          echo "_PR_MSG_" >> "$GITHUB_OUTPUT"
 
       - name: Build
         run: |
