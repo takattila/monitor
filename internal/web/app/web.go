@@ -60,6 +60,7 @@ func main() {
 	router.Post(config.GetString(s, "on_start.routes.power"), h.Power)
 	router.Post(config.GetString(s, "on_start.routes.kill"), h.Kill)
 	router.Get(config.GetString(s, "on_start.routes.run"), h.Run)
+	router.Get(config.GetString(s, "on_start.routes.terminal"), h.Terminal)
 
 	s := servers.Server{
 		Port:       config.GetInt(s, "on_start.port"),

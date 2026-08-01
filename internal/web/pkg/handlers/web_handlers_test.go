@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -12,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/coder/websocket"
 	"github.com/go-chi/chi"
 	"github.com/phayes/freeport"
 	"github.com/stretchr/testify/suite"
@@ -125,6 +127,76 @@ func (a WebHandlersSuite) TestSystemCtlOk() {
 	resp, err = req("POST", systemctlURL, strings.NewReader(form.Encode()))
 	a.Equal(nil, err)
 	a.Equal(200, resp.StatusCode)
+}
+
+func (a WebHandlersSuite) TestTerminalNotAuthenticated() {
+	go startWebServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	terminalURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), config.GetString(s, "on_start.routes.terminal"))
+
+	client := &http.Client{CheckRedirect: func(req *http.Request, via []*http.Request) error { return http.ErrUseLastResponse }}
+	resp, err := client.Get(terminalURL)
+	a.Equal(nil, err)
+	a.Equal(302, resp.StatusCode)
+}
+
+func (a WebHandlersSuite) TestTerminalOk() {
+	oldGetUsernameFunc := bypassGetUsername("username")
+	defer func() { getUsername = oldGetUsernameFunc }()
+
+	go startWebServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	wsURL := fmt.Sprintf("ws://127.0.0.1:%d%s?cols=80&rows=24", config.GetInt(s, "on_start.port"), config.GetString(s, "on_start.routes.terminal"))
+	conn, _, err := websocket.Dial(context.Background(), wsURL, nil)
+	a.Equal(nil, err)
+	defer conn.Close(websocket.StatusNormalClosure, "")
+
+	a.Equal(nil, conn.Write(context.Background(), websocket.MessageText, []byte(`{"type":"input","data":"echo WSOK\r"}`)))
+
+	deadline := time.Now().Add(5 * time.Second)
+	found := false
+	for time.Now().Before(deadline) {
+		_, data, err := conn.Read(context.Background())
+		if err != nil {
+			break
+		}
+		if strings.Contains(string(data), "WSOK") {
+			found = true
+			break
+		}
+	}
+	a.Equal(true, found)
+}
+
+func (a WebHandlersSuite) TestTerminalIpNotAllowed() {
+	oldGetUsernameFunc := bypassGetUsername("username")
+	defer func() { getUsername = oldGetUsernameFunc }()
+
+	oldAllowedIP := h.Cfg.Data.Get("on_runtime.allowed_ip")
+	h.Cfg.Data.Set("on_runtime.allowed_ip", "10.0.0.1")
+	defer func() { h.Cfg.Data.Set("on_runtime.allowed_ip", oldAllowedIP) }()
+
+	go startWebServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	wsURL := fmt.Sprintf("ws://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), config.GetString(s, "on_start.routes.terminal"))
+	_, _, err := websocket.Dial(context.Background(), wsURL, nil)
+	a.NotEqual(nil, err)
+}
+
+func (a WebHandlersSuite) TestTerminalAcceptError() {
+	oldGetUsernameFunc := bypassGetUsername("username")
+	defer func() { getUsername = oldGetUsernameFunc }()
+
+	go startWebServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	terminalURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), config.GetString(s, "on_start.routes.terminal"))
+	resp, err := req("GET", terminalURL, nil)
+	a.Equal(nil, err)
+	a.Equal(426, resp.StatusCode)
 }
 
 func (a WebHandlersSuite) TestSystemCtlNotAuthenticated() {
@@ -493,6 +565,7 @@ func startWebServer(t *testing.T) {
 	r.Post(config.GetString(s, "on_start.routes.power"), h.Power)
 	r.Post(config.GetString(s, "on_start.routes.kill"), h.Kill)
 	r.Get(config.GetString(s, "on_start.routes.run"), h.Run)
+	r.Get(config.GetString(s, "on_start.routes.terminal"), h.Terminal)
 
 	s := servers.Server{
 		Port:       config.GetInt(s, "on_start.port"),

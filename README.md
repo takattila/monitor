@@ -24,6 +24,7 @@ The web interface is responsive, it has `desktop` and `mobile` modes.
 - `Network traffic`: realtime per-interface throughput charts
 - `Storage`
 - `Uptime`
+- `Web terminal`: interactive shell session on a PTY served over WebSocket
 
 ![Monitor Service](assets/features.png)
 
@@ -355,6 +356,8 @@ on_start:                                            # These settings can be app
   web_sources_directory: /web                        # - The source files of the web interface can be found under this directory.
   auth_file: /configs/auth.db                        # - Usernames and passwords are stored here.
   save_credentials: false                            # - Do we want to initialize the user credentials each time when the service starts?
+  terminal_user: ""                                  # - If set to a valid system user, the web terminal shell runs as that user
+                                                     #   (e.g. your own username), so the shell uses that user's home and history.
   routes:                                            # - URL schema, which describe the interfaces for making requests to the service.
     index: /monitor                                  #   - Route to the index page.
     login: /monitor/login                            #   - Route to the login page. (Login required)

@@ -91,7 +91,8 @@ func Toggle(w http.ResponseWriter, r *http.Request) {
 		section == "Services" ||
 		section == "TopProcesses" ||
 		section == "NetworkTraffic" ||
-		section == "Storage" {
+		section == "Storage" ||
+		section == "Terminal" {
 
 		Cfg.Data.Set(section, status)
 

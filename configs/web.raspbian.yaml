@@ -4,6 +4,7 @@ on_start:
   web_sources_directory: /web
   auth_file: /configs/auth.db
   save_credentials: false
+  terminal_user: ""
   routes:
     index: /monitor
     login: /monitor/login
