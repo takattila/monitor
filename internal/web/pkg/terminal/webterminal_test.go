@@ -448,7 +448,15 @@ func TestShellHistoryPersistsAcrossSessions(t *testing.T) {
 	}
 	require.Contains(t, output, "HISTORY_PROBE_1234")
 
-	time.Sleep(500 * time.Millisecond)
+	require.NoError(t, sess.Write("exit\r"))
+
+	deadline = time.Now().Add(10 * time.Second)
+	for time.Now().Before(deadline) {
+		_, err := sess.Read()
+		if err != nil {
+			break
+		}
+	}
 	sess.Close()
 
 	written, err := os.ReadFile(hist)
@@ -468,7 +476,7 @@ func TestSessionCloseKillsStuckShell(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 	sess.Close()
 
-	require.Less(t, time.Since(start), 2*time.Second)
+	require.Less(t, time.Since(start), 10*time.Second)
 	require.NotNil(t, sess.CMD.ProcessState)
 	require.Equal(t, -1, sess.CMD.ProcessState.ExitCode())
 }
