@@ -8,6 +8,8 @@ vendor/
 *.cov
 report.xml
 
+PR.md
+
 example*.*
 *.stdout
 *.finish
