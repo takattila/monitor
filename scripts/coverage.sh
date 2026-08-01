@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+rm -f coverage.out
+
 # List packages excluding the main package
 filtered_packages=$(go list -f '{{.Name}} {{.ImportPath}}' ./... | awk '$1 != "main" {print $2}')
 
