@@ -1,6 +1,8 @@
 let loop = null;
 let stdoutLoop;
 let autoScroll = true;
+let networkHistory = {};
+const NETWORK_HISTORY_POINTS = 60;
 
 function setCookie(cname, cvalue, exdays) {
     const d = new Date();
@@ -476,6 +478,103 @@ function toggleSubSection(id) {
     }
 }
 
+function getNetworkColors() {
+    var style = getComputedStyle(document.body);
+    return {
+        in: style.getPropertyValue('--net-in').trim() || '#00e5ff',
+        out: style.getPropertyValue('--net-out').trim() || '#ff9800',
+        grid: style.getPropertyValue('--net-grid').trim() || 'rgba(255,255,255,0.08)',
+        bg: style.getPropertyValue('--net-bg').trim() || 'rgba(255,255,255,0.02)'
+    };
+}
+
+function drawNetworkChart(canvas, hist) {
+    if (!hist || hist.in.length < 2) {
+        return;
+    }
+
+    var rect = canvas.getBoundingClientRect();
+    if (rect.width === 0) {
+        return;
+    }
+
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+
+    var ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    var colors = getNetworkColors();
+    var width = rect.width;
+    var height = rect.height;
+
+    ctx.clearRect(0, 0, width, height);
+
+    ctx.fillStyle = colors.bg;
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.strokeStyle = colors.grid;
+    ctx.lineWidth = 1;
+    for (var g = 1; g <= 3; g++) {
+        var gy = height - (height * g / 4);
+        ctx.beginPath();
+        ctx.moveTo(0, gy);
+        ctx.lineTo(width, gy);
+        ctx.stroke();
+    }
+
+    var maxVal = 1;
+    for (var i = 0; i < hist.in.length; i++) {
+        if (hist.in[i] > maxVal) {
+            maxVal = hist.in[i];
+        }
+        if (hist.out[i] > maxVal) {
+            maxVal = hist.out[i];
+        }
+    }
+
+    drawNetworkSeries(ctx, hist.in, colors.in, width, height, maxVal);
+    drawNetworkSeries(ctx, hist.out, colors.out, width, height, maxVal);
+}
+
+function drawNetworkSeries(ctx, values, color, width, height, maxVal) {
+    var n = values.length;
+    if (n < 2) {
+        return;
+    }
+
+    var step = width / (NETWORK_HISTORY_POINTS - 1);
+    var startX = width - (n - 1) * step;
+
+    ctx.beginPath();
+    ctx.moveTo(startX, height);
+    for (var i = 0; i < n; i++) {
+        var y = height - (values[i] / maxVal) * (height - 4) - 2;
+        ctx.lineTo(startX + i * step, y);
+    }
+    ctx.lineTo(width, height);
+    ctx.closePath();
+    ctx.globalAlpha = 0.15;
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    ctx.beginPath();
+    for (var i = 0; i < n; i++) {
+        var x = startX + i * step;
+        var y = height - (values[i] / maxVal) * (height - 4) - 2;
+        if (i === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+    }
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+}
+
 function monitor() {
     var cpuUsage = new CircleProgress('#percent_cpu_usage_circle', {
         max: 100,
@@ -699,53 +798,54 @@ function monitor() {
             // Network Traffic section
             var networkInfo = data.network_info;
             var networkHtml = '';
-
-            var trafficInArray = [];
-            var trafficOutArray = [];
+            var networkIds = [];
 
             for (var id in networkInfo) {
                 if (networkInfo.hasOwnProperty(id)) {
                     var obj = networkInfo[id];
-                    trafficInArray.push(obj.in);
-                    trafficOutArray.push(obj.out);
-                }
-            }
+                    var inVal = Number(obj.in) || 0;
+                    var outVal = Number(obj.out) || 0;
 
-            var maxInTraffic = Math.max.apply(null, trafficInArray)
-            var maxOutTraffic = Math.max.apply(null, trafficOutArray)
+                    if (!networkHistory[id]) {
+                        networkHistory[id] = { in: [], out: [] };
+                    }
+                    var hist = networkHistory[id];
+                    hist.in.push(inVal);
+                    hist.out.push(outVal);
+                    if (hist.in.length > NETWORK_HISTORY_POINTS) {
+                        hist.in.shift();
+                        hist.out.shift();
+                    }
 
-            for (var id in networkInfo) {
-                if (networkInfo.hasOwnProperty(id)) {
-                    var obj = networkInfo[id];
-
-                    inPercent = (obj.in == 0 ? 0 : obj.in * 100 / maxInTraffic);
-                    inPercent = Number((inPercent).toFixed(1));
-
-                    outPercent = (obj.out == 0 ? 0 : obj.out * 100 / maxOutTraffic);
-                    outPercent = Number((outPercent).toFixed(1));
-
+                    networkIds.push(id);
                     networkHtml += `
                     <p>
-                        <b>[ ` + id + ` ]</b> <i class="fas fa-angle-double-left w3-text-blue"></i> <b>in</b>
+                        <b>[ ` + id + ` ]</b>
+                        <i class="fas fa-angle-double-left w3-text-blue"></i> <b>in</b>
+                        <span class="network-in-value">` + inVal.toFixed(2) + `&nbsp;KB/s</span>
+                        &nbsp;&nbsp;
+                        <i class="fas fa-angle-double-right color-text-dark-blue"></i> <b>out</b>
+                        <span class="network-out-value">` + outVal.toFixed(2) + `&nbsp;KB/s</span>
                     </p>
-                    <div class="color-light-blue w3-large w3-round">
-                        <div class="w3-container w3-center w3-large w3-blue w3-round" style="width: ` + inPercent + `%">
-                            ` + obj.in + `&nbsp;KB/s
-                        </div>
-                    </div>
-                    <p>
-                        <b>[ ` + id + ` ]</b> <i class="fas fa-angle-double-right color-text-dark-blue"></i> <b>out</b>
-                    </p>
-                    <div class="color-light-blue w3-large w3-round">
-                        <div class="w3-container w3-center w3-large color-dark-blue w3-round" style="width: ` + outPercent + `%">
-                            ` + obj.out + `&nbsp;KB/s
-                        </div>
-                    </div>
+                    <canvas class="network-chart"></canvas>
                     `;
                 }
             }
 
+            // Remove the history of interfaces that no longer exist.
+            for (var h in networkHistory) {
+                if (!networkInfo.hasOwnProperty(h)) {
+                    delete networkHistory[h];
+                }
+            }
+
             $('#network_container').html(networkHtml + '<p></p>');
+
+            var chartIndex = 0;
+            $('#network_container .network-chart').each(function() {
+                drawNetworkChart(this, networkHistory[networkIds[chartIndex]]);
+                chartIndex++;
+            });
 
             // Storage section
             var devInfo = data.storage_info;
