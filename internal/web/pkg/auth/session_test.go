@@ -2,6 +2,7 @@ package auth
 
 import (
 	"database/sql"
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -99,6 +100,43 @@ func (s WebSessionSuite) TestSaveCredentialsExistingUser() {
 
 	var count int
 	err = db.QueryRow("SELECT COUNT(*) FROM users WHERE username = ?", "username: ").Scan(&count)
+	s.Require().NoError(err)
+	s.Equal(1, count)
+}
+
+func (s WebSessionSuite) TestSaveCredentialsMigrateLegacy() {
+	authdb := "testauth_legacy.db"
+	defer func() {
+		_ = os.Remove(authdb)
+		_ = os.Remove(authdb + ".legacy")
+	}()
+
+	oldTerminalPrompt := terminalPrompt
+	defer func() { terminalPrompt = oldTerminalPrompt }()
+
+	terminalPrompt = func(prompt string) string {
+		return prompt
+	}
+
+	f, err := os.OpenFile(authdb, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	s.Require().NoError(err)
+	authString := base64.StdEncoding.EncodeToString([]byte("legacyuser:legacypass"))
+	_, err = f.WriteString(authString + "\n")
+	s.Require().NoError(err)
+	f.Close()
+
+	err = SaveCredentials(authdb, true)
+	s.Equal(nil, err)
+
+	_, err = os.Stat(authdb + ".legacy")
+	s.Require().NoError(err)
+
+	db, err := sql.Open("sqlite", authdb)
+	s.Require().NoError(err)
+	defer db.Close()
+
+	var count int
+	err = db.QueryRow("SELECT COUNT(*) FROM users WHERE username = ?", "legacyuser").Scan(&count)
 	s.Require().NoError(err)
 	s.Equal(1, count)
 }

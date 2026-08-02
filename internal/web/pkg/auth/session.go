@@ -1,8 +1,12 @@
 package auth
 
 import (
+	"bufio"
+	"encoding/base64"
 	"fmt"
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/gorilla/securecookie"
 	"github.com/takattila/monitor/internal/web/pkg/terminal"
@@ -63,6 +67,13 @@ func SaveCredentials(authFile string, saveCredentials bool) error {
 		user := terminalPrompt("username: ")
 		pass := terminalPrompt("password: ")
 
+		var legacyCreds []string
+		if fileExists(authFile) && !isSQLiteDatabase(authFile) {
+			legacyCreds, _ = readLegacyCredentials(authFile)
+			backupPath := authFile + ".legacy"
+			_ = os.Rename(authFile, backupPath)
+		}
+
 		db, err := initDB(authFile)
 		if err != nil {
 			return err
@@ -78,6 +89,39 @@ func SaveCredentials(authFile string, saveCredentials bool) error {
 		if err != nil {
 			return fmt.Errorf("INSERT: %w", err)
 		}
+
+		for _, cred := range legacyCreds {
+			parts := strings.SplitN(cred, ":", 2)
+			if len(parts) == 2 {
+				hash, err := bcrypt.GenerateFromPassword([]byte(parts[1]), bcrypt.DefaultCost)
+				if err != nil {
+					return fmt.Errorf("bcrypt.GenerateFromPassword: %w", err)
+				}
+				_, err = db.Exec("INSERT OR IGNORE INTO users (username, password_hash) VALUES (?, ?)", parts[0], string(hash))
+				if err != nil {
+					return fmt.Errorf("INSERT: %w", err)
+				}
+			}
+		}
 	}
 	return nil
+}
+
+func readLegacyCredentials(authFile string) ([]string, error) {
+	file, err := os.Open(authFile)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var creds []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		decoded, err := base64.StdEncoding.DecodeString(line)
+		if err == nil {
+			creds = append(creds, string(decoded))
+		}
+	}
+	return creds, scanner.Err()
 }
