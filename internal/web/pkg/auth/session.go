@@ -3,7 +3,6 @@ package auth
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/securecookie"
 	"github.com/takattila/monitor/internal/web/pkg/terminal"
@@ -81,12 +80,4 @@ func SaveCredentials(authFile string, saveCredentials bool) error {
 		}
 	}
 	return nil
-}
-
-func fileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) || info == nil {
-		return false
-	}
-	return !info.IsDir()
 }

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"database/sql"
+	"encoding/base64"
 	"os"
 	"testing"
 
@@ -49,6 +50,30 @@ func (s WebAuthSuite) TestAuthenticate() {
 
 	exists = Authenticate("bad.db", user, pass)
 	s.Equal(false, exists)
+
+	_ = os.Remove(auth)
+}
+
+func (s WebAuthSuite) TestAuthenticateLegacyFallback() {
+	auth := "legacy_auth.db"
+	user := "legacyuser"
+	pass := "legacypass"
+
+	_ = os.Remove(auth)
+
+	f, err := os.OpenFile(auth, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	s.Require().NoError(err)
+	defer f.Close()
+
+	authString := base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
+	_, err = f.WriteString(authString + "\n")
+	s.Require().NoError(err)
+
+	exists := Authenticate(auth, "bad", "credentials")
+	s.Equal(false, exists)
+
+	exists = Authenticate(auth, user, pass)
+	s.Equal(true, exists)
 
 	_ = os.Remove(auth)
 }
