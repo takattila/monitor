@@ -1,18 +1,17 @@
 package auth
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 
+	"golang.org/x/crypto/bcrypt"
+	_ "modernc.org/sqlite"
 	"github.com/stretchr/testify/suite"
 )
-
-// Testing:
-// go test -coverprofile="coverage.out" -v ./...
-// go tool cover -html="coverage.out"
 
 type (
 	WebSessionSuite struct {
@@ -49,6 +48,17 @@ func (s WebSessionSuite) TestSaveCredentials() {
 
 	err := SaveCredentials(authdb, true)
 	s.Equal(nil, err)
+
+	db, err := sql.Open("sqlite", authdb)
+	s.Require().NoError(err)
+	defer db.Close()
+
+	var hash string
+	err = db.QueryRow("SELECT password_hash FROM users WHERE username = ?", "username: ").Scan(&hash)
+	s.Require().NoError(err)
+
+	err = bcrypt.CompareHashAndPassword([]byte(hash), []byte("password: "))
+	s.Equal(nil, err)
 }
 
 func (s WebSessionSuite) TestSaveCredentialsBadPathError() {
@@ -63,15 +73,12 @@ func (s WebSessionSuite) TestSaveCredentialsBadPathError() {
 	}
 
 	err := SaveCredentials(authdb, true)
-	s.Contains(fmt.Sprint(err), "no such file or directory")
+	s.Contains(fmt.Sprint(err), "unable to open database file")
 }
 
-func (s WebSessionSuite) TestSaveCredentialsWriteStringError() {
-	authdb := "testauth.db"
+func (s WebSessionSuite) TestSaveCredentialsExistingUser() {
+	authdb := "testauth2.db"
 	defer func() { _ = os.Remove(authdb) }()
-
-	oldRriteString := writeString
-	defer func() { writeString = oldRriteString }()
 
 	oldTerminalPrompt := terminalPrompt
 	defer func() { terminalPrompt = oldTerminalPrompt }()
@@ -80,12 +87,20 @@ func (s WebSessionSuite) TestSaveCredentialsWriteStringError() {
 		return prompt
 	}
 
-	writeString = func(f *os.File, s string) (n int, err error) {
-		return 0, fmt.Errorf("error: %s", "file.WriteString")
-	}
-
 	err := SaveCredentials(authdb, true)
-	s.Contains(fmt.Sprint(err), "error: file.WriteString")
+	s.Equal(nil, err)
+
+	err = SaveCredentials(authdb, true)
+	s.Equal(nil, err)
+
+	db, err := sql.Open("sqlite", authdb)
+	s.Require().NoError(err)
+	defer db.Close()
+
+	var count int
+	err = db.QueryRow("SELECT COUNT(*) FROM users WHERE username = ?", "username: ").Scan(&count)
+	s.Require().NoError(err)
+	s.Equal(1, count)
 }
 
 func (s WebSessionSuite) TestTerminalPrompt() {

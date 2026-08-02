@@ -1,14 +1,12 @@
 package auth
 
-// Testing:
-// go test -coverprofile="coverage.out" -v ./...
-// go tool cover -html="coverage.out"
-
 import (
-	"encoding/base64"
+	"database/sql"
 	"os"
 	"testing"
 
+	"golang.org/x/crypto/bcrypt"
+	_ "modernc.org/sqlite"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -25,16 +23,23 @@ func (s WebAuthSuite) TestAuthenticate() {
 
 	_ = os.Remove(auth)
 
-	f, err := os.OpenFile(auth, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
-	if err != nil {
-		s.T().Fatalf("os.OpenFile: %v", err)
-	}
-	defer f.Close()
+	db, err := sql.Open("sqlite", auth)
+	s.Require().NoError(err)
+	defer db.Close()
 
-	authString := base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
-	if _, err := f.WriteString(authString + "\n"); err != nil {
-		s.T().Fatalf("f.WriteString: %v", err)
-	}
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS users (
+			username TEXT PRIMARY KEY,
+			password_hash TEXT NOT NULL
+		)
+	`)
+	s.Require().NoError(err)
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+	s.Require().NoError(err)
+
+	_, err = db.Exec("INSERT INTO users (username, password_hash) VALUES (?, ?)", user, string(hash))
+	s.Require().NoError(err)
 
 	exists := Authenticate(auth, "bad", "credentials")
 	s.Equal(false, exists)

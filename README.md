@@ -354,7 +354,7 @@ on_start:                                            # These settings can be app
   port: 8383                                         # - The service can be reached under this port.
   domain: example.net                                # - If you want to run this service as a stand-alone web service, you can set your domain here.
   web_sources_directory: /web                        # - The source files of the web interface can be found under this directory.
-  auth_file: /configs/auth.db                        # - Usernames and passwords are stored here.
+  auth_file: /configs/auth.db                        # - Usernames and bcrypt-hashed passwords are stored here (SQLite database).
   save_credentials: false                            # - Do we want to initialize the user credentials each time when the service starts?
   terminal_user: ""                                  # - If set to a valid system user, the web terminal shell runs as that user
                                                      #   (e.g. your own username), so the shell uses that user's home and history.

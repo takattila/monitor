@@ -1,13 +1,13 @@
 package auth
 
 import (
-	"encoding/base64"
+	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/securecookie"
 	"github.com/takattila/monitor/internal/web/pkg/terminal"
-	"github.com/takattila/monitor/pkg/common"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -17,10 +17,6 @@ var (
 
 	terminalPrompt = func(prompt string) string {
 		return terminal.Prompt(prompt)
-	}
-
-	writeString = func(f *os.File, s string) (n int, err error) {
-		return f.WriteString(s)
 	}
 )
 
@@ -62,23 +58,35 @@ func GetUserName(request *http.Request) (userName string) {
 	return userName
 }
 
-// SaveCredentials writes user credentials into the AuthFile.
+// SaveCredentials writes user credentials into the AuthFile (SQLite database).
 func SaveCredentials(authFile string, saveCredentials bool) error {
-	if saveCredentials == true || !common.FileExists(authFile) {
+	if saveCredentials == true || !fileExists(authFile) {
 		user := terminalPrompt("username: ")
 		pass := terminalPrompt("password: ")
 
-		f, err := os.OpenFile(authFile,
-			os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+		db, err := initDB(authFile)
 		if err != nil {
 			return err
 		}
-		defer f.Close()
+		defer db.Close()
 
-		authString := base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
-		if _, err := writeString(f, authString+"\n"); err != nil {
-			return err
+		hash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+		if err != nil {
+			return fmt.Errorf("bcrypt.GenerateFromPassword: %w", err)
+		}
+
+		_, err = db.Exec("INSERT OR REPLACE INTO users (username, password_hash) VALUES (?, ?)", user, string(hash))
+		if err != nil {
+			return fmt.Errorf("INSERT: %w", err)
 		}
 	}
 	return nil
+}
+
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) || info == nil {
+		return false
+	}
+	return !info.IsDir()
 }
