@@ -3,12 +3,14 @@ package auth
 import (
 	"database/sql"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 
+	"bou.ke/monkey"
 	"golang.org/x/crypto/bcrypt"
 	_ "modernc.org/sqlite"
 	"github.com/stretchr/testify/suite"
@@ -184,6 +186,129 @@ func (s WebSessionSuite) TestReadLegacyCredentialsMixed() {
 func (s WebSessionSuite) TestTerminalPrompt() {
 	input := terminalPrompt("username: ")
 	s.Equal("", input)
+}
+
+func (s WebSessionSuite) TestSaveCredentialsBcryptError() {
+	authdb := "bcrypt_error.db"
+	defer os.Remove(authdb)
+
+	oldTerminalPrompt := terminalPrompt
+	defer func() { terminalPrompt = oldTerminalPrompt }()
+	terminalPrompt = func(prompt string) string { return prompt }
+
+	patch := monkey.Patch(bcrypt.GenerateFromPassword, func(password []byte, cost int) ([]byte, error) {
+		return nil, errors.New("mock bcrypt error")
+	})
+	defer patch.Unpatch()
+
+	err := SaveCredentials(authdb, true)
+	s.Contains(fmt.Sprint(err), "bcrypt.GenerateFromPassword")
+
+	_ = os.Remove(authdb)
+}
+
+func (s WebSessionSuite) TestSaveCredentialsInsertError() {
+	authdb := "insert_error.db"
+	defer os.Remove(authdb)
+
+	_ = os.Remove(authdb)
+
+	db, err := sql.Open("sqlite", authdb)
+	s.Require().NoError(err)
+	_, err = db.Exec("CREATE TABLE users (username TEXT PRIMARY KEY)")
+	s.Require().NoError(err)
+	db.Close()
+
+	oldTerminalPrompt := terminalPrompt
+	defer func() { terminalPrompt = oldTerminalPrompt }()
+	terminalPrompt = func(prompt string) string { return prompt }
+
+	err = SaveCredentials(authdb, true)
+	s.Contains(fmt.Sprint(err), "INSERT:")
+
+	_ = os.Remove(authdb)
+}
+
+func (s WebSessionSuite) TestSaveCredentialsLegacyBcryptError() {
+	authdb := "legacy_bcrypt_error.db"
+	defer os.Remove(authdb)
+	defer os.Remove(authdb + ".legacy")
+
+	_ = os.Remove(authdb)
+	_ = os.Remove(authdb + ".legacy")
+
+	f, err := os.OpenFile(authdb, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	s.Require().NoError(err)
+	authString := base64.StdEncoding.EncodeToString([]byte("legacyuser:legacypass"))
+	_, err = f.WriteString(authString + "\n")
+	s.Require().NoError(err)
+	f.Close()
+
+	precomputedHash, err := bcrypt.GenerateFromPassword([]byte("password: "), bcrypt.DefaultCost)
+	s.Require().NoError(err)
+
+	callCount := 0
+	patch := monkey.Patch(bcrypt.GenerateFromPassword, func(password []byte, cost int) ([]byte, error) {
+		callCount++
+		if callCount == 1 {
+			return precomputedHash, nil
+		}
+		return nil, errors.New("mock bcrypt error")
+	})
+	defer patch.Unpatch()
+
+	oldTerminalPrompt := terminalPrompt
+	defer func() { terminalPrompt = oldTerminalPrompt }()
+	terminalPrompt = func(prompt string) string { return prompt }
+
+	err = SaveCredentials(authdb, true)
+	s.Contains(fmt.Sprint(err), "bcrypt.GenerateFromPassword")
+
+	_ = os.Remove(authdb)
+	_ = os.Remove(authdb + ".legacy")
+}
+
+func (s WebSessionSuite) TestSaveCredentialsLegacyInsertError() {
+	authdb := "legacy_insert_error.db"
+	triggerdb := "legacy_insert_error_trigger.db"
+	defer os.Remove(authdb)
+	defer os.Remove(authdb + ".legacy")
+	defer os.Remove(triggerdb)
+
+	_ = os.Remove(authdb)
+	_ = os.Remove(authdb + ".legacy")
+	_ = os.Remove(triggerdb)
+
+	f, err := os.OpenFile(authdb, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	s.Require().NoError(err)
+	authString := base64.StdEncoding.EncodeToString([]byte("legacyuser:legacypass"))
+	_, err = f.WriteString(authString + "\n")
+	s.Require().NoError(err)
+	f.Close()
+
+	db, err := sql.Open("sqlite", triggerdb)
+	s.Require().NoError(err)
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password_hash TEXT NOT NULL)")
+	s.Require().NoError(err)
+	_, err = db.Exec("CREATE TRIGGER fail_insert BEFORE INSERT ON users WHEN NEW.username != 'username: ' BEGIN SELECT RAISE(ABORT, 'insert not allowed'); END;")
+	s.Require().NoError(err)
+	db.Close()
+
+	patch := monkey.Patch(initDB, func(authFile string) (*sql.DB, error) {
+		return sql.Open("sqlite", triggerdb)
+	})
+	defer patch.Unpatch()
+
+	oldTerminalPrompt := terminalPrompt
+	defer func() { terminalPrompt = oldTerminalPrompt }()
+	terminalPrompt = func(prompt string) string { return prompt }
+
+	err = SaveCredentials(authdb, true)
+	s.Contains(fmt.Sprint(err), "INSERT:")
+
+	_ = os.Remove(authdb)
+	_ = os.Remove(authdb + ".legacy")
+	_ = os.Remove(triggerdb)
 }
 
 func TestWebSessionSuite(t *testing.T) {

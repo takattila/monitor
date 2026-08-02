@@ -3,10 +3,12 @@ package auth
 import (
 	"database/sql"
 	"encoding/base64"
+	"errors"
 	"os"
 	"strings"
 	"testing"
 
+	"bou.ke/monkey"
 	"golang.org/x/crypto/bcrypt"
 	_ "modernc.org/sqlite"
 	"github.com/stretchr/testify/suite"
@@ -164,6 +166,31 @@ func (s WebAuthSuite) TestAuthenticateScannerErrorFallback() {
 	defer os.Remove(auth)
 
 	exists := Authenticate(auth, user, pass)
+	s.Equal(false, exists)
+}
+
+func (s WebAuthSuite) TestAuthenticateSQLOpenError() {
+	auth := "sqlopen_error.db"
+
+	_ = os.Remove(auth)
+
+	err := os.WriteFile(auth, []byte(sqliteHeader), 0640)
+	s.Require().NoError(err)
+	defer os.Remove(auth)
+
+	patch := monkey.Patch(sql.Open, func(driverName, dataSourceName string) (*sql.DB, error) {
+		return nil, errors.New("mock sql.Open error")
+	})
+	defer patch.Unpatch()
+
+	exists := Authenticate(auth, "username", "password")
+	s.Equal(false, exists)
+}
+
+func (s WebAuthSuite) TestAuthenticateLegacyOpenError() {
+	auth := "nonexistent_dir/legacy_open_error.db"
+
+	exists := Authenticate(auth, "username", "password")
 	s.Equal(false, exists)
 }
 
