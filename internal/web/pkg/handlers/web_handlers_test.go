@@ -3,9 +3,12 @@ package handlers
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"os/exec"
@@ -31,6 +34,7 @@ import (
 	"github.com/takattila/monitor/internal/api/pkg/services"
 	"github.com/takattila/monitor/internal/api/pkg/storage"
 	"github.com/takattila/monitor/internal/common/pkg/config"
+	"github.com/takattila/monitor/internal/web/pkg/auth"
 	"github.com/takattila/monitor/internal/web/pkg/servers"
 	"github.com/takattila/monitor/pkg/common"
 	"github.com/takattila/monitor/pkg/logger"
@@ -42,6 +46,11 @@ type (
 		suite.Suite
 	}
 )
+
+type errorReadCloser struct{}
+
+func (errorReadCloser) Read([]byte) (int, error) { return 0, errors.New("read error") }
+func (errorReadCloser) Close() error             { return nil }
 
 var (
 	gitRootPath = strings.ReplaceAll(common.Cli([]string{"bash", "-c", "git rev-parse --show-toplevel"}), "\n", "")
@@ -523,6 +532,217 @@ func (a WebHandlersSuite) TestToggleApiNotFound() {
 	a.Equal(200, resp.StatusCode)
 }
 
+func (a WebHandlersSuite) TestSettingsGETNotAuthenticated() {
+	go startWebServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	settingsURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), config.GetString(s, "on_start.routes.settings"))
+	resp, err := req("GET", settingsURL, nil)
+	a.Equal(nil, err)
+	a.Equal(200, resp.StatusCode)
+}
+
+func (a WebHandlersSuite) TestSettingsPOSTNotAuthenticated() {
+	go startWebServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	settingsURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), config.GetString(s, "on_start.routes.settings"))
+	body := `{"key":"skin","value":"dark"}`
+	resp, err := req("POST", settingsURL, strings.NewReader(body))
+	a.Equal(nil, err)
+	a.Equal(200, resp.StatusCode)
+}
+
+func (a WebHandlersSuite) TestSettingsGETOk() {
+	user := "username"
+	pass := "password"
+
+	authdb := newTestAuthDB(a.T(), user, pass)
+	defer func() { _ = os.Remove(authdb) }()
+
+	_ = auth.SaveUserSetting(authdb, user, "skin", "dark")
+	_ = auth.SaveUserSetting(authdb, user, "css", "github_red")
+	_ = auth.SaveUserSetting(authdb, user, "logo", "rpi")
+	_ = auth.SaveUserSetting(authdb, user, "preset", "block")
+
+	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
+
+	go startWebServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	settingsURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), config.GetString(s, "on_start.routes.settings"))
+	respBody, statusCode, err := reqWithBody("GET", settingsURL, nil)
+	a.Equal(nil, err)
+	a.Equal(200, statusCode)
+
+	var result map[string]string
+	err = json.Unmarshal(respBody, &result)
+	a.Equal(nil, err)
+	a.Equal("dark", result["skin"])
+	a.Equal("github_red", result["css"])
+	a.Equal("rpi", result["logo"])
+	a.Equal("block", result["preset"])
+}
+
+func (a WebHandlersSuite) TestSettingsPOSTOk() {
+	user := "username"
+	pass := "password"
+
+	authdb := newTestAuthDB(a.T(), user, pass)
+	defer func() { _ = os.Remove(authdb) }()
+
+	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
+
+	go startWebServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	settingsURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), config.GetString(s, "on_start.routes.settings"))
+	body := `{"key":"skin","value":"light"}`
+	resp, err := req("POST", settingsURL, strings.NewReader(body))
+	a.Equal(nil, err)
+	a.Equal(200, resp.StatusCode)
+
+	saved, err := auth.GetUserSetting(authdb, user, "skin")
+	a.Equal(nil, err)
+	a.Equal("light", saved)
+}
+
+func (a WebHandlersSuite) TestSettingsGETDefaults() {
+	user := "username"
+	pass := "password"
+
+	authdb := newTestAuthDB(a.T(), user, pass)
+	defer func() { _ = os.Remove(authdb) }()
+
+	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
+
+	go startWebServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	settingsURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), config.GetString(s, "on_start.routes.settings"))
+	respBody, statusCode, err := reqWithBody("GET", settingsURL, nil)
+	a.Equal(nil, err)
+	a.Equal(200, statusCode)
+
+	var result map[string]string
+	err = json.Unmarshal(respBody, &result)
+	a.Equal(nil, err)
+	a.Equal("", result["skin"])
+	a.Equal("", result["css"])
+	a.Equal("", result["logo"])
+	a.Equal("", result["preset"])
+}
+
+func (a WebHandlersSuite) TestSettingsPOSTInvalidBody() {
+	user := "username"
+	pass := "password"
+
+	authdb := newTestAuthDB(a.T(), user, pass)
+	defer func() { _ = os.Remove(authdb) }()
+
+	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
+
+	go startWebServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	settingsURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), config.GetString(s, "on_start.routes.settings"))
+	body := `not json`
+	resp, err := req("POST", settingsURL, strings.NewReader(body))
+	a.Equal(nil, err)
+	a.Equal(400, resp.StatusCode)
+}
+
+func (a WebHandlersSuite) TestSettingsPOSTMissingKey() {
+	user := "username"
+	pass := "password"
+
+	authdb := newTestAuthDB(a.T(), user, pass)
+	defer func() { _ = os.Remove(authdb) }()
+
+	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
+
+	go startWebServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	settingsURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), config.GetString(s, "on_start.routes.settings"))
+	body := `{"key":"","value":"dark"}`
+	resp, err := req("POST", settingsURL, strings.NewReader(body))
+	a.Equal(nil, err)
+	a.Equal(400, resp.StatusCode)
+}
+
+func (a WebHandlersSuite) TestSettingsGETDbError() {
+	user := "username"
+
+	authdb := newTestAuthDB(a.T(), user, "password")
+	defer func() { _ = os.Remove(authdb) }()
+
+	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
+
+	oldAuthFile := h.AuthFile
+	h.AuthFile = "/nonexistent/dir/bad.db"
+	defer func() { h.AuthFile = oldAuthFile }()
+
+	go startWebServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	settingsURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), config.GetString(s, "on_start.routes.settings"))
+	respBody, statusCode, err := reqWithBody("GET", settingsURL, nil)
+	a.Equal(nil, err)
+	a.Equal(200, statusCode)
+
+	var result map[string]string
+	err = json.Unmarshal(respBody, &result)
+	a.Equal(nil, err)
+	a.Equal("", result["skin"])
+	a.Equal("", result["css"])
+	a.Equal("", result["logo"])
+	a.Equal("", result["preset"])
+}
+
+func (a WebHandlersSuite) TestSettingsPOSTDbError() {
+	user := "username"
+
+	authdb := newTestAuthDB(a.T(), user, "password")
+	defer func() { _ = os.Remove(authdb) }()
+
+	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
+
+	oldAuthFile := h.AuthFile
+	h.AuthFile = "/nonexistent/dir/bad.db"
+	defer func() { h.AuthFile = oldAuthFile }()
+
+	go startWebServer(a.T())
+	time.Sleep(100 * time.Millisecond)
+
+	settingsURL := fmt.Sprintf("http://127.0.0.1:%d%s", config.GetInt(s, "on_start.port"), config.GetString(s, "on_start.routes.settings"))
+	body := `{"key":"skin","value":"dark"}`
+	resp, err := req("POST", settingsURL, strings.NewReader(body))
+	a.Equal(nil, err)
+	a.Equal(500, resp.StatusCode)
+}
+
+func (a WebHandlersSuite) TestSettingsPOSTBodyReadError() {
+	user := "username"
+
+	oldGetUsernameFunc := bypassGetUsername(user)
+	defer func() { getUsername = oldGetUsernameFunc }()
+
+	req := httptest.NewRequest("POST", config.GetString(s, "on_start.routes.settings"), nil)
+	req.Body = errorReadCloser{}
+	w := httptest.NewRecorder()
+
+	h.SettingsPOST(w, req)
+	a.Equal(http.StatusBadRequest, w.Code)
+}
+
 func (a WebHandlersSuite) TestIPisAllowedIPNotSet() {
 	allowed := IPisAllowed("127.0.0.1", "0.0.0.0", h)
 	a.Equal(true, allowed)
@@ -563,6 +783,8 @@ func startWebServer(t *testing.T) {
 	r.Get(config.GetString(s, "on_start.routes.internal"), h.Internal)
 	r.Get(config.GetString(s, "on_start.routes.api"), h.Api)
 	r.Get(config.GetString(s, "on_start.routes.toggle"), h.Toggle)
+	r.Get(config.GetString(s, "on_start.routes.settings"), h.SettingsGET)
+	r.Post(config.GetString(s, "on_start.routes.settings"), h.SettingsPOST)
 	r.Post(config.GetString(s, "on_start.routes.systemctl"), h.SystemCtl)
 	r.Post(config.GetString(s, "on_start.routes.power"), h.Power)
 	r.Post(config.GetString(s, "on_start.routes.kill"), h.Kill)
@@ -639,6 +861,31 @@ func req(method, url string, data io.Reader) (*http.Response, error) {
 	defer res.Body.Close()
 
 	return res, nil
+}
+
+func reqWithBody(method, url string, data io.Reader) ([]byte, int, error) {
+	req, err := http.NewRequest(method, url, data)
+	if err != nil {
+		return nil, 0, fmt.Errorf("http.NewRequest: %v", err)
+	}
+
+	if method == "POST" {
+		req.Header.Add("Content-Type", "application/json")
+	}
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, 0, fmt.Errorf("client.Do: %v", err)
+	}
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, 0, fmt.Errorf("read body: %v", err)
+	}
+
+	return body, res.StatusCode, nil
 }
 
 func bypassGetUsername(username string) func(r *http.Request) string {

@@ -88,9 +88,24 @@ function toggleStatus(section, status) {
 }
 
 function logoutIfSessionEnded() {
-    if (!getCookie("session")) {
-        logout();
-    }
+    $.ajax({
+        type: "GET",
+        url: ROUTE_SETTINGS,
+        timeout: 5000,
+        success: function(response) {
+            try {
+                var settings = $.parseJSON(response);
+                if (!settings || typeof settings !== "object") {
+                    logout();
+                }
+            } catch(e) {
+                logout();
+            }
+        },
+        error: function() {
+            logout();
+        }
+    });
 }
 
 function confirmSystemCtlAction(action, service) {
@@ -175,9 +190,7 @@ function dialog({
     </div>`;
 
     $('#dialog_container').html(infoModal + '<p></p>');
-    
-    skin = getCookie("skin");
-    
+
     if (skin == "light") {
         $('#dialog_box_'+ id).addClass('w3-white').removeClass('w3-dark');
     } else {
@@ -335,7 +348,6 @@ function modalOpen(id) {
     autoScroll = true;
 
     $('#modal_' + id).css('display', "block");
-    skin = getCookie("skin");
     if (skin == "light") {
         $('#modal_box_'+ id).addClass('w3-white').removeClass('w3-dark');
     } else {
@@ -394,17 +406,28 @@ function modalClose(id) {
     });
 }
 
-function setProgressPresetToCookies(preset) {
-    setCookie("preset", preset, Infinity);
-    reload();
+function setProgressPreset(preset) {
+    $.ajax({
+        type: "POST",
+        url: ROUTE_SETTINGS,
+        data: JSON.stringify({key: "preset", value: preset}),
+        contentType: "application/json",
+        success: function() {
+            $('body').removeClass(function(_, cls) {
+                return (cls.match(/(^|\s)preset-\S+/g) || []).join(' ');
+            });
+            document.body.classList.add('preset-' + preset);
+        }
+    });
 }
 
-function loadProgressPresetFromCookie() {
-    var preset = getCookie("preset");
+function loadProgressPreset(preset) {
     if (!preset) {
         preset = "block";
-        setCookie("preset", "block", Infinity);
     }
+    $('body').removeClass(function(_, cls) {
+        return (cls.match(/(^|\s)preset-\S+/g) || []).join(' ');
+    });
     document.body.classList.add('preset-' + preset);
 }
 
@@ -427,13 +450,20 @@ function loadLogoSvg(logo) {
     $('#logo_svg').attr("src", img);
 }
 
-function setLogoToCookies(logo) {
-    setCookie("logo", logo, Infinity);
-    reload();
+function setLogo(logo) {
+    $.ajax({
+        type: "POST",
+        url: ROUTE_SETTINGS,
+        data: JSON.stringify({key: "logo", value: logo}),
+        contentType: "application/json",
+        success: function() {
+            loadLogoPng(logo);
+            loadLogoSvg(logo);
+        }
+    });
 }
 
-function loadLogoFromCookie() {
-    logo = getCookie("logo");
+function loadLogo(logo) {
     if (logo) {
         loadLogoPng(logo);
         loadLogoSvg(logo);
@@ -450,17 +480,23 @@ function loadCSS(skin) {
     oldlink.replaceWith(newlink);
 }
 
-function setCssToCookies(skin) {
-    setCookie("css", skin, Infinity);
-    reload();
+function setCss(skin) {
+    $.ajax({
+        type: "POST",
+        url: ROUTE_SETTINGS,
+        data: JSON.stringify({key: "css", value: skin}),
+        contentType: "application/json",
+        success: function() {
+            loadCSS(skin);
+        }
+    });
 }
 
-function loadCssFromCookie() {
-    css = getCookie("css");
+function loadCss(css) {
     if (css) {
         loadCSS(css);
     } else {
-        loadCSS("github_purple");
+        loadCSS("github_red");
     }
 }
 
@@ -987,7 +1023,7 @@ function monitor() {
 
             for (let i = 0; i < skins.length; i++) {
                 skinHtml += `
-                <div class="w3-half w3-card w3-padding w3-margin-bottom cursor-hand" onclick="setCssToCookies('` + skins[i] + `');">
+                <div class="w3-half w3-card w3-padding w3-margin-bottom cursor-hand" onclick="setCss('` + skins[i] + `');">
                 <i class="fa fa-angle-right"></i> ` + skins[i] + `
                 </div>
                 `;
@@ -1012,7 +1048,7 @@ function monitor() {
 
             for (let i = 0; i < logos.length; i++) {
                 logoHtml += `
-                <div class="w3-half w3-card w3-padding w3-margin-bottom cursor-hand" onclick="setLogoToCookies('` + logos[i] + `');">
+                <div class="w3-half w3-card w3-padding w3-margin-bottom cursor-hand" onclick="setLogo('` + logos[i] + `');">
                 <i class="fa fa-angle-right"></i> ` + logos[i] + `
                 </div>
                 `;
@@ -1050,7 +1086,7 @@ function monitor() {
 
             for (let i = 0; i < presets.length; i++) {
                 progressHtml += `
-                <div class="w3-half w3-card w3-padding w3-margin-bottom cursor-hand" onclick="setProgressPresetToCookies('` + presets[i][0] + `');">
+                <div class="w3-half w3-card w3-padding w3-margin-bottom cursor-hand" onclick="setProgressPreset('` + presets[i][0] + `');">
                 <i class="fa fa-angle-right"></i> ` + presets[i][1] + `
                 </div>
                 `;
@@ -1259,7 +1295,7 @@ function toggleSectionMemory() {
     });
 }
 
-function setLightSkin() {
+function setLightSkin(save) {
     $('header').attr('data-click-state', 0);
     $('footer').attr('data-click-state', 0);
     $('#model_name').attr('data-click-state', 0);
@@ -1267,11 +1303,18 @@ function setLightSkin() {
     $('.w3-dark-grey').addClass('w3-light-grey').removeClass('w3-dark-grey');
     $('.w3-text-light-grey').addClass('w3-text-grey').removeClass('w3-text-light-grey');
     $('body').addClass('light-mode');
-    setCookie("skin", "light", Infinity);
-    skin = getCookie("skin");
+    skin = "light";
+    if (save) {
+        $.ajax({
+            type: "POST",
+            url: ROUTE_SETTINGS,
+            data: JSON.stringify({key: "skin", value: "light"}),
+            contentType: "application/json"
+        });
+    }
 }
 
-function setDarkSkin() {
+function setDarkSkin(save) {
     $('header').attr('data-click-state', 1);
     $('footer').attr('data-click-state', 1);
     $('#model_name').attr('data-click-state', 1);
@@ -1279,33 +1322,57 @@ function setDarkSkin() {
     $('.w3-light-grey').addClass('w3-dark-grey').removeClass('w3-light-grey');
     $('.w3-text-grey').addClass('w3-text-light-grey').removeClass('w3-text-grey');
     $('body').removeClass('light-mode');
-    setCookie("skin", "dark", Infinity);
-    skin = getCookie("skin");
+    skin = "dark";
+    if (save) {
+        $.ajax({
+            type: "POST",
+            url: ROUTE_SETTINGS,
+            data: JSON.stringify({key: "skin", value: "dark"}),
+            contentType: "application/json"
+        });
+    }
 }
 
 function toggleThemeOnHeaderOrFooterClick() {
     $('header, footer, #model_name').on('click', function() {
         if ($(this).attr('data-click-state') == 1) {
-            setLightSkin();
+            setLightSkin(true);
         } else {
-            setDarkSkin();
+            setDarkSkin(true);
         }
     });
 }
 
-function applySkin() {
-    skin = getCookie("skin");
+function loadSettings() {
+    $.ajax({
+        type: "GET",
+        url: ROUTE_SETTINGS,
+        timeout: 5000,
+        success: function(response) {
+            var settings = $.parseJSON(response);
 
-    if (skin === "") {
-        skin = "dark";
-        setCookie("skin", "dark", Infinity);
-    }
+            skin = settings.skin || "dark";
+            if (skin == "dark") {
+                setDarkSkin(false);
+            } else {
+                setLightSkin(false);
+            }
 
-    if (skin == "dark") {
-        setDarkSkin();
-    } else {
-        setLightSkin();
-    }
+            loadCss(settings.css);
+            loadLogo(settings.logo);
+            loadProgressPreset(settings.preset);
+        },
+        error: function() {
+            skin = "dark";
+            setDarkSkin(false);
+            loadCss("");
+            loadLogo("");
+            loadProgressPreset("");
+        },
+        complete: function() {
+            start();
+        }
+    });
 }
 
 
@@ -1413,11 +1480,7 @@ function stop() {
 $(document).ready(function() {
     loader();
     logoutIfSessionEnded();
-    start();
-    applySkin();
-    loadCssFromCookie();
-    loadLogoFromCookie();
-    loadProgressPresetFromCookie();
+    loadSettings();
     toggleSection();
     toggleTerminal();
     toggleSectionCpu();

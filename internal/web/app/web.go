@@ -56,6 +56,8 @@ func main() {
 	router.Get(config.GetString(s, "on_start.routes.internal"), h.Internal)
 	router.Get(config.GetString(s, "on_start.routes.api"), h.Api)
 	router.Get(config.GetString(s, "on_start.routes.toggle"), h.Toggle)
+	router.Get(config.GetString(s, "on_start.routes.settings"), h.SettingsGET)
+	router.Post(config.GetString(s, "on_start.routes.settings"), h.SettingsPOST)
 	router.Post(config.GetString(s, "on_start.routes.systemctl"), h.SystemCtl)
 	router.Post(config.GetString(s, "on_start.routes.power"), h.Power)
 	router.Post(config.GetString(s, "on_start.routes.kill"), h.Kill)

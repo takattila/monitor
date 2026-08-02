@@ -11,6 +11,8 @@ report.xml
 PR.md
 
 example*.*
+
+PLAN.md
 *.stdout
 *.finish
 
