@@ -91,14 +91,10 @@ function logoutIfSessionEnded() {
     $.ajax({
         type: "GET",
         url: ROUTE_SETTINGS,
+        dataType: "json",
         timeout: 5000,
-        success: function(response) {
-            try {
-                var settings = $.parseJSON(response);
-                if (!settings || typeof settings !== "object") {
-                    logout();
-                }
-            } catch(e) {
+        success: function(settings) {
+            if (!settings || typeof settings !== "object") {
                 logout();
             }
         },
@@ -407,6 +403,7 @@ function modalClose(id) {
 }
 
 function setProgressPreset(preset) {
+    setCookie("preset", preset, Infinity);
     $.ajax({
         type: "POST",
         url: ROUTE_SETTINGS,
@@ -451,6 +448,7 @@ function loadLogoSvg(logo) {
 }
 
 function setLogo(logo) {
+    setCookie("logo", logo, Infinity);
     $.ajax({
         type: "POST",
         url: ROUTE_SETTINGS,
@@ -475,12 +473,14 @@ function loadCSS(skin) {
     var newlink = document.createElement("link");
     newlink.setAttribute("rel", "stylesheet");
     newlink.setAttribute("type", "text/css");
+    newlink.setAttribute("id", "css");
     newlink.setAttribute("href", ROUTE_WEB + "/css/" + skin + ".css?v=" + VERSION);
 
     oldlink.replaceWith(newlink);
 }
 
 function setCss(skin) {
+    setCookie("css", skin, Infinity);
     $.ajax({
         type: "POST",
         url: ROUTE_SETTINGS,
@@ -1304,6 +1304,7 @@ function setLightSkin(save) {
     $('.w3-text-light-grey').addClass('w3-text-grey').removeClass('w3-text-light-grey');
     $('body').addClass('light-mode');
     skin = "light";
+    setCookie("skin", "light", Infinity);
     if (save) {
         $.ajax({
             type: "POST",
@@ -1323,6 +1324,7 @@ function setDarkSkin(save) {
     $('.w3-text-grey').addClass('w3-text-light-grey').removeClass('w3-text-grey');
     $('body').removeClass('light-mode');
     skin = "dark";
+    setCookie("skin", "dark", Infinity);
     if (save) {
         $.ajax({
             type: "POST",
@@ -1347,10 +1349,9 @@ function loadSettings() {
     $.ajax({
         type: "GET",
         url: ROUTE_SETTINGS,
+        dataType: "json",
         timeout: 5000,
-        success: function(response) {
-            var settings = $.parseJSON(response);
-
+        success: function(settings) {
             skin = settings.skin || "dark";
             if (skin == "dark") {
                 setDarkSkin(false);
