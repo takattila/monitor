@@ -78,6 +78,24 @@ func (s WebAuthSuite) TestAuthenticateLegacyFallback() {
 	_ = os.Remove(auth)
 }
 
+func (s WebAuthSuite) TestAuthenticateCorruptDBFallback() {
+	auth := "corrupt_auth.db"
+	user := "username"
+	pass := "password"
+
+	_ = os.Remove(auth)
+
+	f, err := os.OpenFile(auth, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	s.Require().NoError(err)
+	_, err = f.WriteString("this is not a valid sqlite database\n")
+	s.Require().NoError(err)
+	f.Close()
+	defer os.Remove(auth)
+
+	exists := Authenticate(auth, user, pass)
+	s.Equal(false, exists)
+}
+
 func TestWebAuthSuite(t *testing.T) {
 	suite.Run(t, new(WebAuthSuite))
 }

@@ -128,9 +128,6 @@ func (s WebSessionSuite) TestSaveCredentialsMigrateLegacy() {
 	err = SaveCredentials(authdb, true)
 	s.Equal(nil, err)
 
-	_, err = os.Stat(authdb + ".legacy")
-	s.Require().NoError(err)
-
 	db, err := sql.Open("sqlite", authdb)
 	s.Require().NoError(err)
 	defer db.Close()
@@ -139,6 +136,24 @@ func (s WebSessionSuite) TestSaveCredentialsMigrateLegacy() {
 	err = db.QueryRow("SELECT COUNT(*) FROM users WHERE username = ?", "legacyuser").Scan(&count)
 	s.Require().NoError(err)
 	s.Equal(1, count)
+
+	_, err = os.Stat(authdb + ".legacy")
+	s.Require().NoError(err)
+}
+
+func (s WebSessionSuite) TestReadLegacyCredentialsCorrupted() {
+	authdb := "corrupt_legacy.db"
+	defer func() { _ = os.Remove(authdb) }()
+
+	f, err := os.OpenFile(authdb, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	s.Require().NoError(err)
+	_, err = f.WriteString("this is not valid base64!!!\n")
+	s.Require().NoError(err)
+	f.Close()
+
+	creds, err := readLegacyCredentials(authdb)
+	s.Equal(nil, err)
+	s.Equal(0, len(creds))
 }
 
 func (s WebSessionSuite) TestTerminalPrompt() {
