@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	"encoding/base64"
+	"database/sql"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,6 +17,8 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/phayes/freeport"
 	"github.com/stretchr/testify/suite"
+	"golang.org/x/crypto/bcrypt"
+	_ "modernc.org/sqlite"
 	"github.com/takattila/monitor/internal/api/pkg/cpu"
 	"github.com/takattila/monitor/internal/api/pkg/handlers"
 	"github.com/takattila/monitor/internal/api/pkg/memory"
@@ -651,15 +653,32 @@ func newTestAuthDB(t *testing.T, user, pass string) string {
 	h.AuthFile = "/configs/testauth.db"
 	authdbFullPath := h.ProgramDir + h.AuthFile
 
-	f, err := os.OpenFile(authdbFullPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
-	if err != nil {
-		t.Fatalf("os.OpenFile: %v", err)
-	}
-	defer f.Close()
+	_ = os.Remove(authdbFullPath)
 
-	authString := base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
-	if _, err := f.WriteString(authString + "\n"); err != nil {
-		t.Fatalf("f.WriteString: %v", err)
+	db, err := sql.Open("sqlite", authdbFullPath)
+	if err != nil {
+		t.Fatalf("sql.Open: %v", err)
+	}
+	defer db.Close()
+
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS users (
+			username TEXT PRIMARY KEY,
+			password_hash TEXT NOT NULL
+		)
+	`)
+	if err != nil {
+		t.Fatalf("CREATE TABLE: %v", err)
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+	if err != nil {
+		t.Fatalf("bcrypt.GenerateFromPassword: %v", err)
+	}
+
+	_, err = db.Exec("INSERT INTO users (username, password_hash) VALUES (?, ?)", user, string(hash))
+	if err != nil {
+		t.Fatalf("INSERT: %v", err)
 	}
 
 	return authdbFullPath

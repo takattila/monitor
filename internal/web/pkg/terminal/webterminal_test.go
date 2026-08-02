@@ -653,3 +653,63 @@ func TestServeStartError(t *testing.T) {
 	require.Error(t, err)
 	wait()
 }
+
+func TestStartSessionWithCredential(t *testing.T) {
+	oldLookup, oldGeteuid := userLookup, geteuid
+	userLookup = func(username string) (*user.User, error) {
+		if username == "root" {
+			return &user.User{Username: "root", Uid: "0", Gid: "0"}, nil
+		}
+		return nil, os.ErrNotExist
+	}
+	geteuid = func() int { return 99999 }
+	defer func() { userLookup, geteuid = oldLookup, oldGeteuid }()
+
+	sess, err := StartSession("/bin/sh", "/tmp", 80, 24, "root")
+	if err == nil {
+		require.NotNil(t, sess.CMD.SysProcAttr)
+		require.NotNil(t, sess.CMD.SysProcAttr.Credential)
+		sess.Close()
+	}
+}
+
+func TestServeWithUsername(t *testing.T) {
+	done := make(chan struct{})
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		conn, err := websocket.Accept(w, r, nil)
+		if err != nil {
+			return
+		}
+		defer conn.Close(websocket.StatusNormalClosure, "")
+		_ = Serve(conn, "/bin/sh", "", 80, 24, "nonexistent-user")
+		close(done)
+	}))
+	defer srv.Close()
+
+	conn, _, err := websocket.Dial(context.Background(), "ws"+strings.TrimPrefix(srv.URL, "http"), nil)
+	require.NoError(t, err)
+	defer conn.Close(websocket.StatusNormalClosure, "")
+
+	require.NoError(t, conn.Write(context.Background(), websocket.MessageText, []byte(`{"type":"input","data":"echo USERNAME_OK\r"}`)))
+
+	deadline := time.Now().Add(5 * time.Second)
+	var output string
+	for time.Now().Before(deadline) {
+		_, data, readErr := conn.Read(context.Background())
+		if readErr != nil {
+			break
+		}
+		output += string(data)
+		if strings.Contains(output, "USERNAME_OK") {
+			break
+		}
+	}
+
+	require.NoError(t, conn.Close(websocket.StatusNormalClosure, ""))
+
+	select {
+	case <-done:
+	case <-time.After(10 * time.Second):
+		t.Fatalf("timed out waiting for Serve to finish")
+	}
+}
