@@ -141,6 +141,12 @@ func (s WebSessionSuite) TestSaveCredentialsMigrateLegacy() {
 	s.Require().NoError(err)
 }
 
+func (s WebSessionSuite) TestReadLegacyCredentialsNonExistent() {
+	creds, err := readLegacyCredentials("nonexistent_legacy.db")
+	s.Equal(0, len(creds))
+	s.NotEqual(nil, err)
+}
+
 func (s WebSessionSuite) TestReadLegacyCredentialsCorrupted() {
 	authdb := "corrupt_legacy.db"
 	defer func() { _ = os.Remove(authdb) }()

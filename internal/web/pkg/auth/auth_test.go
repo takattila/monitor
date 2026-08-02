@@ -98,6 +98,10 @@ func (s WebAuthSuite) TestAuthenticateNoTableFallback() {
 	_ = os.Remove(auth)
 }
 
+func (s WebAuthSuite) TestIsSQLiteDatabaseDirectory() {
+	s.Equal(false, isSQLiteDatabase("/tmp"))
+}
+
 func (s WebAuthSuite) TestIsSQLiteDatabaseNonExistent() {
 	s.Equal(false, isSQLiteDatabase("nonexistent.db"))
 }
