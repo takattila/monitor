@@ -156,6 +156,25 @@ func (s WebSessionSuite) TestReadLegacyCredentialsCorrupted() {
 	s.Equal(0, len(creds))
 }
 
+func (s WebSessionSuite) TestReadLegacyCredentialsMixed() {
+	authdb := "mixed_legacy.db"
+	defer func() { _ = os.Remove(authdb) }()
+
+	f, err := os.OpenFile(authdb, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	s.Require().NoError(err)
+	validCred := base64.StdEncoding.EncodeToString([]byte("validuser:validpass"))
+	_, err = f.WriteString(validCred + "\n")
+	s.Require().NoError(err)
+	_, err = f.WriteString("not valid base64!!!\n")
+	s.Require().NoError(err)
+	f.Close()
+
+	creds, err := readLegacyCredentials(authdb)
+	s.Equal(nil, err)
+	s.Equal(1, len(creds))
+	s.Equal("validuser:validpass", creds[0])
+}
+
 func (s WebSessionSuite) TestTerminalPrompt() {
 	input := terminalPrompt("username: ")
 	s.Equal("", input)

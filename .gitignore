@@ -13,3 +13,5 @@ PR.md
 example*.*
 *.stdout
 *.finish
+
+*.db

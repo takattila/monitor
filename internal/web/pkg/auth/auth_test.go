@@ -78,6 +78,30 @@ func (s WebAuthSuite) TestAuthenticateLegacyFallback() {
 	_ = os.Remove(auth)
 }
 
+func (s WebAuthSuite) TestAuthenticateNoTableFallback() {
+	auth := "no_table_auth.db"
+	user := "username"
+	pass := "password"
+
+	_ = os.Remove(auth)
+
+	db, err := sql.Open("sqlite", auth)
+	s.Require().NoError(err)
+	defer db.Close()
+
+	_, err = db.Exec("CREATE TABLE other_table (id INTEGER)")
+	s.Require().NoError(err)
+
+	exists := Authenticate(auth, user, pass)
+	s.Equal(false, exists)
+
+	_ = os.Remove(auth)
+}
+
+func (s WebAuthSuite) TestIsSQLiteDatabaseNonExistent() {
+	s.Equal(false, isSQLiteDatabase("nonexistent.db"))
+}
+
 func (s WebAuthSuite) TestAuthenticateCorruptDBFallback() {
 	auth := "corrupt_auth.db"
 	user := "username"
