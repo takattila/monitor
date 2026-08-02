@@ -231,7 +231,12 @@ function installServices {
 function setRootPassword {
     sudo -p "$(
         echo
-        echo -e "- A password is required for installation."
+        echo -e "- Root password is required for installation."
+        echo -e "  The following actions need root privileges:"
+        echo -e "  - Creating directories and setting ownership"
+        echo -e "  - Copying service files to /etc/systemd/system"
+        echo -e "  - Reloading and enabling systemd services"
+        echo -e "  - Setting file permissions for auth.db"
         echo -e "  Please enter the ${YELLOW}root password${ENDCOLOR}: "
     )" echo -n "" 2> /dev/null
 }
