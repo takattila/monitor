@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"os"
+	"strings"
 	"testing"
 
 	"golang.org/x/crypto/bcrypt"
@@ -106,6 +107,30 @@ func (s WebAuthSuite) TestIsSQLiteDatabaseNonExistent() {
 	s.Equal(false, isSQLiteDatabase("nonexistent.db"))
 }
 
+func (s WebAuthSuite) TestAuthenticateQueryErrorFallback() {
+	auth := "query_error_auth.db"
+	user := "username"
+	pass := "password"
+
+	_ = os.Remove(auth)
+
+	db, err := sql.Open("sqlite", auth)
+	s.Require().NoError(err)
+	defer db.Close()
+
+	_, err = db.Exec(`
+		CREATE TABLE users (
+			username TEXT PRIMARY KEY
+		)
+	`)
+	s.Require().NoError(err)
+
+	exists := Authenticate(auth, user, pass)
+	s.Equal(false, exists)
+
+	_ = os.Remove(auth)
+}
+
 func (s WebAuthSuite) TestAuthenticateCorruptDBFallback() {
 	auth := "corrupt_auth.db"
 	user := "username"
@@ -116,6 +141,24 @@ func (s WebAuthSuite) TestAuthenticateCorruptDBFallback() {
 	f, err := os.OpenFile(auth, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
 	s.Require().NoError(err)
 	_, err = f.WriteString("this is not a valid sqlite database\n")
+	s.Require().NoError(err)
+	f.Close()
+	defer os.Remove(auth)
+
+	exists := Authenticate(auth, user, pass)
+	s.Equal(false, exists)
+}
+
+func (s WebAuthSuite) TestAuthenticateScannerErrorFallback() {
+	auth := "scanner_error_auth.db"
+	user := "username"
+	pass := "password"
+
+	_ = os.Remove(auth)
+
+	f, err := os.OpenFile(auth, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	s.Require().NoError(err)
+	_, err = f.WriteString(strings.Repeat("A", 70000) + "\n")
 	s.Require().NoError(err)
 	f.Close()
 	defer os.Remove(auth)
