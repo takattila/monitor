@@ -41,9 +41,8 @@ jobs:
         id: vars
         run: |
           echo "tag=${GITHUB_REF#refs/*/}" >> "$GITHUB_OUTPUT"
-          echo "tag_msg<<_PR_MSG_" >> "$GITHUB_OUTPUT"
-          git cat-file -p "$(git describe --tags --abbrev=0)" | tail -n +6 >> "$GITHUB_OUTPUT"
-          echo "_PR_MSG_" >> "$GITHUB_OUTPUT"
+          echo "tag_msg=$(git log -1 --format=%s "$(git describe --tags --abbrev=0)")" >> "$GITHUB_OUTPUT"
+          echo "RELEASE_VERSION=${{ github.ref_name }}" >> "$GITHUB_ENV"
 
       - name: Build
         run: |
@@ -61,7 +60,6 @@ jobs:
 
       - name: ZIP
         run: zip -qq -r monitor-${{ steps.vars.outputs.tag }}-${{ matrix.goos }}-${{ matrix.goarch }}.zip . -x *.git* -x *internal* -x *pkg* -x *scripts* -x *assets* -x *README.md* -x *go.mod* -x *go.sum*
-
 
       - name: Release
         uses: softprops/action-gh-release@v3
