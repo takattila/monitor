@@ -1,18 +1,20 @@
 package auth
 
 import (
+	"database/sql"
+	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 
+	"bou.ke/monkey"
+	"golang.org/x/crypto/bcrypt"
+	_ "modernc.org/sqlite"
 	"github.com/stretchr/testify/suite"
 )
-
-// Testing:
-// go test -coverprofile="coverage.out" -v ./...
-// go tool cover -html="coverage.out"
 
 type (
 	WebSessionSuite struct {
@@ -49,6 +51,17 @@ func (s WebSessionSuite) TestSaveCredentials() {
 
 	err := SaveCredentials(authdb, true)
 	s.Equal(nil, err)
+
+	db, err := sql.Open("sqlite", authdb)
+	s.Require().NoError(err)
+	defer db.Close()
+
+	var hash string
+	err = db.QueryRow("SELECT password_hash FROM users WHERE username = ?", "username: ").Scan(&hash)
+	s.Require().NoError(err)
+
+	err = bcrypt.CompareHashAndPassword([]byte(hash), []byte("password: "))
+	s.Equal(nil, err)
 }
 
 func (s WebSessionSuite) TestSaveCredentialsBadPathError() {
@@ -63,15 +76,12 @@ func (s WebSessionSuite) TestSaveCredentialsBadPathError() {
 	}
 
 	err := SaveCredentials(authdb, true)
-	s.Contains(fmt.Sprint(err), "no such file or directory")
+	s.Contains(fmt.Sprint(err), "unable to open database file")
 }
 
-func (s WebSessionSuite) TestSaveCredentialsWriteStringError() {
-	authdb := "testauth.db"
+func (s WebSessionSuite) TestSaveCredentialsExistingUser() {
+	authdb := "testauth2.db"
 	defer func() { _ = os.Remove(authdb) }()
-
-	oldRriteString := writeString
-	defer func() { writeString = oldRriteString }()
 
 	oldTerminalPrompt := terminalPrompt
 	defer func() { terminalPrompt = oldTerminalPrompt }()
@@ -80,17 +90,225 @@ func (s WebSessionSuite) TestSaveCredentialsWriteStringError() {
 		return prompt
 	}
 
-	writeString = func(f *os.File, s string) (n int, err error) {
-		return 0, fmt.Errorf("error: %s", "file.WriteString")
+	err := SaveCredentials(authdb, true)
+	s.Equal(nil, err)
+
+	err = SaveCredentials(authdb, true)
+	s.Equal(nil, err)
+
+	db, err := sql.Open("sqlite", authdb)
+	s.Require().NoError(err)
+	defer db.Close()
+
+	var count int
+	err = db.QueryRow("SELECT COUNT(*) FROM users WHERE username = ?", "username: ").Scan(&count)
+	s.Require().NoError(err)
+	s.Equal(1, count)
+}
+
+func (s WebSessionSuite) TestSaveCredentialsMigrateLegacy() {
+	authdb := "testauth_legacy.db"
+	defer func() {
+		_ = os.Remove(authdb)
+		_ = os.Remove(authdb + ".legacy")
+	}()
+
+	oldTerminalPrompt := terminalPrompt
+	defer func() { terminalPrompt = oldTerminalPrompt }()
+
+	terminalPrompt = func(prompt string) string {
+		return prompt
 	}
 
-	err := SaveCredentials(authdb, true)
-	s.Contains(fmt.Sprint(err), "error: file.WriteString")
+	f, err := os.OpenFile(authdb, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	s.Require().NoError(err)
+	authString := base64.StdEncoding.EncodeToString([]byte("legacyuser:legacypass"))
+	_, err = f.WriteString(authString + "\n")
+	s.Require().NoError(err)
+	f.Close()
+
+	err = SaveCredentials(authdb, true)
+	s.Equal(nil, err)
+
+	db, err := sql.Open("sqlite", authdb)
+	s.Require().NoError(err)
+	defer db.Close()
+
+	var count int
+	err = db.QueryRow("SELECT COUNT(*) FROM users WHERE username = ?", "legacyuser").Scan(&count)
+	s.Require().NoError(err)
+	s.Equal(1, count)
+
+	_, err = os.Stat(authdb + ".legacy")
+	s.Require().NoError(err)
+}
+
+func (s WebSessionSuite) TestReadLegacyCredentialsNonExistent() {
+	creds, err := readLegacyCredentials("nonexistent_legacy.db")
+	s.Equal(0, len(creds))
+	s.NotEqual(nil, err)
+}
+
+func (s WebSessionSuite) TestReadLegacyCredentialsCorrupted() {
+	authdb := "corrupt_legacy.db"
+	defer func() { _ = os.Remove(authdb) }()
+
+	f, err := os.OpenFile(authdb, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	s.Require().NoError(err)
+	_, err = f.WriteString("this is not valid base64!!!\n")
+	s.Require().NoError(err)
+	f.Close()
+
+	creds, err := readLegacyCredentials(authdb)
+	s.Equal(nil, err)
+	s.Equal(0, len(creds))
+}
+
+func (s WebSessionSuite) TestReadLegacyCredentialsMixed() {
+	authdb := "mixed_legacy.db"
+	defer func() { _ = os.Remove(authdb) }()
+
+	f, err := os.OpenFile(authdb, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	s.Require().NoError(err)
+	validCred := base64.StdEncoding.EncodeToString([]byte("validuser:validpass"))
+	_, err = f.WriteString(validCred + "\n")
+	s.Require().NoError(err)
+	_, err = f.WriteString("not valid base64!!!\n")
+	s.Require().NoError(err)
+	f.Close()
+
+	creds, err := readLegacyCredentials(authdb)
+	s.Equal(nil, err)
+	s.Equal(1, len(creds))
+	s.Equal("validuser:validpass", creds[0])
 }
 
 func (s WebSessionSuite) TestTerminalPrompt() {
 	input := terminalPrompt("username: ")
 	s.Equal("", input)
+}
+
+func (s WebSessionSuite) TestSaveCredentialsBcryptError() {
+	authdb := "bcrypt_error.db"
+	defer os.Remove(authdb)
+
+	oldTerminalPrompt := terminalPrompt
+	defer func() { terminalPrompt = oldTerminalPrompt }()
+	terminalPrompt = func(prompt string) string { return prompt }
+
+	patch := monkey.Patch(bcrypt.GenerateFromPassword, func(password []byte, cost int) ([]byte, error) {
+		return nil, errors.New("mock bcrypt error")
+	})
+	defer patch.Unpatch()
+
+	err := SaveCredentials(authdb, true)
+	s.Contains(fmt.Sprint(err), "bcrypt.GenerateFromPassword")
+
+	_ = os.Remove(authdb)
+}
+
+func (s WebSessionSuite) TestSaveCredentialsInsertError() {
+	authdb := "insert_error.db"
+	defer os.Remove(authdb)
+
+	_ = os.Remove(authdb)
+
+	db, err := sql.Open("sqlite", authdb)
+	s.Require().NoError(err)
+	_, err = db.Exec("CREATE TABLE users (username TEXT PRIMARY KEY)")
+	s.Require().NoError(err)
+	db.Close()
+
+	oldTerminalPrompt := terminalPrompt
+	defer func() { terminalPrompt = oldTerminalPrompt }()
+	terminalPrompt = func(prompt string) string { return prompt }
+
+	err = SaveCredentials(authdb, true)
+	s.Contains(fmt.Sprint(err), "INSERT:")
+
+	_ = os.Remove(authdb)
+}
+
+func (s WebSessionSuite) TestSaveCredentialsLegacyBcryptError() {
+	authdb := "legacy_bcrypt_error.db"
+	defer os.Remove(authdb)
+	defer os.Remove(authdb + ".legacy")
+
+	_ = os.Remove(authdb)
+	_ = os.Remove(authdb + ".legacy")
+
+	f, err := os.OpenFile(authdb, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	s.Require().NoError(err)
+	authString := base64.StdEncoding.EncodeToString([]byte("legacyuser:legacypass"))
+	_, err = f.WriteString(authString + "\n")
+	s.Require().NoError(err)
+	f.Close()
+
+	precomputedHash, err := bcrypt.GenerateFromPassword([]byte("password: "), bcrypt.DefaultCost)
+	s.Require().NoError(err)
+
+	callCount := 0
+	patch := monkey.Patch(bcrypt.GenerateFromPassword, func(password []byte, cost int) ([]byte, error) {
+		callCount++
+		if callCount == 1 {
+			return precomputedHash, nil
+		}
+		return nil, errors.New("mock bcrypt error")
+	})
+	defer patch.Unpatch()
+
+	oldTerminalPrompt := terminalPrompt
+	defer func() { terminalPrompt = oldTerminalPrompt }()
+	terminalPrompt = func(prompt string) string { return prompt }
+
+	err = SaveCredentials(authdb, true)
+	s.Contains(fmt.Sprint(err), "bcrypt.GenerateFromPassword")
+
+	_ = os.Remove(authdb)
+	_ = os.Remove(authdb + ".legacy")
+}
+
+func (s WebSessionSuite) TestSaveCredentialsLegacyInsertError() {
+	authdb := "legacy_insert_error.db"
+	triggerdb := "legacy_insert_error_trigger.db"
+	defer os.Remove(authdb)
+	defer os.Remove(authdb + ".legacy")
+	defer os.Remove(triggerdb)
+
+	_ = os.Remove(authdb)
+	_ = os.Remove(authdb + ".legacy")
+	_ = os.Remove(triggerdb)
+
+	f, err := os.OpenFile(authdb, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	s.Require().NoError(err)
+	authString := base64.StdEncoding.EncodeToString([]byte("legacyuser:legacypass"))
+	_, err = f.WriteString(authString + "\n")
+	s.Require().NoError(err)
+	f.Close()
+
+	db, err := sql.Open("sqlite", triggerdb)
+	s.Require().NoError(err)
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password_hash TEXT NOT NULL)")
+	s.Require().NoError(err)
+	_, err = db.Exec("CREATE TRIGGER fail_insert BEFORE INSERT ON users WHEN NEW.username != 'username: ' BEGIN SELECT RAISE(ABORT, 'insert not allowed'); END;")
+	s.Require().NoError(err)
+	db.Close()
+
+	patch := monkey.Patch(initDB, func(authFile string) (*sql.DB, error) {
+		return sql.Open("sqlite", triggerdb)
+	})
+	defer patch.Unpatch()
+
+	oldTerminalPrompt := terminalPrompt
+	defer func() { terminalPrompt = oldTerminalPrompt }()
+	terminalPrompt = func(prompt string) string { return prompt }
+
+	err = SaveCredentials(authdb, true)
+	s.Contains(fmt.Sprint(err), "INSERT:")
+
+	_ = os.Remove(authdb)
+	_ = os.Remove(authdb + ".legacy")
+	_ = os.Remove(triggerdb)
 }
 
 func TestWebSessionSuite(t *testing.T) {

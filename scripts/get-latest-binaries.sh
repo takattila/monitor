@@ -160,7 +160,7 @@ function installServices {
                 sudo chown ${USER}:${USER} ${cfgBackupPath}
                 sudo chown -R ${USER}:${USER} ${cfgBackupPath}
                 sudo cp -f ${monitorPath}/configs/*.yaml ${cfgBackupPath} >/dev/null 2>&1 || true
-                sudo cp -f ${monitorPath}/configs/*.db ${cfgBackupPath} >/dev/null 2>&1 || true
+                sudo cp -f ${monitorPath}/configs/auth.db ${cfgBackupPath}/auth.db >/dev/null 2>&1 || true
                 sudo rm -rf ${monitorPath} >/dev/null 2>&1 || true
             else
                 echo -e "  - ${YELLOW}Backup skipped...${ENDCOLOR}"
@@ -172,7 +172,7 @@ function installServices {
     echo -e "- ${YELLOW}[3./${totalSteps}.] ${GREEN}Unzip monitor-v*.zip to ${basePath}...${ENDCOLOR}"
         sudo unzip -q -o monitor-v*.zip -d monitor
         sudo cp ${cfgBackupPath}/*.yaml ${monitorPath}/configs >/dev/null 2>&1 || true
-        sudo cp ${cfgBackupPath}/*.db ${monitorPath}/configs >/dev/null 2>&1 || true
+        sudo cp ${cfgBackupPath}/auth.db ${monitorPath}/configs/auth.db >/dev/null 2>&1 || true
         sudo rm -rf ${cfgBackupPath} >/dev/null 2>&1 || true
         sudo rm -f monitor-v*.zip 2>&1 || true
 
@@ -200,9 +200,10 @@ function installServices {
     echo -e "- ${YELLOW}[7./${totalSteps}.] ${GREEN}Save your credentials${ENDCOLOR}"
         if [[ "$backupCfg" =~ ^([yY][eE][sS]|[yY])$ ]]; then
             echo -e "  - ${YELLOW}Using backup...${ENDCOLOR}"
-            sudo chown root:root ${monitorPath}/configs/*.db >/dev/null 2>&1 || true
+            sudo chown root:root ${monitorPath}/configs/auth.db >/dev/null 2>&1 || true
         else
             sudo ./cmd/credentials
+            sudo chown root:root ${monitorPath}/configs/auth.db >/dev/null 2>&1 || true
         fi
 
     echo -e "- ${YELLOW}[8./${totalSteps}.] ${GREEN}Copy ${programDir}/tools/*.service to /etc/systemd/system...${ENDCOLOR}"
@@ -230,7 +231,12 @@ function installServices {
 function setRootPassword {
     sudo -p "$(
         echo
-        echo -e "- A password is required for installation."
+        echo -e "- Root password is required for installation."
+        echo -e "  The following actions need root privileges:"
+        echo -e "  - Creating directories and setting ownership"
+        echo -e "  - Copying service files to /etc/systemd/system"
+        echo -e "  - Reloading and enabling systemd services"
+        echo -e "  - Setting file permissions for auth.db"
         echo -e "  Please enter the ${YELLOW}root password${ENDCOLOR}: "
     )" echo -n "" 2> /dev/null
 }

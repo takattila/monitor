@@ -1,14 +1,16 @@
 package auth
 
-// Testing:
-// go test -coverprofile="coverage.out" -v ./...
-// go tool cover -html="coverage.out"
-
 import (
+	"database/sql"
 	"encoding/base64"
+	"errors"
 	"os"
+	"strings"
 	"testing"
 
+	"bou.ke/monkey"
+	"golang.org/x/crypto/bcrypt"
+	_ "modernc.org/sqlite"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -25,16 +27,23 @@ func (s WebAuthSuite) TestAuthenticate() {
 
 	_ = os.Remove(auth)
 
-	f, err := os.OpenFile(auth, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
-	if err != nil {
-		s.T().Fatalf("os.OpenFile: %v", err)
-	}
-	defer f.Close()
+	db, err := sql.Open("sqlite", auth)
+	s.Require().NoError(err)
+	defer db.Close()
 
-	authString := base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
-	if _, err := f.WriteString(authString + "\n"); err != nil {
-		s.T().Fatalf("f.WriteString: %v", err)
-	}
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS users (
+			username TEXT PRIMARY KEY,
+			password_hash TEXT NOT NULL
+		)
+	`)
+	s.Require().NoError(err)
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+	s.Require().NoError(err)
+
+	_, err = db.Exec("INSERT INTO users (username, password_hash) VALUES (?, ?)", user, string(hash))
+	s.Require().NoError(err)
 
 	exists := Authenticate(auth, "bad", "credentials")
 	s.Equal(false, exists)
@@ -46,6 +55,143 @@ func (s WebAuthSuite) TestAuthenticate() {
 	s.Equal(false, exists)
 
 	_ = os.Remove(auth)
+}
+
+func (s WebAuthSuite) TestAuthenticateLegacyFallback() {
+	auth := "legacy_auth.db"
+	user := "legacyuser"
+	pass := "legacypass"
+
+	_ = os.Remove(auth)
+
+	f, err := os.OpenFile(auth, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	s.Require().NoError(err)
+	defer f.Close()
+
+	authString := base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
+	_, err = f.WriteString(authString + "\n")
+	s.Require().NoError(err)
+
+	exists := Authenticate(auth, "bad", "credentials")
+	s.Equal(false, exists)
+
+	exists = Authenticate(auth, user, pass)
+	s.Equal(true, exists)
+
+	_ = os.Remove(auth)
+}
+
+func (s WebAuthSuite) TestAuthenticateNoTableFallback() {
+	auth := "no_table_auth.db"
+	user := "username"
+	pass := "password"
+
+	_ = os.Remove(auth)
+
+	db, err := sql.Open("sqlite", auth)
+	s.Require().NoError(err)
+	defer db.Close()
+
+	_, err = db.Exec("CREATE TABLE other_table (id INTEGER)")
+	s.Require().NoError(err)
+
+	exists := Authenticate(auth, user, pass)
+	s.Equal(false, exists)
+
+	_ = os.Remove(auth)
+}
+
+func (s WebAuthSuite) TestIsSQLiteDatabaseDirectory() {
+	s.Equal(false, isSQLiteDatabase("/tmp"))
+}
+
+func (s WebAuthSuite) TestIsSQLiteDatabaseNonExistent() {
+	s.Equal(false, isSQLiteDatabase("nonexistent.db"))
+}
+
+func (s WebAuthSuite) TestAuthenticateQueryErrorFallback() {
+	auth := "query_error_auth.db"
+	user := "username"
+	pass := "password"
+
+	_ = os.Remove(auth)
+
+	db, err := sql.Open("sqlite", auth)
+	s.Require().NoError(err)
+	defer db.Close()
+
+	_, err = db.Exec(`
+		CREATE TABLE users (
+			username TEXT PRIMARY KEY
+		)
+	`)
+	s.Require().NoError(err)
+
+	exists := Authenticate(auth, user, pass)
+	s.Equal(false, exists)
+
+	_ = os.Remove(auth)
+}
+
+func (s WebAuthSuite) TestAuthenticateCorruptDBFallback() {
+	auth := "corrupt_auth.db"
+	user := "username"
+	pass := "password"
+
+	_ = os.Remove(auth)
+
+	f, err := os.OpenFile(auth, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	s.Require().NoError(err)
+	_, err = f.WriteString("this is not a valid sqlite database\n")
+	s.Require().NoError(err)
+	f.Close()
+	defer os.Remove(auth)
+
+	exists := Authenticate(auth, user, pass)
+	s.Equal(false, exists)
+}
+
+func (s WebAuthSuite) TestAuthenticateScannerErrorFallback() {
+	auth := "scanner_error_auth.db"
+	user := "username"
+	pass := "password"
+
+	_ = os.Remove(auth)
+
+	f, err := os.OpenFile(auth, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	s.Require().NoError(err)
+	_, err = f.WriteString(strings.Repeat("A", 70000) + "\n")
+	s.Require().NoError(err)
+	f.Close()
+	defer os.Remove(auth)
+
+	exists := Authenticate(auth, user, pass)
+	s.Equal(false, exists)
+}
+
+func (s WebAuthSuite) TestAuthenticateSQLOpenError() {
+	auth := "sqlopen_error.db"
+
+	_ = os.Remove(auth)
+
+	err := os.WriteFile(auth, []byte(sqliteHeader), 0640)
+	s.Require().NoError(err)
+	defer os.Remove(auth)
+
+	patch := monkey.Patch(sql.Open, func(driverName, dataSourceName string) (*sql.DB, error) {
+		return nil, errors.New("mock sql.Open error")
+	})
+	defer patch.Unpatch()
+
+	exists := Authenticate(auth, "username", "password")
+	s.Equal(false, exists)
+}
+
+func (s WebAuthSuite) TestAuthenticateLegacyOpenError() {
+	auth := "nonexistent_dir/legacy_open_error.db"
+
+	exists := Authenticate(auth, "username", "password")
+	s.Equal(false, exists)
 }
 
 func TestWebAuthSuite(t *testing.T) {

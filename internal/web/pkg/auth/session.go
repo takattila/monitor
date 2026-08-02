@@ -1,13 +1,16 @@
 package auth
 
 import (
+	"bufio"
 	"encoding/base64"
+	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gorilla/securecookie"
 	"github.com/takattila/monitor/internal/web/pkg/terminal"
-	"github.com/takattila/monitor/pkg/common"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -17,10 +20,6 @@ var (
 
 	terminalPrompt = func(prompt string) string {
 		return terminal.Prompt(prompt)
-	}
-
-	writeString = func(f *os.File, s string) (n int, err error) {
-		return f.WriteString(s)
 	}
 )
 
@@ -62,23 +61,67 @@ func GetUserName(request *http.Request) (userName string) {
 	return userName
 }
 
-// SaveCredentials writes user credentials into the AuthFile.
+// SaveCredentials writes user credentials into the AuthFile (SQLite database).
 func SaveCredentials(authFile string, saveCredentials bool) error {
-	if saveCredentials == true || !common.FileExists(authFile) {
+	if saveCredentials == true || !fileExists(authFile) {
 		user := terminalPrompt("username: ")
 		pass := terminalPrompt("password: ")
 
-		f, err := os.OpenFile(authFile,
-			os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+		var legacyCreds []string
+		if fileExists(authFile) && !isSQLiteDatabase(authFile) {
+			legacyCreds, _ = readLegacyCredentials(authFile)
+			backupPath := authFile + ".legacy"
+			_ = os.Rename(authFile, backupPath)
+		}
+
+		db, err := initDB(authFile)
 		if err != nil {
 			return err
 		}
-		defer f.Close()
+		defer db.Close()
 
-		authString := base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
-		if _, err := writeString(f, authString+"\n"); err != nil {
-			return err
+		hash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+		if err != nil {
+			return fmt.Errorf("bcrypt.GenerateFromPassword: %w", err)
+		}
+
+		_, err = db.Exec("INSERT OR REPLACE INTO users (username, password_hash) VALUES (?, ?)", user, string(hash))
+		if err != nil {
+			return fmt.Errorf("INSERT: %w", err)
+		}
+
+		for _, cred := range legacyCreds {
+			parts := strings.SplitN(cred, ":", 2)
+			if len(parts) == 2 {
+				hash, err := bcrypt.GenerateFromPassword([]byte(parts[1]), bcrypt.DefaultCost)
+				if err != nil {
+					return fmt.Errorf("bcrypt.GenerateFromPassword: %w", err)
+				}
+				_, err = db.Exec("INSERT OR IGNORE INTO users (username, password_hash) VALUES (?, ?)", parts[0], string(hash))
+				if err != nil {
+					return fmt.Errorf("INSERT: %w", err)
+				}
+			}
 		}
 	}
 	return nil
+}
+
+func readLegacyCredentials(authFile string) ([]string, error) {
+	file, err := os.Open(authFile)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var creds []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		decoded, err := base64.StdEncoding.DecodeString(line)
+		if err == nil {
+			creds = append(creds, string(decoded))
+		}
+	}
+	return creds, scanner.Err()
 }
