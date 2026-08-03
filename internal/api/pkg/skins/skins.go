@@ -21,7 +21,7 @@ func GetJSON() string {
 	files, err := ioutil.ReadDir(SkinsPath)
 	L.Error(err)
 
-	excluded := []string{"progress-presets"}
+	excluded := []string{"progress-presets", "light-mode", "fancy", "xterm"}
 
 	var skins []string
 

@@ -11,6 +11,7 @@ folder, which the README references.
 ## Requirements
 
 - The monitor stack must be running locally (web on port `8383`, api on `7070`).
+- Valid login credentials for the web interface (`MONITOR_USER`/`MONITOR_PASS`).
 - A Chrome/Chromium binary. Default: `/opt/google/chrome/chrome`.
 - Node.js with npm.
 
@@ -51,6 +52,35 @@ node capture.js --themes --skin mint
 node capture.js --all
 ```
 
+With non-default credentials:
+
+```sh
+MONITOR_USER=myuser MONITOR_PASS=mypass node capture.js --all
+```
+
+Limit to a single skin in both modes, e.g. while styling `github_red`:
+
+```sh
+MONITOR_USER=myuser MONITOR_PASS=mypass node capture.js --themes --skin github_red
+```
+
+Capture only the light variants of one skin:
+
+```sh
+MONITOR_USER=myuser MONITOR_PASS=mypass node capture.js --themes --skin mint
+# then copy just the *_light.png files you need:
+cp out/desktop-mint-light.png ../../assets/
+```
+
+Full workflow from a fresh checkout:
+
+```sh
+cd tools/screenshots
+npm install
+MONITOR_USER=myuser MONITOR_PASS=mypass node capture.js --all
+cp out/*.png ../../assets/
+```
+
 ## Environment variables
 
 | Variable         | Default                   | Description                         |
@@ -74,6 +104,10 @@ The assets are referenced from `../../README.md`.
 
 - The network capture generates loopback traffic with `curl` so the charts show
   real movement; `curl` must be available for that shot to look meaningful.
-- The script logs in with the default `admin`/`admin` credentials (see
-  `configs/auth.db` in the repository root). Override with
-  `MONITOR_USER`/`MONITOR_PASS` if your instance uses different credentials.
+- Each shot persists the chosen skin/mode through the `/monitor/settings`
+  endpoint (like the UI does), so the dashboard's `loadSettings()` applies light
+  mode instead of falling back to the default dark skin.
+- The script logs in with the credentials set in `configs/auth.db` of your
+  instance. The database is not shipped with the repository; it is created on
+  first run (by the installer or `cmd/credentials`) with your own user name and
+  password. Point `MONITOR_USER`/`MONITOR_PASS` at those credentials.

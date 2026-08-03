@@ -113,6 +113,17 @@ async function login(page) {
 async function setSkin(page, skin, mode) {
     await page.setCookie({ name: 'css', value: skin, url: BASE, path: '/monitor/' });
     await page.setCookie({ name: 'skin', value: mode, url: BASE, path: '/monitor/' });
+
+    // Persist server-side so the dashboard's loadSettings() honors the choice.
+    await page.evaluate(async (settings) => {
+        for (const [key, value] of settings) {
+            await fetch('/monitor/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key, value })
+            });
+        }
+    }, [['skin', mode], ['css', skin]]);
 }
 
 async function shoot(page, skin, mode, fname, viewport) {
