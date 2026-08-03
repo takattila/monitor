@@ -95,6 +95,189 @@ function getRoute {
     cat "${monitorPath}/configs/web.$(getWebConfigType).yaml" | grep "^    index:" | awk '{print $2}'
 }
 
+function mergeConfigFile {
+    local oldFile="$1"
+    local newFile="$2"
+    local oldIndex
+    local newIndex
+
+    oldIndex="$(grep '^    index:' "${oldFile}" | head -n1 | awk '{print $2}')"
+    newIndex="$(grep '^    index:' "${newFile}" | head -n1 | awk '{print $2}')"
+
+    awk -v oldFile="${oldFile}" -v newFile="${newFile}" -v oldIndex="${oldIndex}" -v newIndex="${newIndex}" '
+BEGIN {
+    while ((getline line < oldFile) > 0) {
+        oldCount++
+        oldLines[oldCount] = line
+    }
+    close(oldFile)
+
+    while ((getline line < newFile) > 0) {
+        newCount++
+        newLines[newCount] = line
+    }
+    close(newFile)
+
+    buildPaths("old")
+    buildPaths("new")
+    collectInsertions()
+    applyInsertions()
+
+    for (i = 1; i <= outCount; i++) {
+        print outLines[i]
+    }
+    exit
+}
+
+function indentOf(line,    n, c) {
+    n = 0
+    c = substr(line, n + 1, 1)
+    while (c == " " || c == "\t") {
+        n++
+        c = substr(line, n + 1, 1)
+    }
+    return n
+}
+
+function isKeyLine(line) {
+    return line ~ /^[ \t]*[A-Za-z0-9_.-]+:/
+}
+
+function extractKey(line,    k) {
+    k = line
+    sub(/^[ \t]*/, "", k)
+    sub(/:.*$/, "", k)
+    return k
+}
+
+function joinPath(stackName, depth,    i, p) {
+    p = stackName[1]
+    for (i = 2; i <= depth; i++) p = p "/" stackName[i]
+    return p
+}
+
+function parentOf(path,    i, n) {
+    n = length(path)
+    i = n
+    while (i > 0 && substr(path, i, 1) != "/") i--
+    if (i == 0) return ""
+    return substr(path, 1, i - 1)
+}
+
+function buildPaths(kind,    cnt, i, line, indent, key, path, depth, stackInd, stackName, stackPath) {
+    depth = 0
+    if (kind == "old") {
+        cnt = oldCount
+    } else {
+        cnt = newCount
+    }
+
+    for (i = 1; i <= cnt; i++) {
+        if (kind == "old") line = oldLines[i]; else line = newLines[i]
+        if (line ~ /^[ \t]*$/ || line ~ /^[ \t]*#/) continue
+        indent = indentOf(line)
+        if (isKeyLine(line)) {
+            while (depth > 0 && stackInd[depth] >= indent) {
+                if (kind == "old") oldBlockEnd[stackPath[depth]] = i - 1
+                else newBlockEnd[stackPath[depth]] = i - 1
+                depth--
+            }
+            depth++
+            stackInd[depth] = indent
+            key = extractKey(line)
+            stackName[depth] = key
+            path = joinPath(stackName, depth)
+            stackPath[depth] = path
+            if (kind == "old") {
+                oldBlockStart[path] = i
+                oldPathSet[path] = 1
+            } else {
+                newBlockStart[path] = i
+                newPaths[++newPathsCount] = path
+            }
+        }
+    }
+    for (i = depth; i >= 1; i--) {
+        if (kind == "old") oldBlockEnd[stackPath[i]] = cnt
+        else newBlockEnd[stackPath[i]] = cnt
+    }
+}
+
+function routeTransformValue(path, value,    v) {
+    if (newIndex == "" || oldIndex == "") return value
+    if (path !~ /^on_start\/routes\//) return value
+    v = value
+    if (v == newIndex) return oldIndex
+    if (index(v, newIndex "/") == 1) {
+        return oldIndex substr(v, length(newIndex) + 1)
+    }
+    return value
+}
+
+function transformKeyLine(path, line,    i, keyPart, valPart) {
+    if (newIndex == "" || oldIndex == "") return line
+    if (path !~ /^on_start\/routes\//) return line
+    i = index(line, ":")
+    if (i == 0) return line
+    keyPart = substr(line, 1, i)
+    valPart = substr(line, i + 1)
+    sub(/^[ \t]*/, "", valPart)
+    sub(/[ \t]*$/, "", valPart)
+    return keyPart " " routeTransformValue(path, valPart)
+}
+
+function collectInsertions(    n, i, path, parent) {
+    n = 0
+    for (i = 1; i <= newPathsCount; i++) {
+        path = newPaths[i]
+        if (path in oldPathSet) continue
+        parent = parentOf(path)
+        if (parent != "" && !(parent in oldPathSet)) continue
+        n++
+        insPos[n] = (parent == "" ? oldCount : oldBlockEnd[parent])
+        insStart[n] = newBlockStart[path]
+        insEnd[n] = newBlockEnd[path]
+        insPath[n] = path
+    }
+    insCount = n
+    for (i = 2; i <= n; i++) {
+        keyPos = insPos[i]
+        keyStart = insStart[i]
+        keyEnd = insEnd[i]
+        keyPath = insPath[i]
+        j = i - 1
+        while (j >= 1 && insPos[j] < keyPos) {
+            insPos[j + 1] = insPos[j]
+            insStart[j + 1] = insStart[j]
+            insEnd[j + 1] = insEnd[j]
+            insPath[j + 1] = insPath[j]
+            j--
+        }
+        insPos[j + 1] = keyPos
+        insStart[j + 1] = keyStart
+        insEnd[j + 1] = keyEnd
+        insPath[j + 1] = keyPath
+    }
+}
+
+function applyInsertions(    i, k, pos, m, j, line, start) {
+    for (i = 1; i <= oldCount; i++) outLines[i] = oldLines[i]
+    outCount = oldCount
+    for (k = 1; k <= insCount; k++) {
+        pos = insPos[k]
+        m = insEnd[k] - insStart[k] + 1
+        for (i = outCount; i > pos; i--) outLines[i + m] = outLines[i]
+        start = insStart[k]
+        for (j = 1; j <= m; j++) {
+            line = newLines[start + j - 1]
+            if (j == 1) line = transformKeyLine(insPath[k], line)
+            outLines[pos + j] = line
+        }
+        outCount += m
+    }
+}
+'
+}
 
 function checkProgramIsInstalled {
     local program=$1
@@ -162,6 +345,7 @@ function installServices {
                 sudo cp -f ${monitorPath}/configs/*.yaml ${cfgBackupPath} >/dev/null 2>&1 || true
                 sudo cp -f ${monitorPath}/configs/auth.db ${cfgBackupPath}/auth.db >/dev/null 2>&1 || true
                 sudo rm -rf ${monitorPath} >/dev/null 2>&1 || true
+                echo -e "  - ${YELLOW}Backup saved to: ${cfgBackupPath}${ENDCOLOR}"
             else
                 echo -e "  - ${YELLOW}Backup skipped...${ENDCOLOR}"
             fi
@@ -171,9 +355,25 @@ function installServices {
 
     echo -e "- ${YELLOW}[3./${totalSteps}.] ${GREEN}Unzip monitor-v*.zip to ${basePath}...${ENDCOLOR}"
         sudo unzip -q -o monitor-v*.zip -d monitor
-        sudo cp ${cfgBackupPath}/*.yaml ${monitorPath}/configs >/dev/null 2>&1 || true
-        sudo cp ${cfgBackupPath}/auth.db ${monitorPath}/configs/auth.db >/dev/null 2>&1 || true
-        sudo rm -rf ${cfgBackupPath} >/dev/null 2>&1 || true
+
+        if [[ "$backupCfg" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+            echo -e "  - ${YELLOW}Restoring configuration and adding new options...${ENDCOLOR}"
+            for cfg in "${monitorPath}"/configs/*.yaml; do
+                local cfgName
+                cfgName="$(basename "${cfg}")"
+                if [[ -e "${cfgBackupPath}/${cfgName}" ]]; then
+                    local mergedFile="${cfgBackupPath}/${cfgName}.merged"
+                    echo -e "  - ${GREEN}${cfgName}${ENDCOLOR}"
+                    mergeConfigFile "${cfgBackupPath}/${cfgName}" "${cfg}" > "${mergedFile}"
+                    sudo cp -f "${mergedFile}" "${cfg}"
+                    rm -f "${mergedFile}"
+                fi
+            done
+            sudo cp ${cfgBackupPath}/auth.db ${monitorPath}/configs/auth.db >/dev/null 2>&1 || true
+        else
+            echo -e "  - ${YELLOW}Using the default configuration...${ENDCOLOR}"
+        fi
+
         sudo rm -f monitor-v*.zip 2>&1 || true
 
     echo -e "- ${YELLOW}[4./${totalSteps}.] ${GREEN}Change ownership of the ${monitorPath} directory to $USER...${ENDCOLOR}"
