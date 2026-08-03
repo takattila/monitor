@@ -1359,8 +1359,19 @@ function loadSettings() {
                 setLightSkin(false);
             }
 
+            if (settings.css) {
+                setCookie("css", settings.css, Infinity);
+            }
             loadCss(settings.css);
+
+            if (settings.logo) {
+                setCookie("logo", settings.logo, Infinity);
+            }
             loadLogo(settings.logo);
+
+            if (settings.preset) {
+                setCookie("preset", settings.preset, Infinity);
+            }
             loadProgressPreset(settings.preset);
         },
         error: function() {
