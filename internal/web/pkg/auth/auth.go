@@ -54,7 +54,20 @@ func initDB(authFile string) (*sql.DB, error) {
 		)
 	`)
 	if err != nil {
-		return nil, fmt.Errorf("CREATE TABLE: %w", err)
+		return nil, fmt.Errorf("CREATE TABLE users: %w", err)
+	}
+
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS user_settings (
+			username  TEXT NOT NULL,
+			key_name  TEXT NOT NULL,
+			value     TEXT,
+			PRIMARY KEY (username, key_name),
+			FOREIGN KEY (username) REFERENCES users(username)
+		)
+	`)
+	if err != nil {
+		return nil, fmt.Errorf("CREATE TABLE user_settings: %w", err)
 	}
 
 	return db, nil

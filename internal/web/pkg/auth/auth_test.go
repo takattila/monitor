@@ -1,7 +1,9 @@
 package auth
 
 import (
+	"context"
 	"database/sql"
+	"database/sql/driver"
 	"encoding/base64"
 	"errors"
 	"os"
@@ -9,9 +11,9 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
-	"golang.org/x/crypto/bcrypt"
-	_ "modernc.org/sqlite"
 	"github.com/stretchr/testify/suite"
+	"golang.org/x/crypto/bcrypt"
+	"modernc.org/sqlite"
 )
 
 type (
@@ -19,6 +21,19 @@ type (
 		suite.Suite
 	}
 )
+
+type roConnector struct {
+	d *sqlite.Driver
+	n string
+}
+
+func (c *roConnector) Driver() driver.Driver { return c.d }
+
+func (c *roConnector) Connect(_ context.Context) (driver.Conn, error) {
+	return c.d.Open(c.n)
+}
+
+func (c *roConnector) Close() error { return nil }
 
 func (s WebAuthSuite) TestAuthenticate() {
 	auth := "auth.db"
@@ -192,6 +207,32 @@ func (s WebAuthSuite) TestAuthenticateLegacyOpenError() {
 
 	exists := Authenticate(auth, "username", "password")
 	s.Equal(false, exists)
+}
+
+func (s WebAuthSuite) TestInitDBCreateUserSettingsError() {
+	authdb := "initdb_error.db"
+	defer os.Remove(authdb)
+	_ = os.Remove(authdb)
+
+	// Create the database file with just the users table, but no user_settings table
+	// and make it read-only to cause CREATE TABLE to fail
+	db, err := sql.Open("sqlite", authdb)
+	s.Require().NoError(err)
+	_, err = db.Exec("CREATE TABLE users (username TEXT PRIMARY KEY, password_hash TEXT NOT NULL)")
+	s.Require().NoError(err)
+	db.Close()
+
+	// Open the file in read-only mode by using a URI.
+	// The modernc sqlite driver supports ?mode=ro.
+	patch := monkey.Patch(sql.Open, func(driverName, dataSourceName string) (*sql.DB, error) {
+		// Build a read-only connection via sql.OpenDB so the patched sql.Open
+		// is never called again (which would cause infinite recursion).
+		return sql.OpenDB(&roConnector{d: &sqlite.Driver{}, n: "file:" + dataSourceName + "?mode=ro"}), nil
+	})
+	defer patch.Unpatch()
+
+	_, err = initDB(authdb)
+	s.NotEqual(nil, err)
 }
 
 func TestWebAuthSuite(t *testing.T) {

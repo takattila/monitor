@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -70,6 +71,7 @@ func (h *Handler) Internal(w http.ResponseWriter, r *http.Request) {
 			RoutePower      string
 			RouteKill       string
 			RouteToggle     string
+			RouteSettings   string
 			RouteLogout     string
 			RouteApi        string
 			RouteRun        string
@@ -83,6 +85,7 @@ func (h *Handler) Internal(w http.ResponseWriter, r *http.Request) {
 			RoutePower:      config.GetString(h.Cfg, "on_start.routes.power"),
 			RouteKill:       config.GetString(h.Cfg, "on_start.routes.kill"),
 			RouteToggle:     config.GetString(h.Cfg, "on_start.routes.toggle"),
+			RouteSettings:   config.GetString(h.Cfg, "on_start.routes.settings"),
 			RouteLogout:     config.GetString(h.Cfg, "on_start.routes.logout"),
 			RouteApi:        config.GetString(h.Cfg, "on_start.routes.api"),
 			RouteRun:        config.GetString(h.Cfg, "on_start.routes.run"),
@@ -355,6 +358,85 @@ func (h *Handler) Toggle(w http.ResponseWriter, r *http.Request) {
 		h.L.Error(err)
 
 		fmt.Fprintf(w, "%s", resBody)
+	}
+}
+
+type settingsRequest struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// SettingsGET returns the authenticated user's UI preferences (skin, css, logo,
+// preset) as JSON from the database.
+func (h *Handler) SettingsGET(w http.ResponseWriter, r *http.Request) {
+	userName := getUsername(r)
+	h.L.Debug("userName:", userName)
+	if userName == "" {
+		http.Redirect(w, r, h.LoginRoute, 302)
+		return
+	}
+
+	if IPisAllowed(r.RemoteAddr, config.GetString(h.Cfg, "on_runtime.allowed_ip"), h) {
+		settings, err := auth.GetUserSettings(h.ProgramDir+h.AuthFile, userName)
+		if err != nil {
+			h.L.Error(fmt.Errorf("GetUserSettings: %v", err))
+			settings = map[string]string{}
+		}
+
+		response := map[string]string{
+			"skin":   "",
+			"css":    "",
+			"logo":   "",
+			"preset": "",
+		}
+		for k, v := range settings {
+			response[k] = v
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+	}
+}
+
+// SettingsPOST saves a single UI preference for the authenticated user.
+// The request body must be JSON: {"key": "css", "value": "rpi"}.
+func (h *Handler) SettingsPOST(w http.ResponseWriter, r *http.Request) {
+	userName := getUsername(r)
+	h.L.Debug("userName:", userName)
+	if userName == "" {
+		http.Redirect(w, r, h.LoginRoute, 302)
+		return
+	}
+
+	if IPisAllowed(r.RemoteAddr, config.GetString(h.Cfg, "on_runtime.allowed_ip"), h) {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			h.L.Error(fmt.Errorf("reading body: %v", err))
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+
+		var req settingsRequest
+		if err := json.Unmarshal(body, &req); err != nil {
+			h.L.Error(fmt.Errorf("unmarshal body: %v", err))
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+
+		if req.Key == "" {
+			http.Error(w, "missing key", http.StatusBadRequest)
+			return
+		}
+
+		err = auth.SaveUserSetting(h.ProgramDir+h.AuthFile, userName, req.Key, req.Value)
+		if err != nil {
+			h.L.Error(fmt.Errorf("SaveUserSetting: %v", err))
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"status":"ok","key":"%s","value":"%s"}`, req.Key, req.Value)
 	}
 }
 

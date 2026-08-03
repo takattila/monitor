@@ -30,9 +30,11 @@ func SetSession(path, userName string, response http.ResponseWriter) {
 	}
 	if encoded, err := CookieHandler.Encode("session", value); err == nil {
 		cookie := &http.Cookie{
-			Name:  "session",
-			Value: encoded,
-			Path:  path,
+			Name:     "session",
+			Value:    encoded,
+			Path:     path,
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
 		}
 
 		http.SetCookie(response, cookie)
@@ -42,10 +44,12 @@ func SetSession(path, userName string, response http.ResponseWriter) {
 // ClearSession removes session cookie.
 func ClearSession(path string, response http.ResponseWriter) {
 	cookie := &http.Cookie{
-		Name:   "session",
-		Value:  "",
-		Path:   path,
-		MaxAge: -1,
+		Name:     "session",
+		Value:    "",
+		Path:     path,
+		MaxAge:   -1,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
 	}
 	http.SetCookie(response, cookie)
 }
