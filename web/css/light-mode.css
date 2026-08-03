@@ -22,7 +22,7 @@
 .light-mode,
 .light-mode .w3-white,
 .light-mode .w3-light-grey {
-    background-color: #e8d6b2 !important;
+    background-color: var(--cp-light-bg, #e8d6b2) !important;
 }
 
 .light-mode [class*="w3-text"] {
