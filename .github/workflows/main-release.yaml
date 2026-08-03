@@ -80,7 +80,7 @@ jobs:
           } > INFO.md
 
       - name: ZIP
-        run: zip -qq -r monitor-${{ steps.vars.outputs.tag }}-${{ matrix.goos }}-${{ matrix.goarch }}.zip . -x *.git* -x *internal* -x *pkg* -x *scripts* -x *assets* -x *README.md* -x *go.mod* -x *go.sum*
+        run: zip -qq -r monitor-${{ steps.vars.outputs.tag }}-${{ matrix.goos }}-${{ matrix.goarch }}.zip cmd configs tools/*.service web VERSION.md INFO.md
 
       - name: Release
         uses: softprops/action-gh-release@v3
