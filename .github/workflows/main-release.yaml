@@ -31,6 +31,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Go
         uses: actions/setup-go@v6
@@ -41,7 +43,14 @@ jobs:
         id: vars
         run: |
           echo "tag=${GITHUB_REF#refs/*/}" >> "$GITHUB_OUTPUT"
-          echo "tag_msg=$(git log -1 --format=%s "$(git describe --tags --abbrev=0)")" >> "$GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "commit_full=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "commit_date=$(git log -1 --format=%cI)" >> "$GITHUB_OUTPUT"
+          echo "build_date=$(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_OUTPUT"
+          echo "go_version=$(go version)" >> "$GITHUB_OUTPUT"
+          TAG_MSG="$(git tag -l --format='%(contents:subject)' "${{ github.ref_name }}")"
+          if [ -z "$TAG_MSG" ]; then TAG_MSG="$(git log -1 --format=%s)"; fi
+          echo "tag_msg=$TAG_MSG" >> "$GITHUB_OUTPUT"
           echo "RELEASE_VERSION=${{ github.ref_name }}" >> "$GITHUB_ENV"
 
       - name: Build
@@ -50,13 +59,25 @@ jobs:
           env CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o cmd internal/web/app/web.go
           env CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o cmd internal/credentials/app/credentials.go
 
-          echo "# Version: ${{ steps.vars.outputs.tag }}"                                                   > VERSION.md
-          echo ""                                                                                          >> VERSION.md
-          echo "${{ steps.vars.outputs.tag_msg }}"                                                         >> VERSION.md
+          {
+            echo "# Version: ${{ steps.vars.outputs.tag }}"
+            echo ""
+            echo "Release: ${{ steps.vars.outputs.tag }}"
+            echo "Commit:  ${{ steps.vars.outputs.commit }} (${{ steps.vars.outputs.commit_full }})"
+            echo "Date:    ${{ steps.vars.outputs.commit_date }}"
+            echo "Build:   ${{ steps.vars.outputs.build_date }}"
+            echo "Go:      ${{ steps.vars.outputs.go_version }}"
+            echo "Arch:    ${{ matrix.goos }}/${{ matrix.goarch }}"
+            echo ""
+            echo "Message: ${{ steps.vars.outputs.tag_msg }}"
+          } > VERSION.md
 
-          echo "# Info"                                                                                     > INFO.md
-          echo ""                                                                                          >> INFO.md
-          echo "For more information, please visit: https://github.com/takattila/monitor#monitor-services" >> INFO.md
+          {
+            echo "# Info"
+            echo ""
+            echo "Version: ${{ steps.vars.outputs.tag }} (${{ steps.vars.outputs.commit }})"
+            echo "For more information, please visit: https://github.com/takattila/monitor#monitor-services"
+          } > INFO.md
 
       - name: ZIP
         run: zip -qq -r monitor-${{ steps.vars.outputs.tag }}-${{ matrix.goos }}-${{ matrix.goarch }}.zip . -x *.git* -x *internal* -x *pkg* -x *scripts* -x *assets* -x *README.md* -x *go.mod* -x *go.sum*
