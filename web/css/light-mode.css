@@ -19,6 +19,12 @@
     color: #111 !important;
 }
 
+.light-mode,
+.light-mode .w3-white,
+.light-mode .w3-light-grey {
+    background-color: #e8d6b2 !important;
+}
+
 .light-mode [class*="w3-text"] {
     background-color: transparent !important;
     color: #111 !important;
