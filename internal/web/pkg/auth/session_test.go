@@ -26,6 +26,10 @@ func (s WebSessionSuite) TestSetSessionGetSession() {
 	recorder := httptest.NewRecorder()
 	SetSession("/monitor/", "username", recorder)
 
+	cookies := recorder.Result().Cookies()
+	s.Require().Len(cookies, 1)
+	s.Greater(cookies[0].MaxAge, 0, "session cookie should persist across browser restarts")
+
 	request := &http.Request{Header: http.Header{"Cookie": recorder.HeaderMap["Set-Cookie"]}}
 	s.Equal("username", GetUserName(request))
 }
