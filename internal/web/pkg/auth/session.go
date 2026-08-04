@@ -33,6 +33,7 @@ func SetSession(path, userName string, response http.ResponseWriter) {
 			Name:     "session",
 			Value:    encoded,
 			Path:     path,
+			MaxAge:   30 * 24 * 60 * 60,
 			HttpOnly: true,
 			SameSite: http.SameSiteLaxMode,
 		}

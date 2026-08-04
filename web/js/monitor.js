@@ -88,20 +88,13 @@ function toggleStatus(section, status) {
 }
 
 function logoutIfSessionEnded() {
-    $.ajax({
-        type: "GET",
-        url: ROUTE_SETTINGS,
-        dataType: "json",
-        timeout: 5000,
-        success: function(settings) {
-            if (!settings || typeof settings !== "object") {
+    fetch(ROUTE_SETTINGS)
+        .then(function(response) {
+            if (response.redirected) {
                 logout();
             }
-        },
-        error: function() {
-            logout();
-        }
-    });
+        })
+        .catch(function() {});
 }
 
 function confirmSystemCtlAction(action, service) {
