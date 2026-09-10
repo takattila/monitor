@@ -287,6 +287,14 @@ function tail(id) {
     }
 }
 
+function processCR(text) {
+    text = text.replace(/\r+$/, '');
+    return text.split('\n').map(function(chunk) {
+        var parts = chunk.split('\r');
+        return parts[parts.length - 1];
+    }).join('\n');
+}
+
 function startLoopStdout(id) {
     stdoutLoop = setInterval(function() {
         var stdout = $.ajax({
@@ -308,7 +316,7 @@ function startLoopStdout(id) {
                     stopLoopStdout();
                     autoScroll = false;
                 }
-                $('#modal_data_' + id).text(stdout_response.replace("~x~o(f)o~x~", "").split("\r").join("\n"));
+                $('#modal_data_' + id).text(processCR(stdout_response.replace("~x~o(f)o~x~", "")));
             }
         });
 
