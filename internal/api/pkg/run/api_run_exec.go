@@ -1,7 +1,6 @@
 package run
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"os"
@@ -65,20 +64,16 @@ func Run(name, command string) (err error) {
 			return err
 		}
 
-		writer := bufio.NewWriter(outfile)
-		defer func() {
-			_, _ = writer.WriteString("~x~o(f)o~x~")
-			writer.Flush()
-			_ = os.Rename(stdout, finish)
-		}()
-
 		err = cmdStart(cmd)
 		if err != nil {
 			return err
 		}
 
-		go io.Copy(writer, stdoutPipe)
+		go io.Copy(outfile, stdoutPipe)
 		cmd.Wait()
+		_, _ = outfile.WriteString("~x~o(f)o~x~")
+		_ = outfile.Sync()
+		_ = os.Rename(stdout, finish)
 
 		return nil
 	}
